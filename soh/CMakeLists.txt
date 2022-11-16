@@ -273,6 +273,7 @@ set(Source_Files__soh
     "soh/stubs.c"
     "soh/util.h"
     "soh/util.cpp"
+    "soh/z_actor_otr.cpp"
     "soh/z_message_OTR.cpp"
     "soh/z_play_otr.cpp"
     "soh/z_scene_otr.cpp"

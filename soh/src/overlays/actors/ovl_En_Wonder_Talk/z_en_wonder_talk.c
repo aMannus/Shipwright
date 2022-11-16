@@ -214,7 +214,7 @@ void func_80B395F0(EnWonderTalk* this, PlayState* play) {
             case 3:
                 Message_CloseTextbox(play);
                 if (this->unk_164 == 0) {
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, this->actor.world.pos.x,
+                    OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, this->actor.world.pos.x,
                                 this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 2);
                     this->unk_164 = 1;
                 }
@@ -224,7 +224,7 @@ void func_80B395F0(EnWonderTalk* this, PlayState* play) {
             case 5:
                 Message_CloseTextbox(play);
                 if (this->unk_164 == 0) {
-                    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, this->actor.world.pos.x,
+                    OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_POH, this->actor.world.pos.x,
                                 this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 3);
                     this->unk_164 = 1;
                 }

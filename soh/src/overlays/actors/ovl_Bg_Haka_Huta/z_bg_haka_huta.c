@@ -110,7 +110,7 @@ void BgHakaHuta_SpawnEnemies(BgHakaHuta* this, PlayState* play) {
         this->actionFunc = BgHakaHuta_Open;
         OnePointCutscene_Init(play, 6001, 999, &this->dyna.actor, MAIN_CAM);
         if (this->unk_16A == 2) {
-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY,
                         (this->dyna.actor.world.pos.x + (-25.0f) * Math_CosS(this->dyna.actor.shape.rot.y) +
                          40.0f * Math_SinS(this->dyna.actor.shape.rot.y)),
                         this->dyna.actor.world.pos.y - 10.0f,
@@ -118,7 +118,7 @@ void BgHakaHuta_SpawnEnemies(BgHakaHuta* this, PlayState* play) {
                          Math_CosS(this->dyna.actor.shape.rot.y) * 40.0f),
                         0, this->dyna.actor.shape.rot.y + 0x8000, 0, 2);
 
-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY,
                         (this->dyna.actor.world.pos.x + (-25.0f) * (Math_CosS(this->dyna.actor.shape.rot.y)) +
                          Math_SinS(this->dyna.actor.shape.rot.y) * 80.0f),
                         this->dyna.actor.world.pos.y - 10.0f,
@@ -127,7 +127,7 @@ void BgHakaHuta_SpawnEnemies(BgHakaHuta* this, PlayState* play) {
                         0, this->dyna.actor.shape.rot.y, 0, 2);
 
         } else if (this->unk_16A == 1) {
-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_RD,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_RD,
                         (this->dyna.actor.home.pos.x + (-25.0f) * (Math_CosS(this->dyna.actor.shape.rot.y)) +
                          Math_SinS(this->dyna.actor.shape.rot.y) * 100.0f),
                         this->dyna.actor.home.pos.y - 40.0f,

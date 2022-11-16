@@ -724,7 +724,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
 
         } else if (!this->lightBallSpawned) {
             demoEffectParams = ((s16)(sDemoEffectLightColors[actionIndex] << 0xC) | DEMO_EFFECT_LIGHT);
-            Actor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
                         this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, (s32)demoEffectParams);
             this->lightBallSpawned = true;
         }
@@ -820,7 +820,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
     if ((play->csCtx.npcActions[0]->action >= 19) && (play->csCtx.npcActions[0]->action < 22) &&
         !this->warpEffectSpawned) {
         actionIndex = play->csCtx.npcActions[0]->action - 11;
-        Actor_Spawn(&play->actorCtx, play, ACTOR_DOOR_WARP1, player->actor.world.pos.x,
+        OTRActor_Spawn(&play->actorCtx, play, ACTOR_DOOR_WARP1, player->actor.world.pos.x,
                     player->actor.world.pos.y, player->actor.world.pos.z, 0, 0, 0, actionIndex);
         this->warpEffectSpawned = true;
     }

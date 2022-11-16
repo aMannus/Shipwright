@@ -638,10 +638,10 @@ void BossVa_Init(Actor* thisx, PlayState* play2) {
                 if (gSaveContext.eventChkInf[3] & 0x80) {
                     warpId = ACTOR_DOOR_WARP1;
                 }
-                Actor_Spawn(&play->actorCtx, play, warpId, this->actor.world.pos.x, this->actor.world.pos.y,
+                OTRActor_Spawn(&play->actorCtx, play, warpId, this->actor.world.pos.x, this->actor.world.pos.y,
                             this->actor.world.pos.z, 0, 0, 0,
                             0); //! params could be WARP_DUNGEON_CHILD however this can also spawn Ru1
-                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x + 160.0f,
+                OTRActor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x + 160.0f,
                             this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0);
                 sDoorState = 100;
                 Actor_Kill(&this->actor);
@@ -1648,7 +1648,7 @@ void BossVa_BodyDeath(BossVa* this, PlayState* play) {
                 func_8002DF54(play, &this->actor, 7);
                 sCsState++;
 
-                Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x,
+                OTRActor_Spawn(&play->actorCtx, play, ACTOR_ITEM_B_HEART, this->actor.world.pos.x,
                             this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0);
 
                 for (i = 2, sp7C = 2; i > 0; i--) {
@@ -1658,7 +1658,7 @@ void BossVa_BodyDeath(BossVa* this, PlayState* play) {
                     }
                 }
 
-                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_RU1, sWarpPos[sp7C].x, sWarpPos[sp7C].y,
+                OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_RU1, sWarpPos[sp7C].x, sWarpPos[sp7C].y,
                             sWarpPos[sp7C].z, 0, 0, 0, 0);
             }
         case DEATH_FINISH:
@@ -1767,7 +1767,7 @@ void BossVa_SetupSupportCut(BossVa* this, PlayState* play) {
 
     sBodyState++;
     sFightPhase++;
-    Actor_Spawn(&play->actorCtx, play, ACTOR_BOSS_VA, this->armTip.x, this->armTip.y + 20.0f, this->armTip.z,
+    OTRActor_Spawn(&play->actorCtx, play, ACTOR_BOSS_VA, this->armTip.x, this->armTip.y + 20.0f, this->armTip.z,
                 0, this->actor.shape.rot.y, 0, stumpParams);
     Camera_AddQuake(&play->mainCamera, 2, 11, 8);
     this->burst = false;

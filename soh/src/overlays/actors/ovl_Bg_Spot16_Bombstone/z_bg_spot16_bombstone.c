@@ -324,7 +324,7 @@ void BgSpot16Bombstone_SpawnFragments(BgSpot16Bombstone* this, PlayState* play) 
     s16 scale;
 
     if (this->actor.params == 0) {
-        Actor_Spawn(&play->actorCtx, play, ACTOR_BG_SPOT16_BOMBSTONE, this->actor.world.pos.x,
+        OTRActor_Spawn(&play->actorCtx, play, ACTOR_BG_SPOT16_BOMBSTONE, this->actor.world.pos.x,
                     this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 5);
         index = 3;
     } else {
@@ -356,7 +356,7 @@ void func_808B561C(BgSpot16Bombstone* this, PlayState* play) {
 
     world = &this->actor.world;
     for (index = 0; index < ARRAY_COUNT(D_808B6088); index++) {
-        if (Actor_Spawn(&play->actorCtx, play, ACTOR_BG_SPOT16_BOMBSTONE, world->pos.x, world->pos.y,
+        if (OTRActor_Spawn(&play->actorCtx, play, ACTOR_BG_SPOT16_BOMBSTONE, world->pos.x, world->pos.y,
                         world->pos.z, 0, 0, 0, D_808B6088[index]) == NULL) {
             break;
         }

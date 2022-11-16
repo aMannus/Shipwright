@@ -158,7 +158,7 @@ void EnTp_Init(Actor* thisx, PlayState* play2) {
         Actor_SetScale(&this->actor, 1.5f);
 
         for (i = 0; i <= 6; i++) {
-            next = (EnTp*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_TP, this->actor.world.pos.x,
+            next = (EnTp*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_TP, this->actor.world.pos.x,
                                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0 * i);
 
             if (0 * i) {} // Very fake, but needed to get the s registers right
@@ -320,7 +320,7 @@ void EnTp_Die(EnTp* this, PlayState* play) {
         } else {
             for (i = 0; i < 1; i++) {
                 now =
-                    (EnTp*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_TP, this->actor.world.pos.x,
+                    (EnTp*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_TP, this->actor.world.pos.x,
                                        this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, TAILPASARAN_FRAGMENT);
 
                 if (now != NULL) {

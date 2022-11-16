@@ -164,7 +164,7 @@ void ShotSun_UpdateHyliaSun(ShotSun* this, PlayState* play) {
         osSyncPrintf(VT_FGCOL(CYAN) "SHOT_SUN HIT!!!!!!!\n" VT_RST);
         if ((INV_CONTENT(ITEM_ARROW_FIRE) == ITEM_NONE && !gSaveContext.n64ddFlag) ||
             !Flags_GetTreasure(play, 0x1F)) {
-            Actor_Spawn(&play->actorCtx, play, ACTOR_ITEM_ETCETERA, 700.0f, -800.0f, 7261.0f, 0, 0, 0, 7);
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_ITEM_ETCETERA, 700.0f, -800.0f, 7261.0f, 0, 0, 0, 7);
             play->csCtx.segment = SEGMENTED_TO_VIRTUAL(gLakeHyliaFireArrowsCS);
             gSaveContext.cutsceneTrigger = 1;
         } else {

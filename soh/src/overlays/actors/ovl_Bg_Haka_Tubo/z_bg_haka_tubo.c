@@ -175,7 +175,7 @@ void BgHakaTubo_DropCollectible(BgHakaTubo* this, PlayState* play) {
             } else if (rnd < 0.2f) {
                 // Unlucky, no reward and spawn keese
                 collectibleParams = -1;
-                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY, this->dyna.actor.world.pos.x,
+                OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_FIREFLY, this->dyna.actor.world.pos.x,
                             this->dyna.actor.world.pos.y + 80.0f, this->dyna.actor.world.pos.z, 0,
                             this->dyna.actor.shape.rot.y, 0, 2);
                 func_80078884(NA_SE_SY_ERROR);

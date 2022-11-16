@@ -865,7 +865,7 @@ void EnPeehat_StateExplode(EnPeehat* this, PlayState* play) {
     s32 pad[2];
 
     if (this->animTimer == 5) {
-        bomb = (EnBom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
+        bomb = (EnBom*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
                                    this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0x602, 0);
         if (bomb != NULL) {
             bomb->timer = 0;

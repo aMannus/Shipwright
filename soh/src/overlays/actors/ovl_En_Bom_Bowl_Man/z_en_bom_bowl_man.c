@@ -69,7 +69,7 @@ void EnBomBowlMan_Init(Actor* thisx, PlayState* play2) {
     Actor_SetScale(&this->actor, 0.013f);
 
     for (i = 0; i < 2; i++) {
-        cucco = (EnSyatekiNiw*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_SYATEKI_NIW, cuccoSpawnPos[i].x,
+        cucco = (EnSyatekiNiw*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_SYATEKI_NIW, cuccoSpawnPos[i].x,
                                            cuccoSpawnPos[i].y, cuccoSpawnPos[i].z, 0, 0, 0, 1);
 
         if (cucco != NULL) {

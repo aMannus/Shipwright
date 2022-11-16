@@ -921,7 +921,7 @@ void DemoEffect_UpdateLightRingTriforce(DemoEffect* this, PlayState* play) {
     if (play->csCtx.state != CS_STATE_IDLE) {
         if (play->csCtx.npcActions[this->csActionId] != NULL &&
             play->csCtx.npcActions[this->csActionId]->action == 2) {
-            blueOrb = (DemoEffect*)Actor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT,
+            blueOrb = (DemoEffect*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT,
                                                this->actor.world.pos.x, this->actor.world.pos.y,
                                                this->actor.world.pos.z, 0, 0, 0, DEMO_EFFECT_BLUE_ORB);
 
@@ -952,20 +952,20 @@ void DemoEffect_UpdateCreationFireball(DemoEffect* this, PlayState* play) {
         return;
     }
 
-    effect = (DemoEffect*)Actor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
+    effect = (DemoEffect*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
                                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, DEMO_EFFECT_BLUE_ORB);
     if (effect != NULL) {
         Actor_SetScale(&effect->actor, 0.0f);
     }
 
-    effect = (DemoEffect*)Actor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
+    effect = (DemoEffect*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
                                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0,
                                       DEMO_EFFECT_LIGHTRING_EXPANDING);
     if (effect != NULL) {
         Actor_SetScale(&effect->actor, 0.1f);
     }
 
-    effect = (DemoEffect*)Actor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
+    effect = (DemoEffect*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
                                       this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0,
                                       DEMO_EFFECT_LIGHTRING_SHRINKING);
     if (effect != NULL) {
@@ -1196,7 +1196,7 @@ void DemoEffect_UpdateGodLgtNayru(DemoEffect* this, PlayState* play) {
                 this->godLgt.lightRingSpawnTimer--;
             } else {
                 this->godLgt.lightRingSpawnTimer = this->godLgt.lightRingSpawnDelay;
-                lightRing = (DemoEffect*)Actor_Spawn(
+                lightRing = (DemoEffect*)OTRActor_Spawn(
                     &play->actorCtx, play, ACTOR_DEMO_EFFECT, this->actor.world.pos.x,
                     this->actor.world.pos.y, this->actor.world.pos.z, this->actor.world.rot.x + 0x4000,
                     this->actor.world.rot.y, this->actor.world.rot.z, DEMO_EFFECT_LIGHTRING_EXPANDING);

@@ -285,7 +285,7 @@ void EnAnubice_ShootFireball(EnAnubice* this, PlayState* play) {
     EnAnubice_SetFireballRot(this, play);
 
     if (curFrame == 12.0f) {
-        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ANUBICE_FIRE, this->fireballPos.x,
+        OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_ANUBICE_FIRE, this->fireballPos.x,
                     this->fireballPos.y + 15.0f, this->fireballPos.z, this->fireballRot.x, this->fireballRot.y, 0, 0);
     }
 

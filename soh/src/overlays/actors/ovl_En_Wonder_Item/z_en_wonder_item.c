@@ -307,7 +307,7 @@ void EnWonderItem_MultitagOrdered(EnWonderItem* this, PlayState* play) {
 void EnWonderItem_BombSoldier(EnWonderItem* this, PlayState* play) {
     if (this->collider.base.acFlags & AC_HIT) {
         this->collider.base.acFlags &= ~AC_HIT;
-        if (Actor_Spawn(&play->actorCtx, play, ACTOR_EN_HEISHI2, this->actor.world.pos.x,
+        if (OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_HEISHI2, this->actor.world.pos.x,
                         this->actor.world.pos.y, this->actor.world.pos.z, 0, this->actor.yawTowardsPlayer, 0,
                         9) != NULL) {
             // "Careless soldier spawned"

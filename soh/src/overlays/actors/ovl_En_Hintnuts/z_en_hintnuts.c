@@ -198,7 +198,7 @@ void EnHintnuts_SetupLeave(EnHintnuts* this, PlayState* play) {
     this->collider.base.ocFlags1 &= ~OC1_ON;
     this->actor.flags |= ACTOR_FLAG_4;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_NUTS_DAMAGE);
-    Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x, this->actor.world.pos.y,
+    OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_ITEM00, this->actor.world.pos.x, this->actor.world.pos.y,
                 this->actor.world.pos.z, 0x0, 0x0, 0x0, 0x3); // recovery heart
     this->actionFunc = EnHintnuts_Leave;
 }
@@ -287,7 +287,7 @@ void EnHintnuts_ThrowNut(EnHintnuts* this, PlayState* play) {
         nutPos.x = this->actor.world.pos.x + (Math_SinS(this->actor.shape.rot.y) * 23.0f);
         nutPos.y = this->actor.world.pos.y + 12.0f;
         nutPos.z = this->actor.world.pos.z + (Math_CosS(this->actor.shape.rot.y) * 23.0f);
-        if (Actor_Spawn(&play->actorCtx, play, ACTOR_EN_NUTSBALL, nutPos.x, nutPos.y, nutPos.z,
+        if (OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_NUTSBALL, nutPos.x, nutPos.y, nutPos.z,
                         this->actor.shape.rot.x, this->actor.shape.rot.y, this->actor.shape.rot.z, 1) != NULL) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_NUTS_THROW);
         }

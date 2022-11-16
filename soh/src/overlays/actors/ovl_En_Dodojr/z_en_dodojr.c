@@ -579,7 +579,7 @@ void func_809F7B3C(EnDodojr* this, PlayState* play) {
             this->unk_1FC--;
         }
     } else {
-        bomb = (EnBom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
+        bomb = (EnBom*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
                                    this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOMB_BODY);
 
         if (bomb != NULL) {

@@ -442,7 +442,7 @@ void EnOssan_SpawnItemsOnShelves(EnOssan* this, PlayState* play, ShopItem* shopI
                 this->shelfSlots[i] = NULL;
             } else {
                 shelves = this->shelves;
-                this->shelfSlots[i] = (EnGirlA*)Actor_Spawn(
+                this->shelfSlots[i] = (EnGirlA*)OTRActor_Spawn(
                     &play->actorCtx, play, ACTOR_EN_GIRLA, shelves->actor.world.pos.x + shopItems->xOffset,
                     shelves->actor.world.pos.y + shopItems->yOffset, shelves->actor.world.pos.z + shopItems->zOffset,
                     shelves->actor.shape.rot.x, shelves->actor.shape.rot.y + sItemShelfRot[i],
@@ -468,7 +468,7 @@ void EnOssan_UpdateShopOfferings(EnOssan* this, PlayState* play) {
                 s16 params = sShopItemReplaceFunc[shopItem->shopItemIndex](shopItem->shopItemIndex);
 
                 if (params >= 0) {
-                    this->shelfSlots[i] = (EnGirlA*)Actor_Spawn(
+                    this->shelfSlots[i] = (EnGirlA*)OTRActor_Spawn(
                         &play->actorCtx, play, ACTOR_EN_GIRLA,
                         this->shelves->actor.world.pos.x + shopItem->xOffset,
                         this->shelves->actor.world.pos.y + shopItem->yOffset,

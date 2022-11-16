@@ -241,7 +241,7 @@ void EnIceHono_DropFlame(EnIceHono* this, PlayState* play) {
     if (bgFlag != 0) {
         s32 i;
         for (i = 0; i < 8; i++) {
-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ICE_HONO, this->actor.world.pos.x,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_ICE_HONO, this->actor.world.pos.x,
                         this->actor.world.pos.y, this->actor.world.pos.z, 0,
                         ((s32)(Rand_ZeroOne() * 1000.0f) + i * 0x2000) - 0x1F4, 0, 1);
         }
@@ -292,7 +292,7 @@ void EnIceHono_SpreadFlames(EnIceHono* this, PlayState* play) {
         s32 i;
         for (i = 0; i < 10; i++) {
             s32 rot = i * 0x1999;
-            Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ICE_HONO, this->actor.world.pos.x,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_ICE_HONO, this->actor.world.pos.x,
                         this->actor.world.pos.y, this->actor.world.pos.z, 0,
                         ((s32)(Rand_ZeroOne() * 1000.0f) + rot) - 0x1F4, 0, 2);
         }

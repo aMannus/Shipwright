@@ -111,12 +111,12 @@ static int enemiesToRandomize[] = {
     ACTOR_EN_CROW       // Guay
 };
 
-extern "C" enemyEntry GetRandomizedEnemy(f32 seed1, f32 seed2, f32 seed3) {
+enemyEntry GetRandomizedEnemy(f32 seed1, f32 seed2, f32 seed3) {
     uint32_t randomNumber = rand() + (int)seed1 + (int)seed2 + (int)seed3;
     return randomizedEnemySpawnTable[randomNumber % RANDOMIZED_ENEMY_SPAWN_TABLE_SIZE];
 }
 
-extern "C" uint8_t IsEnemyFoundToRandomize(PlayState* play, int actorId = 0, int param = 0, f32 posX = 0) {
+uint8_t IsEnemyFoundToRandomize(PlayState* play, int actorId = 0, int param = 0, f32 posX = 0) {
 
     for (int i = 0; i < ARRAY_COUNT(enemiesToRandomize); i++) {
 
@@ -179,7 +179,7 @@ extern "C" uint8_t IsEnemyFoundToRandomize(PlayState* play, int actorId = 0, int
     return 0;
 }
 
-extern "C" uint8_t IsEnemyAllowedToSpawn(PlayState* play, enemyEntry enemy) {
+uint8_t IsEnemyAllowedToSpawn(PlayState* play, enemyEntry enemy) {
 
     switch (play->sceneNum) {
         // Don't allow Dark Link in areas with void out zones as it voids out the player as well.

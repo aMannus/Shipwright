@@ -116,7 +116,7 @@ void BgJyaIronobj_SpawnPillarParticles(BgJyaIronobj* this, PlayState* play, EnIk
 
     for (i = 0; i < 8; i++) {
         Actor* actor =
-            Actor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
                         Rand_ZeroOne() * 80.0f + this->dyna.actor.world.pos.y + 20.0f, this->dyna.actor.world.pos.z, 0,
                         (s16)(Rand_ZeroOne() * 0x4000) + rotY - 0x2000, 0, 0);
         if (actor != NULL) {
@@ -124,9 +124,9 @@ void BgJyaIronobj_SpawnPillarParticles(BgJyaIronobj* this, PlayState* play, EnIk
             actor->velocity.y = Rand_ZeroOne() * 10.0f + 6.0f;
         }
     }
-    Actor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
+    OTRActor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
                 this->dyna.actor.world.pos.y + 150.0f, this->dyna.actor.world.pos.z, 0, 0, 0, 1);
-    Actor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
+    OTRActor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
                 this->dyna.actor.world.pos.y, this->dyna.actor.world.pos.z, 0, 0, 0, 2);
     sins = Math_SinS(rotY);
     coss = Math_CosS(rotY);
@@ -178,7 +178,7 @@ void BgJyaIronobj_SpawnThoneParticles(BgJyaIronobj* this, PlayState* play, EnIk*
     rotY = Actor_WorldYawTowardActor(&this->dyna.actor, &enIk->actor) + D_808994D8[enIk->unk_2FF - 1];
     for (i = 0; i < 8; i++) {
         Actor* actor =
-            Actor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
+            OTRActor_Spawn(&play->actorCtx, play, ACTOR_BG_JYA_HAHENIRON, this->dyna.actor.world.pos.x,
                         (Rand_ZeroOne() * 80.0f) + this->dyna.actor.world.pos.y + 10.0f, this->dyna.actor.world.pos.z,
                         0, ((s16)(s32)(Rand_ZeroOne() * 0x4000) + rotY) - 0x2000, 0, 0);
         if (actor != NULL) {

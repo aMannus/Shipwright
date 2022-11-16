@@ -376,7 +376,7 @@ void EnVm_Die(EnVm* this, PlayState* play) {
     Actor_MoveForward(&this->actor);
 
     if (--this->timer == 0) {
-        bomb = (EnBom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
+        bomb = (EnBom*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
                                    this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0x6FF, BOMB_BODY);
 
         if (bomb != NULL) {
@@ -405,7 +405,7 @@ void EnVm_CheckHealth(EnVm* this, PlayState* play) {
         Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 8);
         EnVm_SetupStun(this);
     } else {
-        bomb = (EnBom*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
+        bomb = (EnBom*)OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_BOM, this->actor.world.pos.x,
                                    this->actor.world.pos.y + 20.0f, this->actor.world.pos.z, 0, 0, 0x601, BOMB_BODY);
 
         if (bomb != NULL) {

@@ -399,7 +399,7 @@ void EnElf_Init(Actor* thisx, PlayState* play) {
             func_80A01C38(this, 8);
 
             for (i = 0; i < 8; i++) {
-                Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, thisx->world.pos.x,
+                OTRActor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, thisx->world.pos.x,
                             thisx->world.pos.y - 30.0f, thisx->world.pos.z, 0, 0, 0, FAIRY_HEAL);
             }
             break;

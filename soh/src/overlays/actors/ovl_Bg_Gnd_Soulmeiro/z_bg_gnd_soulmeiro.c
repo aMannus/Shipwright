@@ -73,7 +73,7 @@ void BgGndSoulmeiro_Init(Actor* thisx, PlayState* play) {
             this->actionFunc = func_8087B284;
             if (Flags_GetSwitch(play, (this->actor.params >> 8) & 0x3F)) {
 
-                Actor_Spawn(&play->actorCtx, play, ACTOR_MIR_RAY, this->actor.world.pos.x,
+                OTRActor_Spawn(&play->actorCtx, play, ACTOR_MIR_RAY, this->actor.world.pos.x,
                             this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 9);
                 this->actor.draw = NULL;
                 Actor_Kill(&this->actor);
@@ -121,7 +121,7 @@ void func_8087AF38(BgGndSoulmeiro* this, PlayState* play) {
     if (!this->unk_198) {
         Flags_SetSwitch(play, (thisx->params >> 8) & 0x3F);
         Actor_Kill(&this->actor);
-        Actor_Spawn(&play->actorCtx, play, ACTOR_MIR_RAY, thisx->world.pos.x, thisx->world.pos.y,
+        OTRActor_Spawn(&play->actorCtx, play, ACTOR_MIR_RAY, thisx->world.pos.x, thisx->world.pos.y,
                     thisx->world.pos.z, 0, 0, 0, 9);
     } else if ((this->unk_198 % 6) == 0) {
         s32 i;
