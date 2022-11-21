@@ -1066,6 +1066,10 @@ void Play_Update(PlayState* play) {
                 }
 
                 play->gameplayFrames++;
+                // Gameplay stat tracking
+                if (!gSaveContext.sohStats.gameComplete) {
+                      gSaveContext.sohStats.playTimer++;
+                }
 
                 func_800AA178(1);
 
