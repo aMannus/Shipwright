@@ -2765,7 +2765,7 @@ s32 func_808359FC(Player* this, PlayState* play) {
         this->boomerangActor = &boomerang->actor;
         if (boomerang != NULL) {
             boomerang->moveTo = this->unk_664;
-            boomerang->returnTimer = 20;
+            boomerang->returnTimer = 100;
             this->stateFlags1 |= PLAYER_STATE1_25;
             if (!func_8008E9C4(this)) {
                 func_808355DC(this);
@@ -7699,7 +7699,7 @@ void func_80842180(Player* this, PlayState* play) {
             }
 
             if (CVar_GetS32("gMMBunnyHood", 0) && this->currentMask == PLAYER_MASK_BUNNY) {
-                sp2C *= 1.5f;
+                sp2C *= -5.0f;
             } 
             
             if (CVar_GetS32("gEnableWalkModify", 0)) {

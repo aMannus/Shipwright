@@ -1334,15 +1334,16 @@ void Message_Decode(PlayState* play) {
             break;
         } else if (temp_s2 == MESSAGE_NAME) {
             // Substitute the player name control character for the file's player name.
-            for (playerNameLen = ARRAY_COUNT(gSaveContext.playerName); playerNameLen > 0; playerNameLen--) {
-                if (gSaveContext.playerName[playerNameLen - 1] != 0x3E) {
+            char playername[8] = "Pinheadd";
+            for (playerNameLen = ARRAY_COUNT(playername); playerNameLen > 0; playerNameLen--) {
+                if (playername[playerNameLen - 1] != 0x3E) {
                     break;
                 }
             }
             // "Name"
             osSyncPrintf("\n名前 ＝ ");
             for (i = 0; i < playerNameLen; i++) {
-                phi_s1 = gSaveContext.playerName[i];
+                phi_s1 = playername[i];
                 if (phi_s1 == 0x3E) {
                     phi_s1 = ' ';
                 } else if (phi_s1 == 0x40) {

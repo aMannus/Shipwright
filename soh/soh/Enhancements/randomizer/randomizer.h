@@ -12,7 +12,7 @@
 #include "soh/Enhancements/item-tables/ItemTableTypes.h"
 
 #define NUM_NAVI_MESSAGES 19
-#define NUM_ICE_TRAP_MESSAGES 23
+#define NUM_ICE_TRAP_MESSAGES 1
 
 class Randomizer {
   private:
