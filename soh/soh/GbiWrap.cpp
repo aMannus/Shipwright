@@ -35,13 +35,6 @@ int ResourceMgr_OTRSigCheck(char* imgData);
 
 
 extern "C" void gSPSegment(void* value, int segNum, uintptr_t target) {
-    char* imgData = (char*)target;
-
-    int res = ResourceMgr_OTRSigCheck(imgData);
-
-    if (res)
-        target = (uintptr_t)ResourceMgr_LoadTexOrDListByName(imgData);
-
     __gSPSegment(value, segNum, target);
 }
 

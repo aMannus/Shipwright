@@ -39,7 +39,7 @@ std::string GetName(const char* path);
 #endif
 
 #ifndef __cplusplus
-    void InitOTR(void);
+void InitOTR(void);
 void DeinitOTR(void);
 void VanillaItemTable_Init();
 void OTRAudio_Init();
@@ -63,6 +63,7 @@ void ResourceMgr_LoadFile(const char* resName);
 char* ResourceMgr_LoadFileFromDisk(const char* filePath);
 char* ResourceMgr_LoadJPEG(char* data, int dataSize);
 char* ResourceMgr_LoadTexByName(const char* texPath);
+bool ResourceMgr_LoadBTMemByName(char* texPath);
 uint16_t ResourceMgr_LoadTexWidthByName(char* texPath);
 uint16_t ResourceMgr_LoadTexHeightByName(char* texPath);
 uint32_t ResourceMgr_LoadTexSizeByName(char* texPath);
