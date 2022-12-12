@@ -808,7 +808,14 @@ extern "C" char* ResourceMgr_LoadTexOrDListByName(const char* filePath) {
     else if (res->ResType == Ship::ResourceType::Array)
         return (char*)(std::static_pointer_cast<Ship::Array>(res))->vertices.data();
     else {
-        return strdup(ResourceMgr_GetName(filePath));
+        std::string Path = filePath;
+        if (ResourceMgr_IsGameMasterQuest()) {
+            size_t pos = 0;
+            if ((pos = Path.find("/nonmq/", 0)) != std::string::npos) {
+                Path.replace(pos, 7, "/mq/");
+            }
+        }
+        return strdup(Path.c_str());
     }
 }
 

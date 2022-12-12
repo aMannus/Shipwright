@@ -63,6 +63,7 @@ void ResourceMgr_LoadFile(const char* resName);
 char* ResourceMgr_LoadFileFromDisk(const char* filePath);
 char* ResourceMgr_LoadJPEG(char* data, int dataSize);
 char* ResourceMgr_LoadTexByName(const char* texPath);
+char* ResourceMgr_LoadOffsetByName(char* texPath, uint32_t offset, uint32_t width, uint32_t height);
 bool ResourceMgr_LoadBTMemByName(char* texPath);
 uint16_t ResourceMgr_LoadTexWidthByName(char* texPath);
 uint16_t ResourceMgr_LoadTexHeightByName(char* texPath);
