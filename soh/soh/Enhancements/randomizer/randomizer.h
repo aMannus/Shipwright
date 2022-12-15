@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
+#include <vector>
 #include "../../../include/ultra64.h"
 #include "../../../include/z64item.h"
 #include <memory>
@@ -30,6 +31,7 @@ class Randomizer {
     void ParseEntranceDataFile(const char* spoilerFileName, bool silent);
     bool IsItemVanilla(RandomizerGet randoGet);
     GetItemEntry GetItemEntryFromRGData(RandomizerGetData rgData, GetItemID ogItemId, bool checkObtainability = true);
+    int16_t GetVanillaMerchantPrice(RandomizerCheck check);
 
   public:
     Randomizer();
@@ -46,6 +48,7 @@ class Randomizer {
     std::unordered_map<RandomizerInf, bool> trialsRequired;
     std::unordered_set<uint16_t> masterQuestDungeons;
     std::unordered_map<RandomizerCheck, u16> merchantPrices;
+    std::unordered_map<RandomizerGet, std::vector<std::string>> EnumToSpoilerfileGetName;
 
     static Sprite* GetSeedTexture(uint8_t index);
     s16 GetItemModelFromId(s16 itemId);
@@ -62,6 +65,7 @@ class Randomizer {
     u8 GetRandoSettingValue(RandomizerSettingKey randoSettingKey);
     RandomizerCheck GetCheckFromActor(s16 actorId, s16 sceneNum, s16 actorParams);
     RandomizerCheck GetCheckFromRandomizerInf(RandomizerInf randomizerInf);
+    RandomizerInf GetRandomizerInfFromCheck(RandomizerCheck rc);
     RandomizerGetData GetRandomizerGetDataFromActor(s16 actorId, s16 sceneNum, s16 actorParams);
     RandomizerGetData GetRandomizerGetDataFromKnownCheck(RandomizerCheck randomizerCheck);
     std::string GetChildAltarText() const;

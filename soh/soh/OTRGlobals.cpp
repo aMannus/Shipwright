@@ -39,6 +39,7 @@
 #include "Enhancements/randomizer/randomizer.h"
 #include "Enhancements/randomizer/randomizer_entrance_tracker.h"
 #include "Enhancements/randomizer/randomizer_item_tracker.h"
+#include "Enhancements/randomizer/randomizer_check_tracker.h"
 #include "Enhancements/randomizer/3drando/random.hpp"
 #include "Enhancements/gameplaystats.h"
 #include "Enhancements/n64_weird_frame_data.inc"
@@ -446,6 +447,7 @@ extern "C" void InitOTR() {
     InitItemTracker();
     InitEntranceTracker();
     InitStatTracker();
+    CheckTracker::InitCheckTracker();
     OTRExtScanner();
     VanillaItemTable_Init();
 
@@ -2014,6 +2016,8 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
         } else if (Randomizer_GetSettingValue(RSK_SHUFFLE_WARP_SONGS) &&
                    (textId >= TEXT_WARP_MINUET_OF_FOREST && textId <= TEXT_WARP_PRELUDE_OF_LIGHT)) {
             messageEntry = OTRGlobals::Instance->gRandomizer->GetWarpSongMessage(textId, false);
+        } else if (textId == TEXT_LAKE_HYLIA_WATER_SWITCH_NAVI || textId == TEXT_LAKE_HYLIA_WATER_SWITCH_SIGN) {
+            messageEntry = CustomMessageManager::Instance->RetrieveMessage(Randomizer::hintMessageTableID, textId);
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {
@@ -2042,6 +2046,9 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
     if (textId == TEXT_HEART_PIECE && CVar_GetS32("gInjectItemCounts", 0)) {
         messageEntry = CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, TEXT_HEART_PIECE);
         CustomMessageManager::ReplaceStringInMessage(messageEntry, "{{heartPieceCount}}", std::to_string(gSaveContext.sohStats.heartPieces + 1));
+    }
+    if (textId == TEXT_MARKET_GUARD_NIGHT && CVar_GetS32("gMarketSneak", 0) && play->sceneNum == SCENE_ENTRA_N) {
+        messageEntry = CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, TEXT_MARKET_GUARD_NIGHT);
     }
     if (messageEntry.textBoxType != -1) {
         font->charTexBuf[0] = (messageEntry.textBoxType << 4) | messageEntry.textBoxPos;

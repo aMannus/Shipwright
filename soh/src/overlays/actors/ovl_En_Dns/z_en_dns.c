@@ -178,6 +178,13 @@ void EnDns_Init(Actor* thisx, PlayState* play) {
             this->dnsItemEntry->itemPrice = this->scrubIdentity.itemPrice;
         }
 
+        if (Randomizer_GetSettingValue(RSK_SHUFFLE_SCRUBS) == RO_SCRUBS_EXPENSIVE) {
+            // temporary workaround: always use 40 rupees as price instead of 70
+            if (this->actor.params == 0x0006) {
+                this->dnsItemEntry->itemPrice = 40;
+            }
+        }
+
         if (this->scrubIdentity.isShuffled) {
             this->dnsItemEntry->getItemId = this->scrubIdentity.getItemId;
             this->dnsItemEntry->purchaseableCheck = EnDns_RandomizerPurchaseableCheck;
@@ -401,24 +408,28 @@ void EnDns_Talk(EnDns* this, PlayState* play) {
 }
 
 void func_809EFDD0(EnDns* this, PlayState* play) {
+    u16 pendingGetItemId;
     if (!gSaveContext.n64ddFlag || !this->scrubIdentity.isShuffled) {
         if (this->actor.params == 0x9) {
             if (CUR_UPG_VALUE(UPG_STICKS) < 2) {
-                func_8002F434(&this->actor, play, GI_STICK_UPGRADE_20, 130.0f, 100.0f);
+                pendingGetItemId = GI_STICK_UPGRADE_20;
             } else {
-                func_8002F434(&this->actor, play, GI_STICK_UPGRADE_30, 130.0f, 100.0f);
+                pendingGetItemId = GI_STICK_UPGRADE_30;
             }
         } else if (this->actor.params == 0xA) {
             if (CUR_UPG_VALUE(UPG_NUTS) < 2) {
-                func_8002F434(&this->actor, play, GI_NUT_UPGRADE_30, 130.0f, 100.0f);
+                pendingGetItemId = GI_NUT_UPGRADE_30;
             } else {
-                func_8002F434(&this->actor, play, GI_NUT_UPGRADE_40, 130.0f, 100.0f);
+                pendingGetItemId = GI_NUT_UPGRADE_40;
             }
         } else {
-            func_8002F434(&this->actor, play, this->dnsItemEntry->getItemId, 130.0f, 100.0f);
+            pendingGetItemId = this->dnsItemEntry->getItemId;
         }
+        gSaveContext.pendingSale = ItemTable_Retrieve(pendingGetItemId).itemId;
+        func_8002F434(&this->actor, play, pendingGetItemId, 130.0f, 100.0f);
     } else {
         GetItemEntry itemEntry = Randomizer_GetItemFromKnownCheck(this->scrubIdentity.randomizerCheck, this->scrubIdentity.getItemId);
+        gSaveContext.pendingSale = itemEntry.itemId;
         GiveItemEntryFromActor(&this->actor, play, itemEntry, 130.0f, 100.0f);
     }
 }
