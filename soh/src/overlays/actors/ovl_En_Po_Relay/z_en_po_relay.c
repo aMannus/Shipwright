@@ -189,12 +189,19 @@ void EnPoRelay_Race(EnPoRelay* this, PlayState* play) {
     Vec3f vec;
     f32 speed;
     f32 multiplier;
+    int16_t minFireTimer = 32.0f;
+    f32 chanceForFire = 0.03f;
+
+    if (CVar_GetS32("gSpicyDampe", 0)) {
+        minFireTimer = 5.0f;
+        chanceForFire = 1.0f;
+    }
 
     if (this->actionTimer != 0) {
         this->actionTimer--;
     }
-    if (this->actionTimer == 0 && Rand_ZeroOne() < 0.03f) {
-        this->actionTimer = 32;
+    if (this->actionTimer == 0 && Rand_ZeroOne() < chanceForFire) {
+        this->actionTimer = minFireTimer;
         if (this->pathIndex < 23) {
             speed = Rand_ZeroOne() * 3.0f;
             if (speed < 1.0f) {

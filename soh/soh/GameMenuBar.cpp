@@ -455,6 +455,8 @@ namespace GameMenuBar {
                     UIWidgets::PaddedEnhancementCheckbox("Always Win Dampe Digging Game", "gDampeWin", true, false, SaveManager::Instance->IsRandoFile(),
                                                          "This setting is always enabled in randomizer files", UIWidgets::CheckboxGraphics::Checkmark);
                     UIWidgets::Tooltip("Always win the heart piece/purple rupee on the first dig in Dampe's grave digging game, just like in rando\nIn a rando file, this is unconditionally enabled");
+                    UIWidgets::PaddedEnhancementCheckbox("Spicy Dampe", "gSpicyDampe", true, false);
+                    UIWidgets::Tooltip("Dampe is piiiissed.");
                     UIWidgets::Spacer(0);
 
                     if (ImGui::BeginMenu("Potion Values"))
