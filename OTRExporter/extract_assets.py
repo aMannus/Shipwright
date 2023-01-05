@@ -8,6 +8,12 @@ import struct
 import subprocess
 import argparse
 
+def PreProcessAssets(rom, xmlOutputPath):
+    xmlPathToProcess = "../soh/assets/xml/" + rom.version.xml_ver + "/"
+    print("xmlPathToProcess: " + xmlPathToProcess + " xmlOutputPath: " + xmlOutputPath)
+
+    # go through the xml's here and perform our processing, saving all new xmls to the output folder
+
 def BuildOTR(xmlPath, rom, zapd_exe=None):
     shutil.copytree("assets", "Extract/assets")
 
@@ -42,7 +48,9 @@ def main():
         if (os.path.exists("Extract")):
             shutil.rmtree("Extract")
 
-        BuildOTR("../soh/assets/xml/" + rom.version.xml_ver + "/", rom_path, zapd_exe=args.zapd_exe)
+        tempXmlPath = "../soh/assets/xml_temp/"
+        PreProcessAssets(rom, tempXmlPath)
+        # BuildOTR(tempXmlPath, rom_path, zapd_exe=args.zapd_exe)
 
 if __name__ == "__main__":
     main()

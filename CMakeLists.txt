@@ -105,7 +105,6 @@ install(PROGRAMS "${CMAKE_SOURCE_DIR}/scripts/linux/appimage/soh.sh" DESTINATION
 endif()
 
 find_package(Python3 COMPONENTS Interpreter)
-
 add_custom_target(
     ExtractAssets
     # CMake versions prior to 3.17 do not have the rm command, use remove instead for older versions
