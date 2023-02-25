@@ -26,6 +26,7 @@ typedef enum {
 void BossGoma_Init(Actor* thisx, PlayState* play);
 void BossGoma_Destroy(Actor* thisx, PlayState* play);
 void BossGoma_Update(Actor* thisx, PlayState* play);
+void BossGoma_rUpdate(Actor* thisx, PlayState* play);
 void BossGoma_Draw(Actor* thisx, PlayState* play);
 
 void BossGoma_SetupEncounter(BossGoma* this, PlayState* play);
@@ -57,7 +58,7 @@ const ActorInit Boss_Goma_InitVars = {
     sizeof(BossGoma),
     (ActorFunc)BossGoma_Init,
     (ActorFunc)BossGoma_Destroy,
-    (ActorFunc)BossGoma_Update,
+    (ActorFunc)BossGoma_rUpdate,
     (ActorFunc)BossGoma_Draw,
     NULL,
 };
@@ -1906,6 +1907,14 @@ void BossGoma_UpdateEyeEnvColor(BossGoma* this) {
     Math_ApproachF(&this->eyeEnvColor[0], targetEyeEnvColors[this->visualState][0], 0.5f, 20.0f);
     Math_ApproachF(&this->eyeEnvColor[1], targetEyeEnvColors[this->visualState][1], 0.5f, 20.0f);
     Math_ApproachF(&this->eyeEnvColor[2], targetEyeEnvColors[this->visualState][2], 0.5f, 20.0f);
+}
+
+void BossGoma_rUpdate(Actor* thisx, PlayState* play) {
+    BossGoma_Update(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(gPlayState, player)) {
+        BossGoma_Update(thisx, play);
+    }
 }
 
 void BossGoma_Update(Actor* thisx, PlayState* play) {
