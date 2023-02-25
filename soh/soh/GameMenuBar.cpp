@@ -1317,14 +1317,15 @@ namespace GameMenuBar {
         #ifdef ENABLE_CROWD_CONTROL
             UIWidgets::EnhancementCheckbox("Crowd Control", "gCrowdControl");
             UIWidgets::Tooltip("Will attempt to connect to the Crowd Control server. Check out crowdcontrol.live for more information.");
-
+            UIWidgets::PaddedEnhancementCheckbox("Enable Crowd Control TTS", "gCrowdControlTTS", true, false);
+            UIWidgets::Tooltip("Enable Text-To-Speech for Crowd Control, announcing when effects are triggered and when timed events stop.");
             if (CVarGetInteger("gCrowdControl", 0)) {
                 CrowdControl::Instance->Enable();
             } else {
                 CrowdControl::Instance->Disable();
             }
 
-            ImGui::Dummy(ImVec2(0.0f, 0.0f));
+            UIWidgets::PaddedSeparator();
         #endif
 
             UIWidgets::EnhancementCheckbox("Enemy Randomizer", "gRandomizedEnemies");

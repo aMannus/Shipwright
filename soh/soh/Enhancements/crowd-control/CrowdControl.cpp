@@ -97,6 +97,9 @@ void CrowdControl::ListenToServer() {
             if (!incomingEffect->timeRemaining) {
                 EffectResult result = CrowdControl::ExecuteEffect(incomingEffect);
                 EmitMessage(tcpsock, incomingEffect->id, incomingEffect->timeRemaining, result);
+                if (result == EffectResult::Success) {
+                    TriggerTTS(TriggerEffect, incomingEffect);
+                }
             } else {
                 // If another timed effect is already active that conflicts with the incoming effect.
                 bool isConflictingEffectActive = false;
@@ -119,6 +122,7 @@ void CrowdControl::ListenToServer() {
                     activeEffectsMutex.lock();
                     activeEffects.push_back(incomingEffect);
                     activeEffectsMutex.unlock();
+                    TriggerTTS(StartTimedEffect, incomingEffect);
                 }
             }
         }
@@ -149,6 +153,7 @@ void CrowdControl::ProcessActiveEffects() {
                     it = activeEffects.erase(std::remove(activeEffects.begin(), activeEffects.end(), effect),
                                         activeEffects.end());
                     GameInteractor::RemoveEffect(effect->giEffect);
+                    TriggerTTS(StopTimedEffect, effect);
                     delete effect;
                 } else {
                     // If we have a success after previously being paused, tell CC to resume timer.
@@ -230,6 +235,24 @@ CrowdControl::EffectResult CrowdControl::TranslateGiEnum(GameInteractionEffectQu
     return result;
 }
 
+void CrowdControl::TriggerTTS(TTSTypes TTSType, Effect* effect) {
+    std::string textPrefix;
+    std::string effectName = effect->effectName;
+    std::replace(effectName.begin(), effectName.end(), '_', ' ');
+
+    if (CVarGetInteger("gCrowdControlTTS", 0)) {
+        if (TTSType == TriggerEffect) {
+            textPrefix = "";
+        } else if (TTSType == StartTimedEffect) {
+            textPrefix = "Started ";
+        } else if (TTSType == StopTimedEffect) {
+            textPrefix = "Removed ";
+        }
+        effectName = textPrefix + effectName;
+        SpeechSynthesizerSpeak(strdup(effectName.c_str()), true);
+    }
+}
+
 CrowdControl::Effect* CrowdControl::ParseMessage(char payload[512]) {
     nlohmann::json dataReceived = nlohmann::json::parse(payload, nullptr, false);
     if (dataReceived.is_discarded()) {
@@ -241,7 +264,8 @@ CrowdControl::Effect* CrowdControl::ParseMessage(char payload[512]) {
     effect->lastExecutionResult = EffectResult::Initiate;
     effect->id = dataReceived["id"];
     auto parameters = dataReceived["parameters"];
-    auto effectName = dataReceived["code"].get<std::string>();
+    //auto effectName = dataReceived["code"].get<std::string>();
+    effect->effectName = dataReceived["code"].get<std::string>();
 
     if (parameters.size() > 0) {
         effect->value[0] = dataReceived["parameters"][0];
@@ -249,7 +273,7 @@ CrowdControl::Effect* CrowdControl::ParseMessage(char payload[512]) {
 
     // Assign GameInteractionEffect + values to CC effect.
     // Categories are mostly used for checking for conflicting timed effects.
-    switch (EffectStringToEnum[effectName]) {
+    switch (EffectStringToEnum[effect->effectName]) {
 
         // Spawn Enemies and Objects
         case EffectSpawnCuccoStorm:

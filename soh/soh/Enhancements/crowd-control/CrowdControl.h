@@ -54,6 +54,12 @@ class CrowdControl {
             KeepAlive = 0xFF
         };
 
+        enum TTSTypes {
+            TriggerEffect,
+            StartTimedEffect,
+            StopTimedEffect
+        };
+
         struct Response {
             int id;
             EffectResult status;
@@ -68,6 +74,7 @@ class CrowdControl {
             long timeRemaining;
             GameInteractionEffectBase *giEffect;
             int32_t paramMultiplier = 1;
+            std::string effectName;
 
             // Metadata used while executing (only for timed effects)
             bool isPaused;
@@ -96,6 +103,7 @@ class CrowdControl {
         EffectResult ExecuteEffect(Effect* effect);
         EffectResult CanApplyEffect(Effect *effect);
         EffectResult TranslateGiEnum(GameInteractionEffectQueryResult giResult);
+        void TriggerTTS(TTSTypes TTSType, Effect* effect);
 
     public:
         static CrowdControl* Instance;
