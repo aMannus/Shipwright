@@ -50,7 +50,9 @@ typedef enum {
 void BossSst_Init(Actor* thisx, PlayState* play);
 void BossSst_Destroy(Actor* thisx, PlayState* play);
 void BossSst_UpdateHand(Actor* thisx, PlayState* play);
+void BossSst_rUpdateHand(Actor* thisx, PlayState* play);
 void BossSst_UpdateHead(Actor* thisx, PlayState* play);
+void BossSst_rUpdateHead(Actor* thisx, PlayState* play);
 void BossSst_DrawHand(Actor* thisx, PlayState* play);
 void BossSst_DrawHead(Actor* thisx, PlayState* play);
 void BossSst_UpdateEffect(Actor* thisx, PlayState* play);
@@ -245,7 +247,7 @@ const ActorInit Boss_Sst_InitVars = {
     sizeof(BossSst),
     (ActorFunc)BossSst_Init,
     (ActorFunc)BossSst_Destroy,
-    (ActorFunc)BossSst_UpdateHand,
+    (ActorFunc)BossSst_rUpdateHand,
     (ActorFunc)BossSst_DrawHand,
     NULL,
 };
@@ -309,7 +311,7 @@ void BossSst_Init(Actor* thisx, PlayState* play2) {
             sHands[RIGHT]->actor.child = &sHands[LEFT]->actor;
 
             this->actor.flags &= ~ACTOR_FLAG_0;
-            this->actor.update = BossSst_UpdateHead;
+            this->actor.update = BossSst_rUpdateHead;
             this->actor.draw = BossSst_DrawHead;
             this->radius = -650.0f;
             this->actor.targetArrowOffset = 4000.0f;
@@ -2570,6 +2572,14 @@ void BossSst_HeadCollisionCheck(BossSst* this, PlayState* play) {
     }
 }
 
+void BossSst_rUpdateHand(Actor* thisx, PlayState* play) {
+    BossSst_UpdateHand(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossSst_UpdateHand(thisx, play);
+    }
+}
+
 void BossSst_UpdateHand(Actor* thisx, PlayState* play) {
     s32 pad;
     BossSst* this = (BossSst*)thisx;
@@ -2623,6 +2633,14 @@ void BossSst_UpdateHand(Actor* thisx, PlayState* play) {
 
     this->trailIndex = (this->trailIndex + 1) % 7;
     BossSst_UpdateEffect(&this->actor, play);
+}
+
+void BossSst_rUpdateHead(Actor* thisx, PlayState* play) {
+    BossSst_UpdateHead(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossSst_UpdateHead(thisx, play);
+    }
 }
 
 void BossSst_UpdateHead(Actor* thisx, PlayState* play) {

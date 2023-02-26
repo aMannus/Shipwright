@@ -31,6 +31,7 @@ typedef enum {
 void BossFd2_Init(Actor* thisx, PlayState* play);
 void BossFd2_Destroy(Actor* thisx, PlayState* play);
 void BossFd2_Update(Actor* thisx, PlayState* play);
+void BossFd2_rUpdate(Actor* thisx, PlayState* play);
 void BossFd2_Draw(Actor* thisx, PlayState* play);
 
 void BossFd2_SetupEmerge(BossFd2* this, PlayState* play);
@@ -55,7 +56,7 @@ const ActorInit Boss_Fd2_InitVars = {
     sizeof(BossFd2),
     (ActorFunc)BossFd2_Init,
     (ActorFunc)BossFd2_Destroy,
-    (ActorFunc)BossFd2_Update,
+    (ActorFunc)BossFd2_rUpdate,
     (ActorFunc)BossFd2_Draw,
     NULL,
 };
@@ -955,6 +956,14 @@ void BossFd2_UpdateFace(BossFd2* this, PlayState* play) {
 
     if (this->work[FD2_SCREAM_TIMER] != 0) {
         this->work[FD2_SCREAM_TIMER]--;
+    }
+}
+
+void BossFd2_rUpdate(Actor* thisx, PlayState* play2) {
+    BossFd2_Update(thisx, play2);
+    Player* player = GET_PLAYER(play2);
+    if (!Player_InBlockingCsMode(play2, player)) {
+        BossFd2_Update(thisx, play2);
     }
 }
 

@@ -50,6 +50,7 @@ typedef enum {
 void BossGanondrof_Init(Actor* thisx, PlayState* play);
 void BossGanondrof_Destroy(Actor* thisx, PlayState* play);
 void BossGanondrof_Update(Actor* thisx, PlayState* play);
+void BossGanondrof_rUpdate(Actor* thisx, PlayState* play);
 void BossGanondrof_Draw(Actor* thisx, PlayState* play);
 
 void BossGanondrof_SetupIntro(BossGanondrof* this, PlayState* play);
@@ -77,7 +78,7 @@ const ActorInit Boss_Ganondrof_InitVars = {
     sizeof(BossGanondrof),
     (ActorFunc)BossGanondrof_Init,
     (ActorFunc)BossGanondrof_Destroy,
-    (ActorFunc)BossGanondrof_Update,
+    (ActorFunc)BossGanondrof_rUpdate,
     (ActorFunc)BossGanondrof_Draw,
     NULL,
 };
@@ -1302,6 +1303,14 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
             }
             this->returnCount = 0;
         }
+    }
+}
+
+void BossGanondrof_rUpdate(Actor* thisx, PlayState* play) {
+    BossGanondrof_Update(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossGanondrof_Update(thisx, play);
     }
 }
 

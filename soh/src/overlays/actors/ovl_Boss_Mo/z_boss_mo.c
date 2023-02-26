@@ -52,7 +52,9 @@ typedef struct {
 void BossMo_Init(Actor* thisx, PlayState* play);
 void BossMo_Destroy(Actor* thisx, PlayState* play);
 void BossMo_UpdateCore(Actor* thisx, PlayState* play);
+void BossMo_rUpdateCore(Actor* thisx, PlayState* play);
 void BossMo_UpdateTent(Actor* thisx, PlayState* play);
+void BossMo_rUpdateTent(Actor* thisx, PlayState* play);
 void BossMo_DrawCore(Actor* thisx, PlayState* play);
 void BossMo_DrawTent(Actor* thisx, PlayState* play);
 void BossMo_Reset(void);
@@ -132,7 +134,7 @@ const ActorInit Boss_Mo_InitVars = {
     sizeof(BossMo),
     (ActorFunc)BossMo_Init,
     (ActorFunc)BossMo_Destroy,
-    (ActorFunc)BossMo_UpdateTent,
+    (ActorFunc)BossMo_rUpdateTent,
     (ActorFunc)BossMo_DrawTent,
     (ActorResetFunc)BossMo_Reset,
 };
@@ -389,7 +391,7 @@ void BossMo_Init(Actor* thisx, PlayState* play2) {
                                                    this->actor.world.pos.x, this->actor.world.pos.y,
                                                    this->actor.world.pos.z, 0, 0, 0, BOSSMO_TENTACLE);
         this->actor.draw = BossMo_DrawCore;
-        this->actor.update = BossMo_UpdateCore;
+        this->actor.update = BossMo_rUpdateCore;
         Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_BOSS);
     } else {
         Actor_SetScale(&this->actor, 0.01f);
@@ -2217,6 +2219,14 @@ void BossMo_Core(BossMo* this, PlayState* play) {
     BossMo_CoreCollisionCheck(this, play);
 }
 
+void BossMo_rUpdateCore(Actor* thisx, PlayState* play) {
+    BossMo_UpdateCore(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossMo_UpdateCore(thisx, play);
+    }
+}
+
 void BossMo_UpdateCore(Actor* thisx, PlayState* play) {
     s32 pad;
     BossMo* this = (BossMo*)thisx;
@@ -2261,6 +2271,14 @@ void BossMo_UpdateCore(Actor* thisx, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_0;
     }
     BossMo_Unknown();
+}
+
+void BossMo_rUpdateTent(Actor* thisx, PlayState* play) {
+    BossMo_UpdateTent(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossMo_UpdateTent(thisx, play);
+    }
 }
 
 void BossMo_UpdateTent(Actor* thisx, PlayState* play) {

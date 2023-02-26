@@ -14,6 +14,7 @@
 void BossGanon2_Init(Actor* thisx, PlayState* play);
 void BossGanon2_Destroy(Actor* thisx, PlayState* play);
 void BossGanon2_Update(Actor* thisx, PlayState* play);
+void BossGanon2_rUpdate(Actor* thisx, PlayState* play);
 void BossGanon2_Draw(Actor* thisx, PlayState* play);
 void BossGanon2_Reset(void);
 
@@ -43,7 +44,7 @@ const ActorInit Boss_Ganon2_InitVars = {
     sizeof(BossGanon2),
     (ActorFunc)BossGanon2_Init,
     (ActorFunc)BossGanon2_Destroy,
-    (ActorFunc)BossGanon2_Update,
+    (ActorFunc)BossGanon2_rUpdate,
     (ActorFunc)BossGanon2_Draw,
     (ActorResetFunc)BossGanon2_Reset,
 };
@@ -1995,6 +1996,14 @@ void func_80902524(BossGanon2* this, PlayState* play) {
                 func_80900210(this, play);
             }
         }
+    }
+}
+
+void BossGanon2_rUpdate(Actor* thisx, PlayState* play) {
+    BossGanon2_Update(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossGanon2_Update(thisx, play);
     }
 }
 

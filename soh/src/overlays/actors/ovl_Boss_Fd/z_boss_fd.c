@@ -38,6 +38,7 @@ typedef enum {
 void BossFd_Init(Actor* thisx, PlayState* play);
 void BossFd_Destroy(Actor* thisx, PlayState* play);
 void BossFd_Update(Actor* thisx, PlayState* play);
+void BossFd_rUpdate(Actor* thisx, PlayState* play);
 void BossFd_Draw(Actor* thisx, PlayState* play);
 
 void BossFd_SetupFly(BossFd* this, PlayState* play);
@@ -54,7 +55,7 @@ const ActorInit Boss_Fd_InitVars = {
     sizeof(BossFd),
     (ActorFunc)BossFd_Init,
     (ActorFunc)BossFd_Destroy,
-    (ActorFunc)BossFd_Update,
+    (ActorFunc)BossFd_rUpdate,
     (ActorFunc)BossFd_Draw,
     NULL,
 };
@@ -1298,6 +1299,14 @@ void BossFd_CollisionCheck(BossFd* this, PlayState* play) {
         this->work[BFD_INVINC_TIMER] = 20;
         Audio_PlaySoundGeneral(NA_SE_EN_VALVAISA_DAMAGE1, &this->actor.projectedPos, 4, &D_801333E0, &D_801333E0,
                                &D_801333E8);
+    }
+}
+
+void BossFd_rUpdate(Actor* thisx, PlayState* play) {
+    BossFd_Update(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossFd_Update(thisx, play);
     }
 }
 

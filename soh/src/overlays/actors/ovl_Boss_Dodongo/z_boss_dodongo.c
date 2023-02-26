@@ -9,6 +9,7 @@
 void BossDodongo_Init(Actor* thisx, PlayState* play);
 void BossDodongo_Destroy(Actor* thisx, PlayState* play);
 void BossDodongo_Update(Actor* thisx, PlayState* play);
+void BossDodongo_rUpdate(Actor* thisx, PlayState* play);
 void BossDodongo_Draw(Actor* thisx, PlayState* play);
 
 void BossDodongo_SetupIntroCutscene(BossDodongo* this, PlayState* play);
@@ -42,7 +43,7 @@ const ActorInit Boss_Dodongo_InitVars = {
     sizeof(BossDodongo),
     (ActorFunc)BossDodongo_Init,
     (ActorFunc)BossDodongo_Destroy,
-    (ActorFunc)BossDodongo_Update,
+    (ActorFunc)BossDodongo_rUpdate,
     (ActorFunc)BossDodongo_Draw,
     NULL,
 };
@@ -829,6 +830,14 @@ void BossDodongo_Roll(BossDodongo* this, PlayState* play) {
                 this->unk_1A0 = 3;
             }
         }
+    }
+}
+
+void BossDodongo_rUpdate(Actor* thisx, PlayState* play2) {
+    BossDodongo_Update(thisx, play2);
+    Player* player = GET_PLAYER(play2);
+    if (!Player_InBlockingCsMode(play2, player)) {
+        BossDodongo_Update(thisx, play2);
     }
 }
 

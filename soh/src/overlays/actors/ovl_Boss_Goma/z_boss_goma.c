@@ -1912,7 +1912,7 @@ void BossGoma_UpdateEyeEnvColor(BossGoma* this) {
 void BossGoma_rUpdate(Actor* thisx, PlayState* play) {
     BossGoma_Update(thisx, play);
     Player* player = GET_PLAYER(play);
-    if (!Player_InBlockingCsMode(gPlayState, player)) {
+    if (!Player_InBlockingCsMode(play, player)) {
         BossGoma_Update(thisx, play);
     }
 }

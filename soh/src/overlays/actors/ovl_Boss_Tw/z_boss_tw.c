@@ -23,6 +23,7 @@ typedef enum {
 void BossTw_Init(Actor* thisx, PlayState* play);
 void BossTw_Destroy(Actor* thisx, PlayState* play);
 void BossTw_Update(Actor* thisx, PlayState* play);
+void BossTw_rUpdate(Actor* thisx, PlayState* play);
 void BossTw_Draw(Actor* thisx, PlayState* play);
 void BossTw_Reset(void);
 
@@ -59,6 +60,7 @@ void BossTw_FlyTo(BossTw* this, PlayState* play);
 void BossTw_SetupShootBeam(BossTw* this, PlayState* play);
 void BossTw_TurnToPlayer(BossTw* this, PlayState* play);
 void BossTw_TwinrovaUpdate(Actor* thisx, PlayState* play);
+void BossTw_rTwinrovaUpdate(Actor* thisx, PlayState* play);
 void BossTw_TwinrovaDraw(Actor* thisx, PlayState* play);
 void BossTw_SetupWait(BossTw* this, PlayState* play);
 void BossTw_TwinrovaSetupIntroCS(BossTw* this, PlayState* play);
@@ -85,7 +87,7 @@ const ActorInit Boss_Tw_InitVars = {
     sizeof(BossTw),
     (ActorFunc)BossTw_Init,
     (ActorFunc)BossTw_Destroy,
-    (ActorFunc)BossTw_Update,
+    (ActorFunc)BossTw_rUpdate,
     (ActorFunc)BossTw_Draw,
     (ActorResetFunc)BossTw_Reset,
 };
@@ -512,7 +514,7 @@ void BossTw_Init(Actor* thisx, PlayState* play2) {
         Collider_SetCylinder(play, &this->collider, &this->actor, &sCylinderInitTwinrova);
         this->actor.naviEnemyId = 0x5B;
         this->actor.colChkInfo.health = 24;
-        this->actor.update = BossTw_TwinrovaUpdate;
+        this->actor.update = BossTw_rTwinrovaUpdate;
         this->actor.draw = BossTw_TwinrovaDraw;
         SkelAnime_InitFlex(play, &this->skelAnime, &object_tw_Skel_032020, &object_tw_Anim_0244B4, NULL, NULL, 0);
         Animation_MorphToLoop(&this->skelAnime, &object_tw_Anim_0244B4, -3.0f);
@@ -2821,6 +2823,14 @@ static s16 D_8094A90C[] = {
     0, 1, 2, 2, 2, 2, 2, 2, 1,
 };
 
+void BossTw_rUpdate(Actor* thisx, PlayState* play) {
+    BossTw_Update(thisx, play);
+    Player* player = GET_PLAYER(play);
+    if (!Player_InBlockingCsMode(play, player)) {
+        BossTw_Update(thisx, play);
+    }
+}
+
 void BossTw_Update(Actor* thisx, PlayState* play) {
     BossTw* this = (BossTw*)thisx;
     Player* player = GET_PLAYER(play);
@@ -2939,6 +2949,14 @@ void BossTw_Update(Actor* thisx, PlayState* play) {
                                     this->actor.params, 37);
             }
         }
+    }
+}
+
+void BossTw_rTwinrovaUpdate(Actor* thisx, PlayState* play2) {
+    BossTw_TwinrovaUpdate(thisx, play2);
+    Player* player = GET_PLAYER(play2);
+    if (!Player_InBlockingCsMode(play2, player)) {
+        BossTw_TwinrovaUpdate(thisx, play2);
     }
 }
 
