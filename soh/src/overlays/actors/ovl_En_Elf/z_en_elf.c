@@ -1442,6 +1442,11 @@ void func_80A053F0(Actor* thisx, PlayState* play) {
                 gSaveContext.equips.buttonItems[4] = gSaveContext.equips.buttonItems[5] =
                     gSaveContext.equips.buttonItems[6] = gSaveContext.equips.buttonItems[7] = ITEM_NONE;
             }
+
+            if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
+                gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
+                gSaveContext.equips.buttonItems[5] = ITEM_NONE;
+            }
         }
     }
 
