@@ -1748,9 +1748,9 @@ void func_808333FC(Player* this, s32 arg1) {
 LinkAnimationHeader* func_80833438(Player* this) {
     if (this->unk_890 != 0) {
         return D_80853914[PLAYER_ANIMGROUP_3][this->modelAnimType];
-    } else if (!(this->stateFlags1 & (PLAYER_STATE1_27 | PLAYER_STATE1_29)) &&
+    /*} else if (!(this->stateFlags1 & (PLAYER_STATE1_27 | PLAYER_STATE1_29)) &&
                (this->currentBoots == PLAYER_BOOTS_IRON)) {
-        return D_80853914[PLAYER_ANIMGROUP_4][this->modelAnimType];
+        return D_80853914[PLAYER_ANIMGROUP_4][this->modelAnimType];*/
     } else {
         return D_80853914[PLAYER_ANIMGROUP_2][this->modelAnimType];
     }
@@ -6098,6 +6098,10 @@ void func_8083DFE0(Player* this, f32* arg1, s16* arg2) {
         if (CVarGetInteger("gMMBunnyHood", 0) == 1 && this->currentMask == PLAYER_MASK_BUNNY) {
             maxSpeed *= 1.5f;
         } 
+
+        if (this->currentBoots == PLAYER_BOOTS_IRON) {
+            maxSpeed *= 5.0f;
+        }
         
         if (CVarGetInteger("gEnableWalkModify", 0)) {
             if (CVarGetInteger("gWalkSpeedToggle", 0)) {
@@ -7735,7 +7739,11 @@ void func_80842180(Player* this, PlayState* play) {
 
             if (CVarGetInteger("gMMBunnyHood", 0) && this->currentMask == PLAYER_MASK_BUNNY) {
                 sp2C *= 1.5f;
-            } 
+            }
+
+            if (this->currentBoots == PLAYER_BOOTS_IRON) {
+                sp2C *= 5.0f;
+            }
             
             if (CVarGetInteger("gEnableWalkModify", 0)) {
                 if (CVarGetInteger("gWalkSpeedToggle", 0)) {
