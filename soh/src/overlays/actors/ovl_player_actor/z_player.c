@@ -11036,9 +11036,16 @@ void Player_Update(Actor* thisx, PlayState* play) {
             break;
     }*/
 
-    this->actor.scale.x = 0.009f;
-    this->actor.scale.y = 0.009f;
-    this->actor.scale.z = 0.009f;
+    if (this->stateFlags1 & PLAYER_STATE1_21) {
+        this->actor.scale.x = 0.03f;
+        this->actor.scale.y = 0.009f;
+        this->actor.scale.z = 0.009f;
+    } else {
+        this->actor.scale.x = 0.009f;
+        this->actor.scale.y = 0.009f;
+        this->actor.scale.z = 0.009f;
+    }
+    
 
     switch (GameInteractor_GravityLevel()) {
         case GI_GRAVITY_LEVEL_HEAVY:
