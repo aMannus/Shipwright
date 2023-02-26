@@ -11001,7 +11001,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
     MREG(54) = this->actor.world.pos.z;
     MREG(55) = this->actor.world.rot.y;
 
-    switch (GameInteractor_GetLinkSize()) {
+    /*switch (GameInteractor_GetLinkSize()) {
         case GI_LINK_SIZE_RESET:
             this->actor.scale.x = 0.01f;
             this->actor.scale.y = 0.01f;
@@ -11026,7 +11026,11 @@ void Player_Update(Actor* thisx, PlayState* play) {
         case GI_LINK_SIZE_NORMAL:
         default:
             break;
-    }
+    }*/
+
+    this->actor.scale.x = 0.009f;
+    this->actor.scale.y = 0.009f;
+    this->actor.scale.z = 0.009f;
 
     switch (GameInteractor_GravityLevel()) {
         case GI_GRAVITY_LEVEL_HEAVY:
