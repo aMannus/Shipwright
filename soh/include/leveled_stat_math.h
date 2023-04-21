@@ -1,6 +1,6 @@
 #ifndef LEVELED_STAT_MATH_H
 #define LEVELED_STAT_MATH_H
-#define HEALTH_ATTACK_MULTIPLIER 5
+#define HEALTH_ATTACK_MULTIPLIER 7
 #include "z64.h"
 #endif
 

@@ -157,8 +157,8 @@ f32 Leveled_DamageModify(Actor* actor, Actor* attackingActor, f32 attack) {
     if (damage >= 6)
         damage += Rand_ZeroFloat(damage * 0.12f) - damage * 0.06f;
 
-    if (damage > 999)
-        damage = 999;
+    if (damage > 9999)
+        damage = 9999;
 
     damage = (u16)(damage + 0.5f);
 
