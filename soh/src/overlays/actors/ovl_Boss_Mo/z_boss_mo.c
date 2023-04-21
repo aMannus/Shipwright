@@ -1767,22 +1767,29 @@ void BossMo_CoreCollisionCheck(BossMo* this, PlayState* play) {
         // "hit 2 !!"
         osSyncPrintf("Core_Damage_check 当り 2 ！！\n");
         if ((this->work[MO_TENT_ACTION_STATE] != MO_CORE_UNDERWATER) && (this->work[MO_TENT_INVINC_TIMER] == 0)) {
-            u8 damage = CollisionCheck_GetSwordDamage(hurtbox->toucher.dmgFlags);
+            u16 damage = CollisionCheck_GetSwordDamage(hurtbox->toucher.dmgFlags);
 
             if ((damage != 0) && (this->work[MO_TENT_ACTION_STATE] < MO_CORE_ATTACK)) {
                 // "sword hit !!"
                 osSyncPrintf("Core_Damage_check 剣 当り！！\n");
                 this->work[MO_TENT_ACTION_STATE] = MO_CORE_STUNNED;
                 this->timers[0] = 25;
+                
+                damage = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor, damage * HEALTH_ATTACK_MULTIPLIER);
+                ActorDamageNumber_New(&this->actor, damage);
 
                 this->actor.speedXZ = 15.0f;
 
                 this->actor.world.rot.y = this->actor.yawTowardsPlayer + 0x8000;
                 this->work[MO_CORE_DMG_FLASH_TIMER] = 15;
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_MOFER_CORE_DAMAGE);
-                this->actor.colChkInfo.health -= damage;
+                if (damage < this->actor.colChkInfo.health) {
+                    this->actor.colChkInfo.health -= damage;
+                } else {
+                    this->actor.colChkInfo.health = 0;
+                }
                 this->hitCount++;
-                if ((s8)this->actor.colChkInfo.health <= 0) {
+                if (this->actor.colChkInfo.health <= 0) {
                     if (((sMorphaTent1->csCamera == 0) && (sMorphaTent2 == NULL)) ||
                         ((sMorphaTent1->csCamera == 0) && (sMorphaTent2 != NULL) && (sMorphaTent2->csCamera == 0))) {
                         Enemy_StartFinishingBlow(play, &this->actor);

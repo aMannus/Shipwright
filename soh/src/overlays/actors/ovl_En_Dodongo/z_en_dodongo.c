@@ -662,6 +662,7 @@ void EnDodongo_SetupDeath(EnDodongo* this, PlayState* play) {
     Animation_MorphToPlayOnce(&this->skelAnime, &gDodongoDieAnim, -8.0f);
     this->timer = 0;
     Audio_PlayActorSound2(&this->actor, NA_SE_EN_DODO_J_DEAD);
+    Player_GainExperience(play, this->actor.exp);
     this->actionState = DODONGO_DEATH;
     this->actor.flags &= ~ACTOR_FLAG_0;
     this->actor.speedXZ = 0.0f;

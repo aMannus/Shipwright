@@ -570,7 +570,7 @@ void BossGanon_IntroCutscene(BossGanon* this, PlayState* play) {
                 BossGanon_SetIntroCsCamera(this, 11);
                 this->unk_198 = 2;
                 this->timers[2] = 110;
-                gSaveContext.healthAccumulator = 0x140;
+                gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
                 Audio_QueueSeqCmd(NA_BGM_STOP);
             } else {
                 this->useOpenHand = true;
@@ -786,7 +786,7 @@ void BossGanon_IntroCutscene(BossGanon* this, PlayState* play) {
             }
 
             if (this->csTimer == 25) {
-                gSaveContext.healthAccumulator = 0x140;
+                gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
             }
 
             if (this->csTimer == 100) {
@@ -1202,7 +1202,7 @@ void BossGanon_SetupTowerCutscene(BossGanon* this, PlayState* play) {
         this->csState = 100;
         this->unk_198 = 1;
         gSaveContext.magic = gSaveContext.magicCapacity;
-        gSaveContext.health = gSaveContext.healthCapacity;
+        gSaveContext.health = gSaveContext.healthCapacity2;
     } else {
         this->actionFunc = BossGanon_SetupTowerCutscene;
     }
@@ -2272,7 +2272,7 @@ void BossGanon_Wait(BossGanon* this, PlayState* play) {
         } else if ((this->timers[0] == 0) && !(player->stateFlags1 & 0x2000)) {
             this->timers[0] = (s16)Rand_ZeroFloat(30.0f) + 30;
 
-            if ((s8)this->actor.colChkInfo.health >= 20) {
+            if (this->actor.colChkInfo.health >= GetActorStat_EnemyMaxHealth(20 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
                 BossGanon_SetupChargeLightBall(this, play);
             } else if (Rand_ZeroOne() >= 0.5f) {
                 if ((Rand_ZeroOne() >= 0.5f) || (this->actor.xzDistToPlayer > 350.0f)) {
@@ -2764,7 +2764,7 @@ void BossGanon_UpdateDamage(BossGanon* this, PlayState* play) {
         } else if ((this->actionFunc == BossGanon_Vulnerable) && (this->unk_1C2 >= 3)) {
             if (!(acHitInfo->toucher.dmgFlags & 0x80)) {
                 u8 hitWithSword = false;
-                u8 damage;
+                u16 damage;
                 Vec3f sp50;
                 u32 flags;
 
@@ -2784,8 +2784,21 @@ void BossGanon_UpdateDamage(BossGanon* this, PlayState* play) {
                     hitWithSword = true;
                 }
 
-                if (((s8)this->actor.colChkInfo.health >= 3) || hitWithSword) {
-                    this->actor.colChkInfo.health -= damage;
+                damage = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor, damage * HEALTH_ATTACK_MULTIPLIER);
+                ActorDamageNumber_New(&this->actor, damage);
+
+                if (hitWithSword) {
+                    if (this->actor.colChkInfo.health >= damage) {
+                        this->actor.colChkInfo.health -= damage;
+                    } else {
+                        this->actor.colChkInfo.health = 0;
+                    }
+                } else {
+                    if (this->actor.colChkInfo.health > damage) {
+                        this->actor.colChkInfo.health -= damage;
+                    } else {
+                        this->actor.colChkInfo.health = 1;
+                    }
                 }
 
                 for (i = 0; i < ARRAY_COUNT(sBossGanonCape->strands); i++) {
@@ -2795,8 +2808,9 @@ void BossGanon_UpdateDamage(BossGanon* this, PlayState* play) {
                     }
                 }
 
-                if ((s8)this->actor.colChkInfo.health <= 0) {
+                if (this->actor.colChkInfo.health <= 0) {
                     BossGanon_SetupDeathCutscene(this, play);
+                    Player_GainExperience(play, this->actor.exp);
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_GANON_DEAD);
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_GANON_DD_THUNDER);
                     func_80078914(&sZeroVec, NA_SE_EN_LAST_DAMAGE);

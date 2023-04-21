@@ -8356,13 +8356,14 @@ void func_80843AE8(PlayState* play, Player* this) {
                 }
                 if (CVarGetInteger("gFairyReviveEffect", 0)) {
                     if (CVarGetInteger("gFairyRevivePercentRestore", 0)) {
-                        gSaveContext.healthAccumulator =
-                            (gSaveContext.healthCapacity * CVarGetInteger("gFairyReviveHealth", 100) / 100 + 15) / 16 * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = heartUnits + ((gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gFairyReviveHealth", 100) / 100);
                     } else {
-                        gSaveContext.healthAccumulator = CVarGetInteger("gFairyReviveHealth", 20) * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = CVarGetInteger("gFairyReviveHealth", 20) * heartUnits;
                     }
                 } else {
-                    gSaveContext.healthAccumulator = 0x140;
+                    gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
                 }
                 this->unk_850 = -1;
             }
@@ -9572,6 +9573,7 @@ void Player_InitCommon(Player* this, PlayState* play, FlexSkeletonHeader* skelHe
     this->meleeWeaponEffectIndex = TOTAL_EFFECT_COUNT;
     this->currentYaw = this->actor.world.rot.y;
     func_80834644(play, this);
+    Player_GainExperience(play, 0);
 
     SkelAnime_InitLink(play, &this->skelAnime, skelHeader, D_80853914[PLAYER_ANIMGROUP_0][this->modelAnimType], 9,
                        this->jointTable, this->morphTable, PLAYER_LIMB_MAX);
@@ -12989,37 +12991,40 @@ void func_8084EAC0(Player* this, PlayState* play) {
         if (this->unk_850 == 0) {
             if (this->itemAction == PLAYER_IA_BOTTLE_POE) {
                 s32 rand = Rand_S16Offset(-1, 3);
+                s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
 
                 if (rand == 0) {
                     rand = 3;
                 }
 
-                if ((rand < 0) && (gSaveContext.health <= 0x10)) {
+                if ((rand < 0) && (gSaveContext.health <= heartUnits)) {
                     rand = 3;
                 }
 
                 if (rand < 0) {
-                    Health_ChangeBy(play, -0x10);
+                    Health_ChangeBy(play, -heartUnits);
                 } else {
-                    gSaveContext.healthAccumulator = rand * 0x10;
+                    gSaveContext.healthAccumulator = rand * heartUnits;
                 }
             } else {
                 s32 sp28 = D_808549FC[this->itemAction - PLAYER_IA_BOTTLE_POTION_RED];
 
                 if (CVarGetInteger("gRedPotionEffect", 0) && this->itemAction == PLAYER_IA_BOTTLE_POTION_RED) {
                     if (CVarGetInteger("gRedPercentRestore", 0)) {
-                        gSaveContext.healthAccumulator =
-                            (gSaveContext.healthCapacity * CVarGetInteger("gRedPotionHealth", 100) / 100 + 15) / 16 * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = (gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gRedPotionHealth", 100) / 100;
                     } else {
-                        gSaveContext.healthAccumulator = CVarGetInteger("gRedPotionHealth", 20) * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = CVarGetInteger("gRedPotionHealth", 20) * heartUnits;
                     }
                 } else if (CVarGetInteger("gBluePotionEffects", 0) &&
                            this->itemAction == PLAYER_IA_BOTTLE_POTION_BLUE) {
                     if (CVarGetInteger("gBlueHealthPercentRestore", 0)) {
-                        gSaveContext.healthAccumulator =
-                            (gSaveContext.healthCapacity * CVarGetInteger("gBluePotionHealth", 100) / 100 + 15) / 16 * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = (gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gBluePotionHealth", 100) / 100;
                     } else {
-                        gSaveContext.healthAccumulator = CVarGetInteger("gBluePotionHealth", 20) * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = CVarGetInteger("gBluePotionHealth", 20) * heartUnits;
                     }
 
                     if (CVarGetInteger("gBlueManaPercentRestore", 0)) {
@@ -13027,10 +13032,7 @@ void func_8084EAC0(Player* this, PlayState* play) {
                             Magic_Fill(play);
                         }
 
-                        func_80087708(play,
-                                      (gSaveContext.magicLevel * 48 * CVarGetInteger("gBluePotionMana", 100) / 100 + 15) /
-                                          16 * 16,
-                                      5);
+                        func_80087708(play, (gSaveContext.magicLevel * gSaveContext.magicUnits * CVarGetInteger("gBluePotionMana", 100) / 100 + 15) / 16 * 16, 5);
                     } else {
                         if (gSaveContext.magicState != 10) {
                             Magic_Fill(play);
@@ -13046,10 +13048,7 @@ void func_8084EAC0(Player* this, PlayState* play) {
                             Magic_Fill(play);
                         }
 
-                        func_80087708(play,
-                                      (gSaveContext.magicLevel * 48 * CVarGetInteger("gGreenPotionMana", 100) / 100 + 15) /
-                                          16 * 16,
-                                      5);
+                        func_80087708(play, (gSaveContext.magicLevel * gSaveContext.magicUnits * CVarGetInteger("gGreenPotionMana", 100) / 100 + 15) / 16 * 16, 5);
                     } else {
                         if (gSaveContext.magicState != 10) {
                             Magic_Fill(play);
@@ -13061,24 +13060,25 @@ void func_8084EAC0(Player* this, PlayState* play) {
                 } else if (CVarGetInteger("gMilkEffect", 0) && (this->itemAction == PLAYER_IA_BOTTLE_MILK ||
                                                              this->itemAction == PLAYER_IA_BOTTLE_MILK_HALF)) {
                     if (CVarGetInteger("gMilkPercentRestore", 0)) {
-                        gSaveContext.healthAccumulator =
-                            (gSaveContext.healthCapacity * CVarGetInteger("gMilkHealth", 100) / 100 + 15) / 16 * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = (gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gMilkHealth", 100) / 100;
                     } else {
-                        gSaveContext.healthAccumulator = CVarGetInteger("gMilkHealth", 5) * 16;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = CVarGetInteger("gMilkHealth", 5) * heartUnits;
                     }
                     if (CVarGetInteger("gSeparateHalfMilkEffect", 0) &&
                         this->itemAction == PLAYER_IA_BOTTLE_MILK_HALF) {
                         if (CVarGetInteger("gHalfMilkPercentRestore", 0)) {
-                            gSaveContext.healthAccumulator =
-                                (gSaveContext.healthCapacity * CVarGetInteger("gHalfMilkHealth", 100) / 100 + 15) / 16 *
-                                16;
+                            s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                            gSaveContext.healthAccumulator = (gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gHalfMilkHealth", 100) / 100;
                         } else {
-                            gSaveContext.healthAccumulator = CVarGetInteger("gHalfMilkHealth", 5) * 16;
+                            s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                            gSaveContext.healthAccumulator = CVarGetInteger("gHalfMilkHealth", 5) * heartUnits;
                         }
                     }
                 } else {
                     if (sp28 & 1) {
-                        gSaveContext.healthAccumulator = 0x140;
+                        gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
                     }
 
                     if (sp28 & 2) {
@@ -13086,7 +13086,8 @@ void func_8084EAC0(Player* this, PlayState* play) {
                     }
 
                     if (sp28 & 4) {
-                        gSaveContext.healthAccumulator = 0x50;
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        gSaveContext.healthAccumulator = heartUnits * 5;
                     }
                 }
             }
@@ -13202,13 +13203,15 @@ void func_8084EED8(Player* this, PlayState* play) {
     } else if (LinkAnimation_OnFrame(&this->skelAnime, 47.0f)) {
         if (CVarGetInteger("gFairyEffect", 0)) {
             if (CVarGetInteger("gFairyPercentRestore", 0)) {
+                s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
                 gSaveContext.healthAccumulator =
-                    (gSaveContext.healthCapacity * CVarGetInteger("gFairyHealth", 100) / 100 + 15) / 16 * 16;
+                    (gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gFairyHealth", 100) / 100;
             } else {
-                gSaveContext.healthAccumulator = CVarGetInteger("gFairyHealth", 8) * 16;
+                s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                gSaveContext.healthAccumulator = CVarGetInteger("gFairyHealth", 8) * heartUnits;
             }
         } else {
-            gSaveContext.healthAccumulator = 0x140;
+            gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
         }
     }
 }

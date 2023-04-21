@@ -425,9 +425,13 @@ void SaveManager::InitFileNormal() {
     for (int i = 0; i < ARRAY_COUNT(gSaveContext.playerName); i++) {
         gSaveContext.playerName[i] = 0x3E;
     }
+    gSaveContext.healthCapacity2 = 9999;
+    gSaveContext.magicUnits = 9999;
+    gSaveContext.experience = 0;
+    gSaveContext.showNeededExpTimer = 0;
     gSaveContext.n64ddFlag = 0;
     gSaveContext.healthCapacity = 0x30;
-    gSaveContext.health = 0x30;
+    gSaveContext.health = 3 * CVarGetInteger("gLeveledHeartUnits", 4) << 2;
     gSaveContext.magicLevel = 0;
     gSaveContext.magic = 0x30;
     gSaveContext.rupees = 0;
@@ -601,6 +605,7 @@ void SaveManager::InitFileDebug() {
     for (int i = 0; i < ARRAY_COUNT(gSaveContext.playerName); i++) {
         gSaveContext.playerName[i] = sPlayerName[i];
     }
+    gSaveContext.experience = 50000;
     gSaveContext.n64ddFlag = 0;
     gSaveContext.healthCapacity = 0xE0;
     gSaveContext.health = 0xE0;
@@ -852,6 +857,7 @@ void SaveManager::CreateDefaultGlobal() {
 }
 
 void SaveManager::LoadBaseVersion1() {
+    SaveManager::Instance->LoadData("experience", gSaveContext.experience);
     SaveManager::Instance->LoadData("entranceIndex", gSaveContext.entranceIndex);
     SaveManager::Instance->LoadData("linkAge", gSaveContext.linkAge);
     SaveManager::Instance->LoadData("cutsceneIndex", gSaveContext.cutsceneIndex);
@@ -993,6 +999,7 @@ void SaveManager::LoadBaseVersion1() {
 }
 
 void SaveManager::LoadBaseVersion2() {
+    SaveManager::Instance->LoadData("experience", gSaveContext.experience);
     SaveManager::Instance->LoadData("entranceIndex", gSaveContext.entranceIndex);
     SaveManager::Instance->LoadData("linkAge", gSaveContext.linkAge);
     SaveManager::Instance->LoadData("cutsceneIndex", gSaveContext.cutsceneIndex);
@@ -1199,6 +1206,7 @@ void SaveManager::LoadBaseVersion2() {
 }
 
 void SaveManager::LoadBaseVersion3() {
+    SaveManager::Instance->LoadData("experience", gSaveContext.experience);
     SaveManager::Instance->LoadData("entranceIndex", gSaveContext.entranceIndex);
     SaveManager::Instance->LoadData("linkAge", gSaveContext.linkAge);
     SaveManager::Instance->LoadData("cutsceneIndex", gSaveContext.cutsceneIndex);
@@ -1415,6 +1423,7 @@ void SaveManager::LoadBaseVersion3() {
 }
 
 void SaveManager::SaveBase() {
+    SaveManager::Instance->SaveData("experience", gSaveContext.experience);
     SaveManager::Instance->SaveData("entranceIndex", gSaveContext.entranceIndex);
     SaveManager::Instance->SaveData("linkAge", gSaveContext.linkAge);
     SaveManager::Instance->SaveData("cutsceneIndex", gSaveContext.cutsceneIndex);

@@ -722,6 +722,7 @@ void EnTite_Stunned(EnTite* this, PlayState* play) {
         this->actor.world.rot.y = this->actor.shape.rot.y;
         if (this->actor.colChkInfo.health == 0) {
             EnTite_SetupDeathCry(this);
+            Player_GainExperience(play, this->actor.exp);
         } else if (this->flipState == TEKTITE_FLIPPED) {
             EnTite_SetupFlipUpright(this);
         } else if (((this->actor.xzDistToPlayer > 300.0f) && (this->actor.yDistToPlayer > 80.0f) &&

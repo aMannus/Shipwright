@@ -675,7 +675,7 @@ void func_80A75C38(EnIk* this, PlayState* play) {
     f32 temp_f0;
     u8 pad;
     u8 pad2;
-    u8 prevHealth;
+    u16 prevHealth;
     s32 temp_v0_3;
     Vec3f sp38;
 
@@ -710,19 +710,20 @@ void func_80A75C38(EnIk* this, PlayState* play) {
     Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 0xC);
     prevHealth = this->actor.colChkInfo.health;
     Actor_ApplyDamage(&this->actor);
+    u16 healthCheck = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
     if (this->actor.params != 0) {
-        if ((prevHealth > 10) && (this->actor.colChkInfo.health <= 10)) {
+        if ((prevHealth > healthCheck) && (this->actor.colChkInfo.health <= healthCheck)) {
             this->unk_2FB = 1;
             BodyBreak_Alloc(&this->bodyBreak, 3, play);
         }
-    } else if (this->actor.colChkInfo.health <= 10) {
+    } else if (this->actor.colChkInfo.health <= healthCheck) {
         Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_BOSS);
         SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 20, NA_SE_EN_LAST_DAMAGE);
         if (this->switchFlags != 0xFF) {
             Flags_SetSwitch(play, this->switchFlags);
         }
         return;
-    } else if (prevHealth == 50) {
+    } else if (prevHealth == healthCheck * 5) {
         Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_ENEMY);
     }
 
@@ -738,7 +739,7 @@ void func_80A75C38(EnIk* this, PlayState* play) {
         }
     }
     if ((this->actor.params != 0) && (this->unk_2FB != 0)) {
-        if ((prevHealth > 10) && (this->actor.colChkInfo.health <= 10)) {
+        if ((prevHealth > healthCheck) && (this->actor.colChkInfo.health <= healthCheck)) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_IRONNACK_ARMOR_OFF_DEMO);
         } else {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_IRONNACK_DAMAGE);
@@ -760,7 +761,8 @@ void func_80A75FA0(Actor* thisx, PlayState* play) {
 
     this->unk_2FA = this->unk_2FB;
     func_80A75C38(this, play);
-    if ((this->actor.params == 0) && (this->actor.colChkInfo.health <= 10)) {
+    u16 healthCheck = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+    if ((this->actor.params == 0) && (this->actor.colChkInfo.health <= healthCheck)) {
         func_80A781CC(&this->actor, play);
         return;
     }
@@ -1446,7 +1448,8 @@ void func_80A781CC(Actor* thisx, PlayState* play) {
             Actor_SetScale(&this->actor, 0.01f);
         } else {
         // Because no CS in rando, we hide the death of the knuckle by spawning flames and kill the actor
-            if ((this->actor.colChkInfo.health <= 10)) {
+            u16 healthCheck = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+            if ((this->actor.colChkInfo.health <= healthCheck)) {
                 s32 i;
                 Vec3f pos;
                 Vec3f sp7C = { 0.0f, 0.5f, 0.0f };

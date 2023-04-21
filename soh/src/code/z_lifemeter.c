@@ -385,12 +385,17 @@ void HealthMeter_Draw(PlayState* play) {
     f32 temp2;
     f32 temp3;
     f32 temp4;
+    u8 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+    if (heartUnits < 4) {
+        heartUnits = 4;
+        CVarSetInteger("gLeveledHeartUnits", 1);
+    }
     InterfaceContext* interfaceCtx = &play->interfaceCtx;
     GraphicsContext* gfxCtx = play->state.gfxCtx;
     Vtx* sp154 = interfaceCtx->beatingHeartVtx;
-    s32 curHeartFraction = gSaveContext.health % 0x10;
-    s16 totalHeartCount = gSaveContext.healthCapacity / 0x10;
-    s16 fullHeartCount = gSaveContext.health / 0x10;
+    s32 curHeartFraction = (s32)((f32)gSaveContext.health / heartUnits * 16) % 0x10;
+    s16 totalHeartCount = gSaveContext.healthCapacity2 / heartUnits;
+    s16 fullHeartCount = gSaveContext.health / heartUnits;
     s32 pad2;
     f32 sp144 = interfaceCtx->unk_22A * 0.1f;
     s32 curCombineModeSet = 0;
@@ -405,7 +410,7 @@ void HealthMeter_Draw(PlayState* play) {
 
     OPEN_DISPS(gfxCtx);
 
-    if (!(gSaveContext.health % 0x10)) {
+    if (!(gSaveContext.health % heartUnits)) {
         fullHeartCount--;
     }
 
@@ -615,7 +620,7 @@ void HealthMeter_Draw(PlayState* play) {
         }
 
         offsetX += 10.0f;
-        s32 lineLength = CVarGetInteger("gHeartsLineLength", 10);
+        s32 lineLength = CVarGetInteger("gHeartsLineLength", 15);
         if (lineLength != 0 && (i+1)%lineLength == 0) {
             offsetX = PosX_anchor;
             offsetY += 10.0f;
@@ -651,16 +656,9 @@ void HealthMeter_HandleCriticalAlarm(PlayState* play) {
 
 u32 HealthMeter_IsCritical(void) {
     s32 var;
+    s32 heartValue = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
 
-    if (gSaveContext.healthCapacity <= 0x50) {
-        var = 0x10;
-    } else if (gSaveContext.healthCapacity <= 0xA0) {
-        var = 0x18;
-    } else if (gSaveContext.healthCapacity <= 0xF0) {
-        var = 0x20;
-    } else {
-        var = 0x2C;
-    }
+    var = (s32)(heartValue + (f32)(((gSaveContext.healthCapacity2 / heartValue) - 3) * heartValue) * 0.103f);
 
     if ((var >= gSaveContext.health) && (gSaveContext.health > 0)) {
         return true;

@@ -601,6 +601,7 @@ void EnTp_UpdateDamage(EnTp* this, PlayState* play) {
 
                 if (head->actor.params <= TAILPASARAN_HEAD) {
                     EnTp_SetupDie(head);
+                    Player_GainExperience(play, this->actor.exp);
                     head->damageEffect = this->actor.colChkInfo.damageEffect;
                     head->actor.params = TAILPASARAN_HEAD_DYING;
                 }

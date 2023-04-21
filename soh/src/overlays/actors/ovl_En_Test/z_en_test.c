@@ -315,6 +315,8 @@ void EnTest_Destroy(Actor* thisx, PlayState* play) {
     if ((this->actor.params != STALFOS_TYPE_2) &&
         !Actor_FindNearby(play, &this->actor, ACTOR_EN_TEST, ACTORCAT_ENEMY, 8000.0f)) {
         func_800F5B58();
+        if (this->actor.ignoreExpReward)
+            Player_GainExperience(play, this->actor.exp);
     }
 
     Effect_Delete(play, this->effectIndex);
@@ -1505,7 +1507,7 @@ void func_80862E6C(EnTest* this, PlayState* play) {
         }
     } else {
         if (this->actor.home.rot.x == 0) {
-            this->actor.colChkInfo.health = 10;
+            this->actor.colChkInfo.health = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
 
             if (this->actor.params == STALFOS_TYPE_4) {
                 this->actor.params = -1;

@@ -181,7 +181,8 @@ void func_809BC598(EnBdfire* this, PlayState* play) {
                 player->flameTimers[i] = Rand_S16Offset(0, 200);
             }
             player->isBurning = true;
-            func_8002F6D4(play, &this->actor, 20.0f, this->actor.world.rot.y, 0.0f, 8);
+            // Buffed damage from 8 to 16.
+            func_8002F6D4(play, &this->actor, 20.0f, this->actor.world.rot.y, 0.0f, 16);
             osSyncPrintf("POWER\n");
         }
     }

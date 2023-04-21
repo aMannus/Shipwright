@@ -606,6 +606,10 @@ void DrawActorViewer(bool& open) {
                 ImGui::Text("Name: %s", dispOverlay != nullptr ? dispOverlay->name : "???");
                 ImGui::Text("Description: %s", dispOverlay != nullptr ? GetActorDescription(display->id).c_str() : "???");
                 ImGui::Text("Category: %s", dispOverlay != nullptr ? acMapping[display->category] : "???");
+                if (display->category == ACTORCAT_BOSS || display->category == ACTORCAT_ENEMY) {
+                    ImGui::Text("Level: %d", display->level);
+                    ImGui::Text("EXP: %d", display->exp);
+                }
                 ImGui::Text("ID: %d", display->id);
                 ImGui::Text("Parameters: %d", display->params);
             });
@@ -631,7 +635,7 @@ void DrawActorViewer(bool& open) {
             });
 
             if (display->category == ACTORCAT_BOSS || display->category == ACTORCAT_ENEMY) {
-                ImGui::InputScalar("Enemy Health", ImGuiDataType_U8, &display->colChkInfo.health);
+                ImGui::InputScalar("Enemy Health", ImGuiDataType_U16, &display->colChkInfo.health);
                 UIWidgets::InsertHelpHoverText("Some actors might not use this!");
             }
 

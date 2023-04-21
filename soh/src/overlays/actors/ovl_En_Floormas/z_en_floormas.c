@@ -735,6 +735,11 @@ void EnFloormas_SmDecideAction(EnFloormas* this, PlayState* play) {
 
 void EnFloormas_SmShrink(EnFloormas* this, PlayState* play) {
     if (Math_StepToF(&this->actor.scale.x, 0.0f, 0.0015f)) {
+        EnFloormas* parent = (EnFloormas*)this->actor.parent;
+        EnFloormas* child = (EnFloormas*)this->actor.child;
+        if ((parent->actionFunc == EnFloormas_SmWait) && (child->actionFunc == EnFloormas_SmWait)) {
+            Player_GainExperience(play, this->actor.exp);
+        }
         EnFloormas_SetupSmWait(this);
     }
     this->actor.scale.z = this->actor.scale.x;
@@ -819,7 +824,8 @@ void EnFloormas_GrabLink(EnFloormas* this, PlayState* play) {
             } else {
                 func_8002F7DC(&player->actor, NA_SE_VO_LI_DAMAGE_S);
             }
-            play->damagePlayer(play, -8);
+            u16 damage = (u16)Leveled_DamageModify(&player->actor, &this->actor, 8);
+            play->damagePlayer(play, -damage);
         }
     }
 

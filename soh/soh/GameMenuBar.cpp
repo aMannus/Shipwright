@@ -1336,5 +1336,46 @@ namespace GameMenuBar {
 
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("Leveled")) {
+            UIWidgets::EnhancementCheckbox("Level Gives Bonus Hearts", "gLeveledHeartsWithLevelUp", false, "",
+                                           UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Level Affects Magic Capacity", "gLeveledMagicWithLevelUp", false, "",
+                                           UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Enemy Level Affects Base Attack", "gLeveledEnemyAttackScalesWithLevel",
+                                           false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::Tooltip("Enemies have a fixed attack value. This option scales this up the higher the enemy's "
+                               "Power(Strength) stat. \nThis will increase difficulty a bit.");
+            UIWidgets::EnhancementCheckbox("Equipment Affects Stats", "gLeveledEquipmentStats", false, "",
+                                           UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Navi tells enemy level", "gLeveledNaviLevel", false, "",
+                                           UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Navi tells enemy max HP", "gLeveledNaviMaxHP", false, "",
+                                           UIWidgets::CheckboxGraphics::Checkmark, true);
+
+            if (ImGui::BeginMenu("Heart Capacity in Units")) {
+                CVarGetInteger("gLeveledHeartUnits", 4);
+                UIWidgets::EnhancementRadioButton("4", "gLeveledHeartUnits", 1);
+                UIWidgets::EnhancementRadioButton("8", "gLeveledHeartUnits", 2);
+                UIWidgets::EnhancementRadioButton("12", "gLeveledHeartUnits", 3);
+                UIWidgets::EnhancementRadioButton("16 (Vanilla)", "gLeveledHeartUnits", 4);
+                UIWidgets::EnhancementRadioButton("20", "gLeveledHeartUnits", 5);
+                UIWidgets::EnhancementRadioButton("24", "gLeveledHeartUnits", 6);
+                UIWidgets::EnhancementRadioButton("28", "gLeveledHeartUnits", 7);
+                UIWidgets::EnhancementRadioButton("32", "gLeveledHeartUnits", 8);
+                UIWidgets::EnhancementRadioButton("36", "gLeveledHeartUnits", 9);
+                UIWidgets::EnhancementRadioButton("40", "gLeveledHeartUnits", 10);
+                UIWidgets::EnhancementRadioButton("44", "gLeveledHeartUnits", 11);
+                UIWidgets::EnhancementRadioButton("48", "gLeveledHeartUnits", 12);
+                ImGui::EndMenu();
+            }
+            UIWidgets::Tooltip("Sets how much health units a heart is worth.");
+
+            // if (ImGui::Button("Add 2000 EXP")){
+            //     gSaveContext.experience += 2000;
+            // }
+
+            ImGui::EndMenu();
+        }
     }
 }

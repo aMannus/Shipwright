@@ -1209,6 +1209,7 @@ void EnBb_CollisionCheck(EnBb* this, PlayState* play) {
                         EnBb_KillFlameTrail(this);
                     }
                     EnBb_SetupDeath(this, play);
+                    Player_GainExperience(play, this->actor.exp);
                     //! @bug
                     //! Because Din's Fire kills the bubble in a single hit, Actor_SetColorFilter is never called and
                     //! colorFilterParams is never set. And because Din's Fire halts updating during its cutscene,

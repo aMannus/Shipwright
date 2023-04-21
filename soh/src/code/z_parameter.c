@@ -2205,14 +2205,17 @@ u8 Item_Give(PlayState* play, u8 item) {
         gSaveContext.sohStats.heartPieces++;
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_HEART_CONTAINER) {
+        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
         gSaveContext.healthCapacity += 0x10;
-        gSaveContext.health += 0x10;
+        gSaveContext.health += heartUnits;
         gSaveContext.sohStats.heartContainers++;
+        Actor_RefreshLeveledStats(&GET_PLAYER(play)->actor, GET_PLAYER(play));
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_HEART) {
         osSyncPrintf("回復ハート回復ハート回復ハート\n"); // "Recovery Heart"
         if (play != NULL) {
-            Health_ChangeBy(play, 0x10);
+            s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+            Health_ChangeBy(play, heartUnits);
         }
         return Return_Item(item, MOD_NONE, item);
     } else if (item == ITEM_MAGIC_SMALL) {
@@ -2347,7 +2350,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     slot = SLOT(item);
     if (item == RG_MAGIC_SINGLE) {
         gSaveContext.isMagicAcquired = true;
-        gSaveContext.magicFillTarget = 0x30;
+        gSaveContext.magicFillTarget = gSaveContext.magicUnits;
         Magic_Fill(play);
         return Return_Item_Entry(giEntry, RG_NONE);
     } else if (item == RG_MAGIC_DOUBLE) {
@@ -2355,7 +2358,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
             gSaveContext.isMagicAcquired = true;
         }
         gSaveContext.isDoubleMagicAcquired = true;
-        gSaveContext.magicFillTarget = 0x60;
+        gSaveContext.magicFillTarget = gSaveContext.magicUnits * 2;
         gSaveContext.magicLevel = 0;
         Magic_Fill(play);
         return Return_Item_Entry(giEntry, RG_NONE);
@@ -2372,7 +2375,7 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     if (item == RG_DOUBLE_DEFENSE) {
         gSaveContext.isDoubleDefenseAcquired = true;
         gSaveContext.inventory.defenseHearts = 20;
-        gSaveContext.healthAccumulator = 0x140;
+        gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
         return Return_Item_Entry(giEntry, RG_NONE);
     }
 
@@ -3015,10 +3018,14 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
         }
     }
 
+    if (healthChange < 0) {
+        ActorDamageNumber_New(GET_PLAYER(play), -healthChange);
+    }
+
     gSaveContext.health += healthChange;
 
-    if (gSaveContext.health > gSaveContext.healthCapacity) {
-        gSaveContext.health = gSaveContext.healthCapacity;
+    if (gSaveContext.health > gSaveContext.healthCapacity2) {
+        gSaveContext.health = gSaveContext.healthCapacity2;
     }
 
     heartCount = gSaveContext.health % 0x10;
@@ -3156,7 +3163,7 @@ void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
 void Magic_Fill(PlayState* play) {
     if (gSaveContext.isMagicAcquired) {
         gSaveContext.prevMagicState = gSaveContext.magicState;
-        gSaveContext.magicFillTarget = (gSaveContext.isDoubleMagicAcquired + 1) * 0x30;
+        gSaveContext.magicFillTarget = (gSaveContext.isDoubleMagicAcquired + 1) * gSaveContext.magicUnits;
         gSaveContext.magicState = 9;
     }
 }
@@ -3295,7 +3302,7 @@ void Interface_UpdateMagicBar(PlayState* play) {
 
     switch (gSaveContext.magicState) {
         case 8:
-            temp = gSaveContext.magicLevel * 0x30;
+            temp = gSaveContext.magicLevel * gSaveContext.magicUnits;
             if (gSaveContext.magicCapacity != temp) {
                 if (gSaveContext.magicCapacity < temp) {
                     gSaveContext.magicCapacity += 8;
@@ -3323,6 +3330,9 @@ void Interface_UpdateMagicBar(PlayState* play) {
 
             // "Storage  MAGIC_NOW=%d (%d)"
             osSyncPrintf("蓄電  MAGIC_NOW=%d (%d)\n", gSaveContext.magic, gSaveContext.magicFillTarget);
+            if (gSaveContext.magicFillTarget > gSaveContext.magicCapacity) {
+                gSaveContext.magicFillTarget = gSaveContext.magicCapacity;
+            }
             if (gSaveContext.magic >= gSaveContext.magicFillTarget) {
                 gSaveContext.magic = gSaveContext.magicFillTarget;
                 gSaveContext.magicState = gSaveContext.prevMagicState;
@@ -3545,7 +3555,7 @@ void Interface_DrawMagicBar(PlayState* play) {
         s16 rMagicBarX;
         s16 PosX_MidEnd;
         s16 rMagicFillX;
-        s32 lineLength = CVarGetInteger("gHeartsLineLength", 10);
+        s32 lineLength = CVarGetInteger("gHeartsLineLength", 15);
         if (CVarGetInteger("gMagicBarPosType", 0) != 0) {
             magicBarY = CVarGetInteger("gMagicBarPosY", 0)+Y_Margins;
             if (CVarGetInteger("gMagicBarPosType", 0) == 1) {//Anchor Left
@@ -3572,7 +3582,9 @@ void Interface_DrawMagicBar(PlayState* play) {
                 rMagicFillX = -9999;
             } else if (CVarGetInteger("gMagicBarPosType", 0) == 5) {//Anchor To life meter
                 magicBarY = R_MAGIC_BAR_SMALL_Y-2 +
-                            magicDrop*(lineLength == 0 ? 0 : (gSaveContext.healthCapacity-1)/(0x10*lineLength)) +
+                    magicDrop * (lineLength == 0 ? 0
+                                                 : (gSaveContext.healthCapacity2 - 1) /
+                                                       ((CVarGetInteger("gLeveledHeartUnits", 4) << 2) * lineLength)) +
                             CVarGetInteger("gMagicBarPosY", 0) + getHealthMeterYOffset();
                 s16 xPushover = CVarGetInteger("gMagicBarPosX", 0) + getHealthMeterXOffset() + R_MAGIC_BAR_X-1;
                 PosX_Start = xPushover;
@@ -3581,9 +3593,13 @@ void Interface_DrawMagicBar(PlayState* play) {
                 rMagicFillX = CVarGetInteger("gMagicBarPosX", 0) + getHealthMeterXOffset() + R_MAGIC_FILL_X-1;
             }
         } else {
-            if ((gSaveContext.healthCapacity-1)/0x10 >= lineLength && lineLength != 0) {
+            if ((gSaveContext.healthCapacity2 - 1) / (CVarGetInteger("gLeveledHeartUnits", 4) << 2) >= lineLength &&
+                lineLength != 0) {
                 magicBarY = magicBarY_original_l +
-                            magicDrop*(lineLength == 0 ? 0 : ((gSaveContext.healthCapacity-1)/(0x10*lineLength) - 1));
+                    magicDrop * (lineLength == 0 ? 0
+                                                 : ((gSaveContext.healthCapacity2 - 1) /
+                                                        ((CVarGetInteger("gLeveledHeartUnits", 4) << 2) * lineLength) -
+                                                    1));
             } else {
                 magicBarY = magicBarY_original_s;
             }
@@ -4898,7 +4914,7 @@ void Interface_Draw(PlayState* play) {
     if (pauseCtx->debugState == 0) {
         Interface_InitVertices(play);
         func_8008A994(interfaceCtx);
-        if (fullUi || gSaveContext.health != gSaveContext.healthCapacity) {
+        if (fullUi || gSaveContext.health != gSaveContext.healthCapacity2) {
             HealthMeter_Draw(play);
         }
 
@@ -5116,6 +5132,49 @@ void Interface_Draw(PlayState* play) {
 
         if ((R_PAUSE_MENU_MODE != 2) && (R_PAUSE_MENU_MODE != 3)) {
             func_8002C124(&play->actorCtx.targetCtx, play); // Draw Z-Target
+
+            // Draw Damage
+            Actor* currAct = play->actorCtx.actorLists[ACTORCAT_ENEMY].head;
+            if (currAct != NULL) {
+                while (currAct != NULL) {
+                    ActorDamageNumber_Draw(play, currAct);
+                    currAct = currAct->next;
+                }
+            }
+
+            currAct = play->actorCtx.actorLists[ACTORCAT_MISC].head;
+            if (currAct != NULL) {
+                while (currAct != NULL) {
+                    if (currAct->id == ACTOR_EN_REEBA)
+                        ActorDamageNumber_Draw(play, currAct);
+                    currAct = currAct->next;
+                }
+            }
+
+            currAct = play->actorCtx.actorLists[ACTORCAT_NPC].head;
+            if (currAct != NULL) {
+                while (currAct != NULL) {
+                    ActorDamageNumber_Draw(play, currAct);
+                    currAct = currAct->next;
+                }
+            }
+
+            currAct = play->actorCtx.actorLists[ACTORCAT_BOSS].head;
+            if (currAct != NULL) {
+                while (currAct != NULL) {
+                    ActorDamageNumber_Draw(play, currAct);
+                    currAct = currAct->next;
+                }
+            }
+
+            ActorDamageNumber_Draw(play, GET_PLAYER(play));
+
+            // Draw Experience Gain
+
+            ActorExperienceNumber_Draw(play, GET_PLAYER(play));
+
+            // Draw Level Up
+            Actor_LevelUpDraw(play, GET_PLAYER(play));
         }
 
         Gfx_SetupDL_39Overlay(play->state.gfxCtx);
@@ -5209,6 +5268,8 @@ void Interface_Draw(PlayState* play) {
         }
 
         gDPPipeSync(OVERLAY_DISP++);
+
+        Leveled_Interface_DrawNextLevel(play); // Draw next level
 
         // C-Left Button Icon & Ammo Count
         if (gSaveContext.equips.buttonItems[1] < 0xF0) {
@@ -6155,17 +6216,18 @@ void Interface_Update(PlayState* play) {
     Map_Update(play);
 
     if (gSaveContext.healthAccumulator != 0) {
-        gSaveContext.healthAccumulator -= 4;
-        gSaveContext.health += 4;
-
-        if ((gSaveContext.health & 0xF) < 4) {
+        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+        gSaveContext.healthAccumulator -= heartUnits * 0.25f;
+        gSaveContext.health += heartUnits * 0.25f;
+        
+        if ((gSaveContext.health % (heartUnits)) < heartUnits * 0.25f) {
             Audio_PlaySoundGeneral(NA_SE_SY_HP_RECOVER, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
         }
 
         osSyncPrintf("now_life=%d  max_life=%d\n", gSaveContext.health, gSaveContext.healthCapacity);
 
-        if (gSaveContext.health >= gSaveContext.healthCapacity) {
-            gSaveContext.health = gSaveContext.healthCapacity;
+        if (gSaveContext.health >= gSaveContext.healthCapacity2) {
+            gSaveContext.health = gSaveContext.healthCapacity2;
             osSyncPrintf("S_Private.now_life=%d  S_Private.max_life=%d\n", gSaveContext.health,
                          gSaveContext.healthCapacity);
             gSaveContext.healthAccumulator = 0;

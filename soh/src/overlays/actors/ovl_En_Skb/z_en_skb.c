@@ -414,6 +414,7 @@ void func_80AFD7B4(EnSkb* this, PlayState* play) {
     this->unk_283 |= 4;
     EffectSsDeadSound_SpawnStationary(play, &this->actor.projectedPos, NA_SE_EN_STALKID_DEAD, 1, 1, 0x28);
     EnSkb_SetupAction(this, func_80AFD880);
+    Player_GainExperience(play, this->actor.exp);
     gSaveContext.sohStats.count[COUNT_ENEMIES_DEFEATED_STALCHILD]++;
 }
 

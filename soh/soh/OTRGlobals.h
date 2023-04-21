@@ -110,6 +110,7 @@ void Controller_UnblockGameInput();
 void Hooks_ExecuteAudioInit();
 void* getN64WeirdFrame(s32 i);
 int GetEquipNowMessage(char* buffer, char* src, const int maxBufferSize);
+int GetLeveledNaviEnemyInfo(char* buffer, char* src, const int maxBufferSize, Actor* actor);
 u32 SpoilerFileExists(const char* spoilerFileName);
 Sprite* GetSeedTexture(uint8_t index);
 void Randomizer_LoadSettings(const char* spoilerFileName);

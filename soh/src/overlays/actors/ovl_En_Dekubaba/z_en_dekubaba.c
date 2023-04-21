@@ -1051,6 +1051,7 @@ void EnDekubaba_UpdateDamage(EnDekubaba* this, PlayState* play) {
             ((this->actor.colChkInfo.damageEffect != DEKUBABA_DMGEFF_NONE) || (this->actor.colChkInfo.damage != 0))) {
 
             phi_s0 = this->actor.colChkInfo.health - this->actor.colChkInfo.damage;
+            ActorDamageNumber_New(&this->actor, this->actor.colChkInfo.damage);
 
             if (this->actionFunc != EnDekubaba_StunnedVertical) {
                 if ((this->actor.colChkInfo.damageEffect == DEKUBABA_DMGEFF_BOOMERANG) ||

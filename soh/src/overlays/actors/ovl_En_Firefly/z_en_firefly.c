@@ -632,20 +632,18 @@ void EnFirefly_UpdateDamage(EnFirefly* this, PlayState* play) {
         this->collider.base.acFlags &= ~AC_HIT;
         Actor_SetDropFlag(&this->actor, &this->collider.elements[0].info, 1);
 
-        if ((this->actor.colChkInfo.damageEffect != 0) || (this->actor.colChkInfo.damage != 0)) {
-            if (Actor_ApplyDamage(&this->actor) == 0) {
-                Enemy_StartFinishingBlow(play, &this->actor);
-                this->actor.flags &= ~ACTOR_FLAG_0;
-            }
+        if ((this->actor.colChkInfo.damageEffect != 0 || this->actor.colChkInfo.damage != 0) &&
+            ((this->actor.colorFilterTimer == 0) || ((this->actor.colorFilterParams & 0x4000) == 0))) {
 
             damageEffect = this->actor.colChkInfo.damageEffect;
 
             if (damageEffect == 2) { // Din's Fire
                 if (this->actor.params == KEESE_ICE_FLY) {
-                    this->actor.colChkInfo.health = 0;
-                    Enemy_StartFinishingBlow(play, &this->actor);
-                    EnFirefly_Combust(this, play);
-                    EnFirefly_SetupFall(this);
+                    if (Actor_ApplyDamage(&this->actor) == 0) {
+                        Enemy_StartFinishingBlow(play, &this->actor);
+                        EnFirefly_Combust(this, play);
+                        EnFirefly_SetupFall(this);
+                    }
                 } else if (!this->onFire) {
                     EnFirefly_Ignite(this);
                     if (this->actionFunc == EnFirefly_Perch) {
@@ -656,17 +654,38 @@ void EnFirefly_UpdateDamage(EnFirefly* this, PlayState* play) {
                 if (this->actor.params == KEESE_ICE_FLY) {
                     EnFirefly_SetupFall(this);
                 } else {
-                    EnFirefly_SetupFrozenFall(this, play);
+                    if (Actor_ApplyDamage(&this->actor) == 0) {
+                        Enemy_StartFinishingBlow(play, &this->actor);
+                        this->actor.flags &= ~ACTOR_FLAG_0;
+                        EnFirefly_SetupFrozenFall(this, play);
+                    }
                 }
             } else if (damageEffect == 1) { // Deku Nuts
                 if (this->actionFunc != EnFirefly_Stunned) {
                     EnFirefly_SetupStunned(this);
                 }
-            } else { // Fire Arrows
-                if ((damageEffect == 0xF) && (this->actor.params == KEESE_ICE_FLY)) {
+            } else if ((damageEffect == 0xF) && (this->actor.params == KEESE_ICE_FLY)) { // Fire Arrows
+                if (Actor_ApplyDamage(&this->actor) == 0) {
+                    Enemy_StartFinishingBlow(play, &this->actor);
                     EnFirefly_Combust(this, play);
+                } else {
+                    EnFirefly_SetupFall(this);
                 }
-                EnFirefly_SetupFall(this);
+            } else {
+                if (Actor_ApplyDamage(&this->actor) == 0) {
+                    Enemy_StartFinishingBlow(play, &this->actor);
+                    this->actor.flags &= ~ACTOR_FLAG_0;
+                    EnFirefly_SetupFall(this);
+                }
+            }
+
+            if (this->actor.colChkInfo.health > 0 && damageEffect != 1) {
+                if (this->actionFunc == EnFirefly_Perch) {
+                    EnFirefly_SetupFlyIdle(this);
+                }
+                Audio_PlayActorSound2(&this->actor, NA_SE_EN_FFLY_DEAD);
+                this->actor.flags |= ACTOR_FLAG_4;
+                Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 6);
             }
         }
     }

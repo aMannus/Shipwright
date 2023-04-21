@@ -486,11 +486,13 @@ void EnDh_CollisionCheck(EnDh* this, PlayState* play) {
             lastHealth = this->actor.colChkInfo.health;
             if (Actor_ApplyDamage(&this->actor) == 0) {
                 EnDh_SetupDeath(this);
+                Player_GainExperience(play, this->actor.exp);
                 Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0x90);
             } else {
-                if (((lastHealth >= 15) && (this->actor.colChkInfo.health < 15)) ||
-                    ((lastHealth >= 9) && (this->actor.colChkInfo.health < 9)) ||
-                    ((lastHealth >= 3) && (this->actor.colChkInfo.health < 3))) {
+                u16 healthCheck = GetActorStat_EnemyMaxHealth(3 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+                if (((lastHealth >= healthCheck * 5) && (this->actor.colChkInfo.health < healthCheck * 5)) ||
+                    ((lastHealth >= healthCheck * 3) && (this->actor.colChkInfo.health < healthCheck * 3)) ||
+                    ((lastHealth >= healthCheck) && (this->actor.colChkInfo.health < healthCheck))) {
 
                     this->retreat++;
                 }

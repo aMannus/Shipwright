@@ -1586,6 +1586,50 @@ extern "C" int GetEquipNowMessage(char* buffer, char* src, const int maxBufferSi
     return 0;
 }
 
+extern "C" int GetLeveledNaviEnemyInfo(char* buffer, char* src, const int maxBufferSize, Actor* actor) {
+    std::string postfix;
+
+    if (!actor)
+        return 0;
+
+    if (gSaveContext.language == LANGUAGE_FRA) {
+        postfix = "";
+    } else if (gSaveContext.language == LANGUAGE_GER) {
+        postfix = "";
+    } else {
+        postfix = "";
+        if (CVarGetInteger("gLeveledNaviLevel", 1)) {
+            postfix += " \x05"
+                       "F"
+                       "Lv" +
+                       std::to_string(actor->level);
+        }
+        if (CVarGetInteger("gLeveledNaviMaxHP", 1) && actor->maximumHealth > 0) {
+            postfix += " \x05"
+                       "A"
+                       "MaxHP " +
+                       std::to_string(actor->maximumHealth);
+        }
+    }
+    std::string str;
+    std::string FixedBaseStr(src);
+    int FoundControlChar = FixedBaseStr.find_first_of("\x01");
+
+    if (FoundControlChar != std::string::npos) {
+        FixedBaseStr = FixedBaseStr.insert(FoundControlChar, postfix);
+    }
+
+    str = FixedBaseStr;
+
+    if (!str.empty()) {
+        memset(buffer, 0, maxBufferSize);
+        const int copiedCharLen = std::min<int>(maxBufferSize - 1, str.length());
+        memcpy(buffer, str.c_str(), copiedCharLen);
+        return copiedCharLen;
+    }
+    return 0;
+}
+
 extern "C" void Randomizer_LoadSettings(const char* spoilerFileName) {
     OTRGlobals::Instance->gRandomizer->LoadRandomizerSettings(spoilerFileName);
 }

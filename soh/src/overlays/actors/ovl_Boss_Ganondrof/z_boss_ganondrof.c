@@ -501,7 +501,8 @@ void BossGanondrof_Neutral(BossGanondrof* this, PlayState* play) {
             if (this->timers[0] == 0) {
                 this->timers[0] = (s16)(Rand_ZeroOne() * 64.0f) + 30;
                 rand01 = Rand_ZeroOne();
-                if (thisx->colChkInfo.health < 5) {
+                u16 healthCheck = GetActorStat_EnemyMaxHealth(5 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+                if (thisx->colChkInfo.health < healthCheck) {
                     if (rand01 < 0.25f) {
                         BossGanondrof_SetupThrow(this, play);
                     } else if (rand01 >= 0.8f) {
@@ -672,8 +673,10 @@ void BossGanondrof_Throw(BossGanondrof* this, PlayState* play) {
     if (Animation_OnFrame(&this->skelAnime, this->work[GND_THROW_FRAME])) {
         EnfHG* horseTemp = (EnfHG*)this->actor.child;
 
-        Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_FHG_FIRE, this->spearTip.x,
+        Actor* fireTemp = Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_FHG_FIRE, this->spearTip.x,
                            this->spearTip.y, this->spearTip.z, this->work[GND_ACTION_STATE], 0, 0, FHGFIRE_ENERGY_BALL);
+        fireTemp->level = this->actor.level;
+        Actor_RefreshLeveledStats(fireTemp, GET_PLAYER(play));
         this->actor.child = &horseTemp->actor;
     }
 
@@ -1253,7 +1256,7 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
         this->colliderBody.base.acFlags &= ~AC_HIT;
     } else {
         acHit = this->colliderBody.base.acFlags & AC_HIT;
-        if ((acHit && ((s8)this->actor.colChkInfo.health > 0)) || (this->returnCount != 0)) {
+        if ((acHit && (this->actor.colChkInfo.health > 0)) || (this->returnCount != 0)) {
             if (acHit) {
                 this->colliderBody.base.acFlags &= ~AC_HIT;
                 hurtbox = this->colliderBody.info.acHitInfo;
@@ -1264,7 +1267,7 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
                     osSyncPrintf("hit != 0 \n");
                 } else if (this->actionFunc != BossGanondrof_Charge) {
                     if (this->returnCount == 0) {
-                        u8 dmg;
+                        u16 dmg;
                         u8 canKill = false;
                         s32 dmgFlags = hurtbox->toucher.dmgFlags;
 
@@ -1273,11 +1276,20 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
                         }
                         dmg = CollisionCheck_GetSwordDamage(dmgFlags);
                         (dmg == 0) ? (dmg = 2) : (canKill = true);
-                        if (((s8)this->actor.colChkInfo.health > 2) || canKill) {
-                            this->actor.colChkInfo.health -= dmg;
+                        dmg = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor,
+                                                   dmg * HEALTH_ATTACK_MULTIPLIER);
+                        ActorDamageNumber_New(&this->actor, dmg);
+                        if ((this->actor.colChkInfo.health > 2) || canKill) {
+                            if (dmg < this->actor.colChkInfo.health) {
+                                this->actor.colChkInfo.health -= dmg;
+                            } else if (this->actor.colChkInfo.health > 2) {
+                                this->actor.colChkInfo.health = 1;
+                            } else {
+                                this->actor.colChkInfo.health = 0;
+                            }
                         }
 
-                        if ((s8)this->actor.colChkInfo.health <= 0) {
+                        if (this->actor.colChkInfo.health <= 0) {
                             BossGanondrof_SetupDeath(this, play);
                             Enemy_StartFinishingBlow(play, &this->actor);
                             gSaveContext.sohStats.itemTimestamp[TIMESTAMP_DEFEAT_PHANTOM_GANON] = GAMEPLAYSTAT_TOTAL_TIME;
@@ -1296,7 +1308,13 @@ void BossGanondrof_CollisionCheck(BossGanondrof* this, PlayState* play) {
                 }
             } else if (acHit && (hurtbox->toucher.dmgFlags & 0x0001F8A4)) {
                 this->work[GND_INVINC_TIMER] = 10;
-                this->actor.colChkInfo.health -= 2;
+                u16 dmg = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor, 2 * HEALTH_ATTACK_MULTIPLIER);
+                ActorDamageNumber_New(&this->actor, dmg);
+                if (dmg < this->actor.colChkInfo.health) {
+                    this->actor.colChkInfo.health -= dmg;
+                } else {
+                    this->actor.colChkInfo.health = 0;
+                }
                 horse->hitTimer = 20;
                 Audio_PlayActorSound2(&this->actor, NA_SE_EN_FANTOM_DAMAGE);
             }

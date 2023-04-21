@@ -44,17 +44,17 @@ void GameInteractor::RawAction::AddOrRemoveMagic(int8_t amount) {
 
 void GameInteractor::RawAction::HealOrDamagePlayer(int16_t hearts) {
     if (hearts > 0) {
-        Health_ChangeBy(gPlayState, hearts * 0x10);
+        Health_ChangeBy(gPlayState, hearts * CVarGetInteger("gLeveledHeartUnits", 4) << 2);
     } else if (hearts < 0) {
         Player* player = GET_PLAYER(gPlayState);
-        Health_ChangeBy(gPlayState, hearts * 0x10);
+        Health_ChangeBy(gPlayState, hearts * CVarGetInteger("gLeveledHeartUnits", 4) << 2);
         func_80837C0C(gPlayState, player, 0, 0, 0, 0, 0);
         player->invincibilityTimer = 28;
     }
 }
 
 void GameInteractor::RawAction::SetPlayerHealth(int16_t hearts) {
-    gSaveContext.health = hearts * 0x10;
+    gSaveContext.health = hearts * CVarGetInteger("gLeveledHeartUnits", 4) << 2;
 }
 
 void GameInteractor::RawAction::SetLinkInvisibility(bool active) {

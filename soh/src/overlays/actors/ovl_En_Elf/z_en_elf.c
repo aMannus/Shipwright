@@ -632,16 +632,20 @@ void func_80A0329C(EnElf* this, PlayState* play) {
                 {
                     if (CVarGetInteger("gFairyPercentRestore", 0))
                     {
-                        Health_ChangeBy(play, (gSaveContext.healthCapacity * CVarGetInteger("gFairyHealth", 100) / 100 + 15) / 16 * 16);
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        Health_ChangeBy(play, heartUnits + ((gSaveContext.healthCapacity2 - heartUnits) * CVarGetInteger("gFairyHealth", 100) / 100));
+                    
                     }
                     else
                     {
-                        Health_ChangeBy(play, CVarGetInteger("gFairyHealth", 8) * 16);
+                        s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                        Health_ChangeBy(play, CVarGetInteger("gFairyHealth", 8) * heartUnits);
                     }
                 }
                 else
                 {
-                    Health_ChangeBy(play, 128);
+                    s32 heartUnits = CVarGetInteger("gLeveledHeartUnits", 4) << 2;
+                    Health_ChangeBy(play, 8 * heartUnits);
                 }
                 if (this->fairyFlags & FAIRY_FLAG_BIG) {
                     Magic_Fill(play);

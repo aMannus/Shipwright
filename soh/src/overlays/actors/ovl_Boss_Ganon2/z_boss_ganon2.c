@@ -1451,7 +1451,7 @@ void func_80900890(BossGanon2* this, PlayState* play) {
             if (Animation_OnFrame(&this->skelAnime, this->unk_194)) {
                 func_808FFDB0(this, play);
                 if (this->unk_334 == 0) {
-                    this->actor.colChkInfo.health = 25;
+                    this->actor.colChkInfo.health = GetActorStat_EnemyMaxHealth(25 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
                 }
                 this->unk_336 = 1;
             }
@@ -1920,10 +1920,10 @@ void func_80902348(BossGanon2* this, PlayState* play) {
 }
 
 void func_80902524(BossGanon2* this, PlayState* play) {
-    s8 temp_v0_4;
+    u16 temp_v0_4;
     ColliderInfo* acHitInfo;
     s16 i;
-    u8 phi_v1_2;
+    u16 phi_v1_2;
 
     osSyncPrintf("this->no_hit_time %d\n", this->unk_316);
     if (this->unk_316 != 0 || ((this->unk_334 == 0) && (this->actionFunc == func_80900890))) {
@@ -1948,9 +1948,11 @@ void func_80902524(BossGanon2* this, PlayState* play) {
                     this->unk_342 = 5;
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_MGANON_DAMAGE);
                     Audio_StopSfxById(NA_SE_EN_MGANON_UNARI);
-                    this->actor.colChkInfo.health -= 2;
+                    u16 damage = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor, 2 * HEALTH_ATTACK_MULTIPLIER);
+                    this->actor.colChkInfo.health -= damage;
+                    ActorDamageNumber_New(&this->actor, damage);
                     temp_v0_4 = this->actor.colChkInfo.health;
-                    if (temp_v0_4 < 0x15 && this->unk_334 == 0) {
+                    if (temp_v0_4 < GetActorStat_EnemyMaxHealth(21 * HEALTH_ATTACK_MULTIPLIER, this->actor.level) && this->unk_334 == 0) {
                         func_80900818(this, play);
                     } else {
                         if (temp_v0_4 <= 0) {
@@ -1982,11 +1984,19 @@ void func_80902524(BossGanon2* this, PlayState* play) {
                     phi_v1_2 = 2;
                 }
             }
-            this->actor.colChkInfo.health -= phi_v1_2;
+            u8 baseDamage = phi_v1_2;
+
+            phi_v1_2 = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor, phi_v1_2 * HEALTH_ATTACK_MULTIPLIER);
+            if (phi_v1_2 <= this->actor.colChkInfo.health) {
+                this->actor.colChkInfo.health -= phi_v1_2;
+            } else {
+                this->actor.colChkInfo.health = 0;
+            }
+            ActorDamageNumber_New(&this->actor, phi_v1_2);
             temp_v0_4 = this->actor.colChkInfo.health;
-            if ((temp_v0_4 < 0x15) && (this->unk_334 == 0)) {
+            if ((temp_v0_4 < GetActorStat_EnemyMaxHealth(21 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) && (this->unk_334 == 0)) {
                 func_80900818(this, play);
-            } else if ((temp_v0_4 <= 0) && (phi_v1_2 >= 2)) {
+            } else if ((temp_v0_4 <= 0) && (baseDamage >= 2)) {
                 func_80901020(this, play);
             } else {
                 if (temp_v0_4 <= 0) {

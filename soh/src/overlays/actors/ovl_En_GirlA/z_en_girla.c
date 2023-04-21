@@ -637,7 +637,7 @@ s32 EnGirlA_CanBuy_ZoraTunic(PlayState* play, EnGirlA* this) {
 }
 
 s32 EnGirlA_CanBuy_Health(PlayState* play, EnGirlA* this) {
-    if (gSaveContext.healthCapacity == gSaveContext.health) {
+    if (gSaveContext.healthCapacity2 == gSaveContext.health) {
         return CANBUY_RESULT_CANT_GET_NOW;
     }
     if (gSaveContext.rupees < this->basePrice) {

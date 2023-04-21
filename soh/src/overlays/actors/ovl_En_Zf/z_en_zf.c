@@ -359,6 +359,7 @@ void EnZf_Destroy(Actor* thisx, PlayState* play) {
     if ((this->actor.params >= ENZF_TYPE_LIZALFOS_MINIBOSS_A) /* miniboss */ &&
         (Actor_FindNearby(play, &this->actor, ACTOR_EN_ZF, ACTORCAT_ENEMY, 10000.0f) == NULL)) {
         func_800F5B58();
+        Player_GainExperience(play, this->actor.exp);
     }
 
     Effect_Delete(play, this->blureIndex);

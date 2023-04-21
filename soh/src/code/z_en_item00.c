@@ -1586,7 +1586,7 @@ s16 func_8001F404(s16 dropId) {
     }
     // clang-format on
 
-    if (dropId == ITEM00_HEART && gSaveContext.healthCapacity == gSaveContext.health) {
+    if (dropId == ITEM00_HEART && gSaveContext.healthCapacity2 == gSaveContext.health) {
         return ITEM00_RUPEE_GREEN;
     }
 

@@ -180,6 +180,8 @@ void func_80AFB950(EnSi* this, PlayState* play) {
         player->actor.freezeTimer = 10;
     } else {
         SET_GS_FLAGS((this->actor.params & 0x1F00) >> 8, this->actor.params & 0xFF);
+        u16 experience = Leveled_GoldSkulltulaExperience(gSaveContext.inventory.gsTokens);
+        Player_GainExperience(play, experience);
         Actor_Kill(&this->actor);
     }
 }

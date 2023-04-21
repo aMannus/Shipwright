@@ -1879,7 +1879,8 @@ void BossSst_HandCrush(BossSst* this, PlayState* play) {
                 func_8002F7DC(&player->actor, NA_SE_VO_LI_DAMAGE_S);
             }
 
-            play->damagePlayer(play, -8);
+            u16 damage = Leveled_DamageModify(&player->actor, &this->actor, 8);
+            play->damagePlayer(play, -damage);
         }
         if (Animation_OnFrame(&this->skelAnime, 0.0f)) {
             Audio_PlayActorSound2(&this->actor, NA_SE_EN_SHADEST_CATCH);

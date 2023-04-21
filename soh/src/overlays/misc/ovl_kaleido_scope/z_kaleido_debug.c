@@ -370,12 +370,14 @@ void KaleidoScope_DrawDebugEditor(PlayState* play) {
         case 1:
             if (CHECK_BTN_ALL(input->press.button, BTN_CUP) || CHECK_BTN_ALL(input->press.button, BTN_CLEFT)) {
                 gSaveContext.healthCapacity -= 0x10;
+                Actor_RefreshLeveledStats(&GET_PLAYER(play)->actor, GET_PLAYER(play));
                 if (gSaveContext.healthCapacity < 0x30) {
                     gSaveContext.healthCapacity = 0x30;
                 }
             } else if (CHECK_BTN_ALL(input->press.button, BTN_CDOWN) ||
                        CHECK_BTN_ALL(input->press.button, BTN_CRIGHT)) {
                 gSaveContext.healthCapacity += 0x10;
+                Actor_RefreshLeveledStats(&GET_PLAYER(play)->actor, GET_PLAYER(play));
                 if (gSaveContext.healthCapacity >= 0x140) {
                     gSaveContext.healthCapacity = 0x140;
                 }

@@ -577,6 +577,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     }
 
                     Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+                    Leveled_SetPlayerModifiedStats(GET_PLAYER(play));
                     pauseCtx->unk_1E4 = 7;
                     sEquipTimer = 10;
                 } else if (CVarGetInteger("gAssignableTunicsAndBoots", 0) != 0) {
@@ -745,6 +746,10 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     KaleidoScope_DrawEquipmentImage(play, pauseCtx->playerSegment, 64, 112);
 
     if (gUpgradeMasks[0]) {}
+
+    if (pauseCtx->pageIndex == PAUSE_EQUIP && (pauseCtx->unk_1E4 == 0 || sEquipTimer > 0) && pauseCtx->alpha == 255) {
+        Leveled_KaleidoEquip_Stats(play);
+    }
 
     CLOSE_DISPS(play->state.gfxCtx);
 }

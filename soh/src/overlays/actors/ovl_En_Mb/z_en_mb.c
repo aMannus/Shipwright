@@ -620,6 +620,7 @@ void EnMb_Stunned(EnMb* this, PlayState* play) {
     if (this->actor.colorFilterTimer == 0) {
         if (this->actor.params == ENMB_TYPE_CLUB) {
             if (this->actor.colChkInfo.health == 0) {
+                Player_GainExperience(play, this->actor.exp);
                 EnMb_SetupClubDead(this);
             } else if (this->state == ENMB_STATE_CLUB_KNEELING) {
                 /* dead code: the setup for this action sets state to something else */
@@ -629,6 +630,7 @@ void EnMb_Stunned(EnMb* this, PlayState* play) {
             }
         } else {
             if (this->actor.colChkInfo.health == 0) {
+                Player_GainExperience(play, this->actor.exp);
                 EnMb_SetupSpearDead(this);
             } else {
                 EnMb_SetupSpearDamaged(this);

@@ -220,10 +220,11 @@ s32 EnFd_SpawnCore(EnFd* this, PlayState* play) {
         return false;
     }
 
-    this->actor.child->colChkInfo.health = this->actor.colChkInfo.health % 8;
+    u16 healthSpawn = GetActorStat_EnemyMaxHealth(8 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+    this->actor.child->colChkInfo.health = this->actor.colChkInfo.health % healthSpawn;
 
     if (this->actor.child->colChkInfo.health == 0) {
-        this->actor.child->colChkInfo.health = 8;
+        this->actor.child->colChkInfo.health = healthSpawn;
     }
 
     if (CHECK_FLAG_ALL(this->actor.flags, ACTOR_FLAG_13)) {
@@ -776,7 +777,7 @@ void EnFd_Draw(Actor* thisx, PlayState* play) {
     Matrix_Pop();
     if (this->actionFunc != EnFd_Reappear && !(this->fadeAlpha < 0.9f)) {
         Gfx_SetupDL_25Xlu(play->state.gfxCtx);
-        clampedHealth = CLAMP(thisx->colChkInfo.health - 1, 0, 23);
+        clampedHealth = CLAMP((u16)((f32)thisx->colChkInfo.health / GetActorStat_EnemyMaxHealth(24 * HEALTH_ATTACK_MULTIPLIER, this->actor.level) * 23), 0, 23);
         gDPSetPrimColor(POLY_XLU_DISP++, 0, 128, primColors[clampedHealth / 8].r, primColors[clampedHealth / 8].g,
                         primColors[clampedHealth / 8].b, (u8)this->fadeAlpha);
         gDPSetEnvColor(POLY_XLU_DISP++, envColors[clampedHealth / 8].r, envColors[clampedHealth / 8].g,

@@ -398,7 +398,7 @@ static s16 sDoorState;
 static u8 sPhase3StopMoving;
 static Vec3s sZapperRot;
 static u16 sPhase2Timer;
-static s8 sPhase4HP;
+static u16 sPhase4HP;
 
 void BossVa_SetupAction(BossVa* this, BossVaActionFunc func) {
     this->actionFunc = func;
@@ -1348,7 +1348,7 @@ void BossVa_SetupBodyPhase4(BossVa* this, PlayState* play) {
     this->actor.world.rot.y = this->actor.yawTowardsPlayer;
     this->timer2 = (s16)(Rand_ZeroOne() * 150.0f) + 300;
     sBodyState = 1;
-    sPhase4HP = 4;
+    sPhase4HP = GetActorStat_EnemyMaxHealth(4 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
     if (this->actor.shape.yOffset != 0.0f) {
         this->timer = -30;
     }
@@ -1386,11 +1386,19 @@ void BossVa_BodyPhase4(BossVa* this, PlayState* play) {
                     this->actor.world.rot.y = this->actor.yawTowardsPlayer;
                     Audio_PlayActorSound2(&this->actor, NA_SE_EN_BALINADE_DAMAGE);
                     Actor_SetColorFilter(&this->actor, 0x4000, 255, 0, 12);
-                    sPhase4HP -= this->actor.colChkInfo.damage;
+                    u16 dmg = this->actor.colChkInfo.damage;
+
+                    if (dmg > sPhase4HP) {
+                        sPhase4HP = 0;
+                    } else {
+                        sPhase4HP -= dmg;
+                    }
+
+                    ActorDamageNumber_New(&this->actor, dmg);
                     if (sPhase4HP <= 0) {
                         this->timer = 0;
                         sFightPhase++;
-                        sPhase4HP += 3;
+                        sPhase4HP += GetActorStat_EnemyMaxHealth(3 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
                         if (sFightPhase >= PHASE_DEATH) {
                             BossVa_SetupBodyDeath(this, play);
                             Enemy_StartFinishingBlow(play, &this->actor);

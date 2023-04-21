@@ -198,7 +198,7 @@ void BgDyYoseizo_CheckMagicAcquired(BgDyYoseizo* this, PlayState* play) {
         play->msgCtx.ocarinaMode = OCARINA_MODE_04;
 
         if(gSaveContext.n64ddFlag) {
-            gSaveContext.healthAccumulator = 0x140;
+            gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
             Magic_Fill(play);
             if(Flags_GetTreasure(play, this->fountainType + 1)) {
                 Actor_Kill(&this->actor);
@@ -490,7 +490,7 @@ void BgDyYoseizo_HealPlayer_NoReward(BgDyYoseizo* this, PlayState* play) {
     }
 
     if (this->healingTimer == 110) {
-        gSaveContext.healthAccumulator = 0x140;
+        gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
         Magic_Fill(play);
         this->refillTimer = 200;
     }
@@ -739,7 +739,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
         switch (actionIndex) {
             case FAIRY_UPGRADE_MAGIC:
                 gSaveContext.isMagicAcquired = true;
-                gSaveContext.magicFillTarget = 0x30;
+                gSaveContext.magicFillTarget = gSaveContext.magicUnits;
                 Interface_ChangeAlpha(9);
                 break;
             case FAIRY_UPGRADE_DOUBLE_MAGIC:
@@ -747,7 +747,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
                     gSaveContext.isMagicAcquired = true;
                 }
                 gSaveContext.isDoubleMagicAcquired = true;
-                gSaveContext.magicFillTarget = 0x60;
+                gSaveContext.magicFillTarget = gSaveContext.magicUnits << 1;
                 gSaveContext.magicLevel = 0;
                 Interface_ChangeAlpha(9);
                 break;
@@ -758,7 +758,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
         }
 
         if (!this->healing) {
-            gSaveContext.healthAccumulator = 0x140;
+            gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
             this->healing = true;
             if (actionIndex == 2) {
                 Magic_Fill(play);
@@ -787,7 +787,7 @@ void BgDyYoseizo_Give_Reward(BgDyYoseizo* this, PlayState* play) {
                 }
 
                 this->itemSpawned = true;
-                gSaveContext.healthAccumulator = 0x140;
+                gSaveContext.healthAccumulator = gSaveContext.healthCapacity2;
                 Interface_ChangeAlpha(9);
                 gSaveContext.itemGetInf[1] |= sItemGetFlags[actionIndex];
                 Item_Give(play, sItemIds[actionIndex]);

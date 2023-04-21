@@ -384,6 +384,7 @@ void EnVm_Die(EnVm* this, PlayState* play) {
             bomb->timer = 0;
         }
 
+        Player_GainExperience(play, this->actor.exp);
         Item_DropCollectibleRandom(play, &this->actor, &this->actor.world.pos, 0xA0);
         Actor_Kill(&this->actor);
     }
@@ -393,7 +394,10 @@ void EnVm_CheckHealth(EnVm* this, PlayState* play) {
     EnBom* bomb;
 
     if (Actor_GetCollidedExplosive(play, &this->colliderCylinder.base) != NULL) {
-        this->actor.colChkInfo.health--;
+        u16 damage = Leveled_DamageModify(&this->actor, &GET_PLAYER(play)->actor, HEALTH_ATTACK_MULTIPLIER);
+        this->actor.colChkInfo.damage += damage;
+        ActorDamageNumber_New(&this->actor, damage);
+        Actor_ApplyDamage(&this->actor);
         osSyncPrintf("hp down %d\n", this->actor.colChkInfo.health);
     } else {
         if (!(this->colliderQuad2.base.acFlags & AC_HIT) || this->unk_21C == 2) {

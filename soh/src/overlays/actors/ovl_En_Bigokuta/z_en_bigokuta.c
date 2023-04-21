@@ -174,6 +174,7 @@ void EnBigokuta_Init(Actor* thisx, PlayState* play) {
     }
 
     CollisionCheck_SetInfo(&this->actor.colChkInfo, &sDamageTable, sColChkInfoInit);
+    Actor_GetLevelAndExperience(play, &this->actor, ACTOR_EN_BIGOKUTA);
 
     this->unk_194 = 1;
 

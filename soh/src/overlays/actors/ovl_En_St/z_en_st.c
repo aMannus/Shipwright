@@ -396,8 +396,9 @@ s32 EnSt_CheckHitLink(EnSt* this, PlayState* play) {
         Audio_PlayActorSound2(&this->actor, NA_SE_EN_STALTU_ROLL);
     }
 
+    u16 damage = (u16)Leveled_DamageModify(&player->actor, &this->actor, 8);
     this->gaveDamageSpinTimer = 30;
-    play->damagePlayer(play, -8);
+    play->damagePlayer(play, -damage);
     Audio_PlayActorSound2(&player->actor, NA_SE_PL_BODY_HIT);
     func_8002F71C(play, &this->actor, 4.0f, this->actor.yawTowardsPlayer, 6.0f);
     return true;

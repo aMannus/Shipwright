@@ -43,8 +43,8 @@ void RegisterInfiniteMoney() {
 void RegisterInfiniteHealth() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
         if (CVarGetInteger("gInfiniteHealth", 0) != 0) {
-            if (gSaveContext.health < gSaveContext.healthCapacity) {
-                gSaveContext.health = gSaveContext.healthCapacity;
+            if (gSaveContext.health < gSaveContext.healthCapacity2) {
+                gSaveContext.health = gSaveContext.healthCapacity2;
             }
         }
     });

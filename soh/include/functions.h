@@ -397,6 +397,7 @@ void TitleCard_InitBossName(PlayState* play, TitleCardContext* titleCtx, void* t
 void TitleCard_InitPlaceName(PlayState* play, TitleCardContext* titleCtx, void* texture, s32 x, s32 y,
                              s32 width, s32 height, s32 delay);
 s32 func_8002D53C(PlayState* play, TitleCardContext* titleCtx);
+void Actor_RefreshLeveledStats(Actor* actor, Player* player);
 void Actor_Kill(Actor* actor);
 void Actor_SetFocus(Actor* actor, f32 offset);
 void Actor_SetScale(Actor* actor, f32 scale);
@@ -550,7 +551,7 @@ s32 func_800354B4(PlayState* play, Actor* actor, f32 range, s16 arg3, s16 arg4, 
 void func_8003555C(PlayState* play, Vec3f* pos, Vec3f* velocity, Vec3f* accel);
 void func_800355B8(PlayState* play, Vec3f* pos);
 u8 func_800355E4(PlayState* play, Collider* collider);
-u8 Actor_ApplyDamage(Actor* actor);
+u16 Actor_ApplyDamage(Actor* actor);
 void Actor_SetDropFlag(Actor* actor, ColliderInfo* colBody, s32 freezeFlag);
 void Actor_SetDropFlagJntSph(Actor* actor, ColliderJntSph* colBody, s32 freezeFlag);
 void func_80035844(Vec3f* arg0, Vec3f* arg1, Vec3s* arg2, s32 arg3);
@@ -1057,6 +1058,10 @@ void Minimap_Draw(PlayState* play);
 void Map_Update(PlayState* play);
 void Interface_ChangeAlpha(u16 alphaType);
 void Interface_SetSceneRestrictions(PlayState* play);
+Gfx* Gfx_TextureIA8(Gfx* displayListHead, void* texture, s16 textureWidth, s16 textureHeight, s16 rectLeft, s16 rectTop,
+                    s16 rectWidth, s16 rectHeight, u16 dsdx, u16 dtdy);
+Gfx* Gfx_TextureI8(Gfx* displayListHead, void* texture, s16 textureWidth, s16 textureHeight, s16 rectLeft, s16 rectTop,
+                   s16 rectWidth, s16 rectHeight, u16 dsdx, u16 dtdy);
 void Inventory_SwapAgeEquipment(void);
 void Interface_InitHorsebackArchery(PlayState* play);
 void func_800849EC(PlayState* play);
@@ -1113,6 +1118,7 @@ void func_8008EE08(Player* player);
 void func_8008EEAC(PlayState* play, Actor* actor);
 s32 func_8008EF44(PlayState* play, s32 ammo);
 s32 Player_IsBurningStickInRange(PlayState* play, Vec3f* pos, f32 radius, f32 arg3);
+void Player_GainExperience(PlayState* play, u16 experience);
 s32 Player_GetStrength(void);
 u8 Player_GetMask(PlayState* play);
 Player* Player_UnsetMask(PlayState* play);
