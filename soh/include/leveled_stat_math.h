@@ -4,8 +4,8 @@
 #include "z64.h"
 #endif
 
-u16 GetActorStat_DisplayAttack(u8 attack, u8 power);
-u16 GetActorStat_Attack(u8 attack, u8 power);
+u16 GetActorStat_DisplayAttack(u16 attack, u8 power);
+u16 GetActorStat_Attack(u16 attack, u8 power);
 u8 GetActorStat_Power(u8 level);
 u8 GetActorStat_Courage(u8 level);
 u8 GetActorStat_PlayerPower(u8 level);

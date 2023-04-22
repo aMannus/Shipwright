@@ -218,11 +218,11 @@ void BossFd2_SetupEmerge(BossFd2* this, PlayState* play) {
     this->timers[0] = 10;
     if (bossFd != NULL) {
         health = bossFd->actor.colChkInfo.health;
-        if (health >= GetActorStat_EnemyMaxHealth(18 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+        if (health >= GetActorStat_EnemyMaxHealth(18, this->actor.level)) {
             this->work[FD2_FAKEOUT_COUNT] = 0;
-        } else if (health >= GetActorStat_EnemyMaxHealth(12 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+        } else if (health >= GetActorStat_EnemyMaxHealth(12, this->actor.level)) {
             this->work[FD2_FAKEOUT_COUNT] = 1;
-        } else if (health >= GetActorStat_EnemyMaxHealth(6 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+        } else if (health >= GetActorStat_EnemyMaxHealth(6, this->actor.level)) {
             this->work[FD2_FAKEOUT_COUNT] = 2;
         } else {
             this->work[FD2_FAKEOUT_COUNT] = 3;
@@ -255,13 +255,13 @@ void BossFd2_Emerge(BossFd2* this, PlayState* play) {
                 this->work[FD2_HOLE_COUNTER]++;
                 this->actor.world.pos.y = -200.0f;
                 health = bossFd->actor.colChkInfo.health;
-                if (health == GetActorStat_EnemyMaxHealth(24 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+                if (health == GetActorStat_EnemyMaxHealth(24, this->actor.level)) {
                     holeTime = 30;
-                } else if (health >= GetActorStat_EnemyMaxHealth(18 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+                } else if (health >= GetActorStat_EnemyMaxHealth(18, this->actor.level)) {
                     holeTime = 25;
-                } else if (health >= GetActorStat_EnemyMaxHealth(12 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+                } else if (health >= GetActorStat_EnemyMaxHealth(12, this->actor.level)) {
                     holeTime = 20;
-                } else if (health >= GetActorStat_EnemyMaxHealth(6 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+                } else if (health >= GetActorStat_EnemyMaxHealth(6, this->actor.level)) {
                     holeTime = 10;
                 } else {
                     holeTime = 5;
@@ -321,13 +321,13 @@ void BossFd2_SetupIdle(BossFd2* this, PlayState* play) {
     Animation_PlayLoop(&this->skelAnime, &gHoleVolvagiaTurnAnim);
     this->actionFunc = BossFd2_Idle;
     health = bossFd->actor.colChkInfo.health;
-    if (health == GetActorStat_EnemyMaxHealth(24 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+    if (health == GetActorStat_EnemyMaxHealth(24, this->actor.level)) {
         idleTime = 50;
-    } else if (health >= GetActorStat_EnemyMaxHealth(18 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+    } else if (health >= GetActorStat_EnemyMaxHealth(18, this->actor.level)) {
         idleTime = 40;
-    } else if (health >= GetActorStat_EnemyMaxHealth(12 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+    } else if (health >= GetActorStat_EnemyMaxHealth(12, this->actor.level)) {
         idleTime = 40;
-    } else if (health >= GetActorStat_EnemyMaxHealth(6 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+    } else if (health >= GetActorStat_EnemyMaxHealth(6, this->actor.level)) {
         idleTime = 30;
     } else {
         idleTime = 20;
@@ -381,7 +381,7 @@ void BossFd2_Burrow(BossFd2* this, PlayState* play) {
     } else {
         Math_ApproachF(&this->actor.world.pos.y, -100.0f, 1.0f, 10.0f);
         if (this->timers[0] == 0) {
-            if ((this->work[FD2_HOLE_COUNTER] >= 3) && (bossFd->actor.colChkInfo.health < GetActorStat_EnemyMaxHealth(24 * HEALTH_ATTACK_MULTIPLIER, this->actor.level))) {
+            if ((this->work[FD2_HOLE_COUNTER] >= 3) && (bossFd->actor.colChkInfo.health < GetActorStat_EnemyMaxHealth(24, this->actor.level))) {
                 this->work[FD2_HOLE_COUNTER] = 0;
                 this->actionFunc = BossFd2_Wait;
                 bossFd->handoffSignal = FD2_SIGNAL_FLY;

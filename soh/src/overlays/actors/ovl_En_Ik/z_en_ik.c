@@ -710,7 +710,7 @@ void func_80A75C38(EnIk* this, PlayState* play) {
     Actor_SetColorFilter(&this->actor, 0x4000, 0xFF, 0, 0xC);
     prevHealth = this->actor.colChkInfo.health;
     Actor_ApplyDamage(&this->actor);
-    u16 healthCheck = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+    u16 healthCheck = GetActorStat_EnemyMaxHealth(10, this->actor.level);
     if (this->actor.params != 0) {
         if ((prevHealth > healthCheck) && (this->actor.colChkInfo.health <= healthCheck)) {
             this->unk_2FB = 1;
@@ -723,7 +723,7 @@ void func_80A75C38(EnIk* this, PlayState* play) {
             Flags_SetSwitch(play, this->switchFlags);
         }
         return;
-    } else if (prevHealth == healthCheck * 5) {
+    } else if (prevHealth == GetActorStat_EnemyMaxHealth(50, this->actor.level)) {
         Actor_ChangeCategory(play, &play->actorCtx, &this->actor, ACTORCAT_ENEMY);
     }
 
@@ -761,7 +761,7 @@ void func_80A75FA0(Actor* thisx, PlayState* play) {
 
     this->unk_2FA = this->unk_2FB;
     func_80A75C38(this, play);
-    u16 healthCheck = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+    u16 healthCheck = GetActorStat_EnemyMaxHealth(10, this->actor.level);
     if ((this->actor.params == 0) && (this->actor.colChkInfo.health <= healthCheck)) {
         func_80A781CC(&this->actor, play);
         return;
@@ -1448,7 +1448,7 @@ void func_80A781CC(Actor* thisx, PlayState* play) {
             Actor_SetScale(&this->actor, 0.01f);
         } else {
         // Because no CS in rando, we hide the death of the knuckle by spawning flames and kill the actor
-            u16 healthCheck = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+            u16 healthCheck = GetActorStat_EnemyMaxHealth(10, this->actor.level);
             if ((this->actor.colChkInfo.health <= healthCheck)) {
                 s32 i;
                 Vec3f pos;

@@ -3028,7 +3028,7 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
         gSaveContext.health = gSaveContext.healthCapacity2;
     }
 
-    heartCount = gSaveContext.health % 0x10;
+    heartCount = gSaveContext.health / CVarGetInteger("gLeveledHeartUnits", 4) << 2;
 
     healthLevel = heartCount;
     if (heartCount != 0) {

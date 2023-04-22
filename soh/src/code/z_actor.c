@@ -1263,7 +1263,7 @@ void Actor_Init(Actor* actor, PlayState* play) {
         if (actor->category != ACTORCAT_PLAYER) {
             Actor_GetLevelAndExperience(play, actor, 0);
             actor->colChkInfo.health =
-                GetActorStat_EnemyMaxHealth(actor->colChkInfo.health * HEALTH_ATTACK_MULTIPLIER, actor->level);
+                GetActorStat_EnemyMaxHealth(actor->colChkInfo.health, actor->level);
             actor->maximumHealth = actor->colChkInfo.health;
         }
 

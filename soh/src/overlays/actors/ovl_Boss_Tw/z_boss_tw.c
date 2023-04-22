@@ -3092,7 +3092,7 @@ void BossTw_TwinrovaUpdate(Actor* thisx, PlayState* play2) {
             ActorDamageNumber_New(&this->actor, damage);
 
             if (!(info->toucher.dmgFlags & DMG_HOOKSHOT)) {
-                if ((this->actor.colChkInfo.health < GetActorStat_EnemyMaxHealth(3 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) && !swordDamage) {
+                if ((this->actor.colChkInfo.health < GetActorStat_EnemyMaxHealth(3, this->actor.level)) && !swordDamage) {
                 
                     damage = 0;
                 }
@@ -5166,7 +5166,7 @@ void BossTw_TwinrovaChargeBlast(BossTw* this, PlayState* play) {
     Math_ApproachS(&this->actor.shape.rot.y, this->actor.yawTowardsPlayer, 5, 0x1000);
 
     if (Animation_OnFrame(&this->skelAnime, this->workf[ANIM_SW_TGT])) {
-        if (this->actor.colChkInfo.health < GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+        if (this->actor.colChkInfo.health < GetActorStat_EnemyMaxHealth(10, this->actor.level)) {
             sTwinrovaBlastType = Rand_ZeroFloat(1.99f);
         } else {
             if (++sFixedBlatSeq >= 4) {

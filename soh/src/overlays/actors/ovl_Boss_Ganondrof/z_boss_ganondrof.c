@@ -501,7 +501,7 @@ void BossGanondrof_Neutral(BossGanondrof* this, PlayState* play) {
             if (this->timers[0] == 0) {
                 this->timers[0] = (s16)(Rand_ZeroOne() * 64.0f) + 30;
                 rand01 = Rand_ZeroOne();
-                u16 healthCheck = GetActorStat_EnemyMaxHealth(5 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+                u16 healthCheck = GetActorStat_EnemyMaxHealth(5, this->actor.level);
                 if (thisx->colChkInfo.health < healthCheck) {
                     if (rand01 < 0.25f) {
                         BossGanondrof_SetupThrow(this, play);

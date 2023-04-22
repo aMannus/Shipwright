@@ -1348,7 +1348,7 @@ void BossVa_SetupBodyPhase4(BossVa* this, PlayState* play) {
     this->actor.world.rot.y = this->actor.yawTowardsPlayer;
     this->timer2 = (s16)(Rand_ZeroOne() * 150.0f) + 300;
     sBodyState = 1;
-    sPhase4HP = GetActorStat_EnemyMaxHealth(4 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+    sPhase4HP = GetActorStat_EnemyMaxHealth(4, this->actor.level);
     if (this->actor.shape.yOffset != 0.0f) {
         this->timer = -30;
     }
@@ -1398,7 +1398,7 @@ void BossVa_BodyPhase4(BossVa* this, PlayState* play) {
                     if (sPhase4HP <= 0) {
                         this->timer = 0;
                         sFightPhase++;
-                        sPhase4HP += GetActorStat_EnemyMaxHealth(3 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+                        sPhase4HP += GetActorStat_EnemyMaxHealth(3, this->actor.level);
                         if (sFightPhase >= PHASE_DEATH) {
                             BossVa_SetupBodyDeath(this, play);
                             Enemy_StartFinishingBlow(play, &this->actor);

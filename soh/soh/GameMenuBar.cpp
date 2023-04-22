@@ -1338,20 +1338,20 @@ namespace GameMenuBar {
         }
 
         if (ImGui::BeginMenu("Leveled")) {
-            UIWidgets::EnhancementCheckbox("Level Gives Bonus Hearts", "gLeveledHeartsWithLevelUp", false, "",
-                                           UIWidgets::CheckboxGraphics::Checkmark, true);
-            UIWidgets::EnhancementCheckbox("Level Affects Magic Capacity", "gLeveledMagicWithLevelUp", false, "",
-                                           UIWidgets::CheckboxGraphics::Checkmark, true);
-            UIWidgets::EnhancementCheckbox("Enemy Level Affects Base Attack", "gLeveledEnemyAttackScalesWithLevel",
-                                           false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
-            UIWidgets::Tooltip("Enemies have a fixed attack value. This option scales this up the higher the enemy's "
-                               "Power(Strength) stat. \nThis will increase difficulty a bit.");
-            UIWidgets::EnhancementCheckbox("Equipment Affects Stats", "gLeveledEquipmentStats", false, "",
-                                           UIWidgets::CheckboxGraphics::Checkmark, true);
-            UIWidgets::EnhancementCheckbox("Navi tells enemy level", "gLeveledNaviLevel", false, "",
-                                           UIWidgets::CheckboxGraphics::Checkmark, true);
-            UIWidgets::EnhancementCheckbox("Navi tells enemy max HP", "gLeveledNaviMaxHP", false, "",
-                                           UIWidgets::CheckboxGraphics::Checkmark, true);
+            if (ImGui::BeginMenu("Floating Numbers")) {
+                UIWidgets::EnhancementCheckbox("Enemy Damage", "gLeveledFloatingNumberEnemyDamage", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+                UIWidgets::EnhancementCheckbox("Player Damage", "gLeveledFloatingNumberPlayerDamage", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+                UIWidgets::EnhancementCheckbox("EXP Gain", "gLeveledFloatingNumberExpGain", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+                ImGui::EndMenu();
+            }
+
+            UIWidgets::EnhancementCheckbox("Level Gives Bonus Hearts", "gLeveledHeartsWithLevelUp", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Level Affects Magic Capacity", "gLeveledMagicWithLevelUp", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Enemy Level Affects Base Attack", "gLeveledEnemyAttackScalesWithLevel", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::Tooltip("Enemies have a fixed attack value. This option scales this up the higher the enemy's Power(Strength) stat. \nThis will increase difficulty a bit.");
+            UIWidgets::EnhancementCheckbox("Equipment Affects Stats", "gLeveledEquipmentStats", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Navi tells enemy level", "gLeveledNaviLevel", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
+            UIWidgets::EnhancementCheckbox("Navi tells enemy max HP", "gLeveledNaviMaxHP", false, "", UIWidgets::CheckboxGraphics::Checkmark, true);
 
             if (ImGui::BeginMenu("Heart Capacity in Units")) {
                 CVarGetInteger("gLeveledHeartUnits", 4);

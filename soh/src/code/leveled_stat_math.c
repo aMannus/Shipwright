@@ -19,16 +19,16 @@ static u32 sExpTable[] = { 0,      30,     65,     110,    167,    240,    334, 
   507136, 526696, 546754, 567315, 588386, 609974, 632084, 654723, 677897, 701612, 725875, 750692, 776069,
   802012, 828528, 855623, 883303, 911574, 940443, 969916, 999999 };*/
 
-u16 GetActorStat_DisplayAttack(u8 attack, u8 power) {
+u16 GetActorStat_DisplayAttack(u16 attack, u8 power) {
     return GetActorStat_Attack(attack, power) / (1 + (float)power / 30.0f);
 }
 
-u16 GetActorStat_Attack(u8 attack, u8 power) {
+u16 GetActorStat_Attack(u16 attack, u8 power) {
     return (float)attack * (1 + (power - 2) * (0.14f + (power - 2) * 0.0006f));
 }
 
-u16 GetActorStat_EnemyAttack(u8 attack, u8 power) {
-    return (float)attack * (1 + (power - 2) * (0.016f + (power - 2) * 0.0002f));
+f32 GetActorStat_EnemyAttack(u16 attack, u8 power) {
+    return (float)attack * (1 + (power - 2) * (0.007f + (power - 2) * 0.0002f));
 }
 
 u8 GetActorStat_Power(u8 level) {
@@ -48,7 +48,7 @@ u8 GetActorStat_PlayerCourage(u8 level) {
 }
 
 u16 GetActorStat_EnemyMaxHealth(u16 baseHealth, u8 level){ 
-    return GetActorStat_Attack(baseHealth, GetActorStat_Power(level));
+    return GetActorStat_Attack(baseHealth * HEALTH_ATTACK_MULTIPLIER, GetActorStat_PlayerPower(level));
 }
 
 u8 GetPlayerStat_BonusHearts(u8 level){
@@ -121,7 +121,8 @@ f32 Leveled_DamageFormulaOnPlayer(f32 attack, u8 power, u8 courage) {
 
         if (power >= courage) {
             for (u8 i = 0; i < power - courage; i++) {
-                damage *= 1.03f + CLAMP_MIN(0.07f - (f32)i / 100.0f, 0);
+                f32 multAddition = CLAMP_MIN((0.07f - (power * 0.0005f)) - (f32)i / (100.0f - (power * 0.33f)), 0);
+                damage *= 1.04f + multAddition;
             }
         } else {
             for (u8 i = 0; i < courage - power; i++) {

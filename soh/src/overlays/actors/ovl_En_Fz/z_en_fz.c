@@ -719,7 +719,7 @@ void EnFz_Draw(Actor* thisx, PlayState* play) {
     s32 pad;
     s32 index;
 
-    index = (6 - (u8)CLAMP(((f32)this->actor.colChkInfo.health / GetActorStat_EnemyMaxHealth(6 * HEALTH_ATTACK_MULTIPLIER, this->actor.level) * 5 + 0.99999f), 0, 6)) >> 1;
+    index = (6 - (u8)CLAMP(((f32)this->actor.colChkInfo.health / GetActorStat_EnemyMaxHealth(6, this->actor.level) * 5 + 0.99999f), 0, 6)) >> 1;
 
     OPEN_DISPS(play->state.gfxCtx);
 

@@ -209,7 +209,7 @@ void BossDodongo_Init(Actor* thisx, PlayState* play) {
     this->unk_1F8 = 1.0f;
     BossDodongo_SetupIntroCutscene(this, play);
     Actor_GetLevelAndExperience(play, &this->actor, 0);
-    this->health = GetActorStat_EnemyMaxHealth(12 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+    this->health = GetActorStat_EnemyMaxHealth(12, this->actor.level);
     this->colorFilterMin = 995.0f;
     this->actor.colChkInfo.mass = MASS_IMMOVABLE;
     this->colorFilterMax = 1000.0f;

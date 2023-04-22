@@ -2272,7 +2272,7 @@ void BossGanon_Wait(BossGanon* this, PlayState* play) {
         } else if ((this->timers[0] == 0) && !(player->stateFlags1 & 0x2000)) {
             this->timers[0] = (s16)Rand_ZeroFloat(30.0f) + 30;
 
-            if (this->actor.colChkInfo.health >= GetActorStat_EnemyMaxHealth(20 * HEALTH_ATTACK_MULTIPLIER, this->actor.level)) {
+            if (this->actor.colChkInfo.health >= GetActorStat_EnemyMaxHealth(20, this->actor.level)) {
                 BossGanon_SetupChargeLightBall(this, play);
             } else if (Rand_ZeroOne() >= 0.5f) {
                 if ((Rand_ZeroOne() >= 0.5f) || (this->actor.xzDistToPlayer > 350.0f)) {

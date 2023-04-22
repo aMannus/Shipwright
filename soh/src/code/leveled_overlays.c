@@ -104,7 +104,7 @@ void Leveled_OverlayDrawTex4b(PlayState* play, void* texture, s16 textureWidth, 
 }
 
 void ActorDamageNumber_New(Actor* actor, u16 damage) {
-    if (damage == 0)
+    if (damage == 0 || (actor->category == ACTORCAT_PLAYER && !CVarGetInteger("gLeveledFloatingNumberPlayerDamage", 1)) || (actor->category != ACTORCAT_PLAYER && !CVarGetInteger("gLeveledFloatingNumberEnemyDamage", 1)))
         return;
 
     Vec2f position = { 0, 0 };
@@ -117,7 +117,7 @@ void ActorDamageNumber_New(Actor* actor, u16 damage) {
 }
 
 void ActorExperienceNumber_New(Actor* actor, u16 experience) {
-    if (experience == 0)
+    if (experience == 0 || !CVarGetInteger("gLeveledFloatingNumberExpGain", 1))
         return;
 
 
@@ -268,7 +268,7 @@ void ActorDamageNumber_Draw(PlayState* play, Actor* actor) {
 
     extern const char* digitTextures[];
     s16 val = actor->floatingNumber[0];
-    u8 digit[] = { 0, 0, 0 };
+    u8 digit[] = { 0, 0, 0, 0 };
     u8 digits = 1;
     u8 width = 8;
     Vec3f spBC;
@@ -284,14 +284,20 @@ void ActorDamageNumber_Draw(PlayState* play, Actor* actor) {
     if (val < 0)
         val = 0;
 
-    if (val > 999)
-        val = 999;
+    if (val > 9999)
+        val = 9999;
 
+    if (val >= 1000)
+        digits += 1;
     if (val >= 100)
         digits += 1;
     if (val >= 10)
         digits += 1;
 
+    for (j = 0; val >= 1000; j++) {
+        val -= 1000;
+        digit[3] += 1;
+    }
     for (j = 0; val >= 100; j++) {
         val -= 100;
         digit[2] += 1;
@@ -339,10 +345,9 @@ void ActorDamageNumber_Draw(PlayState* play, Actor* actor) {
     gDPSetCombineLERP(OVERLAY_DISP++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
                       PRIMITIVE, 0);
 
-    for (u8 i = 0; i < 3; i++) {
-        if (i == 0 || i == 1 && (digit[1] > 0 || digit[2] > 0) || (i == 2 && digit[2] > 0))
-            OVERLAY_DISP = Gfx_TextureI8(OVERLAY_DISP, (u8*)digitTextures[digit[i]], 8, 16, (s16)spBC.x - i * width, (s16)spBC.y,
-                                         8, 16, 1 << 10, 1 << 10);
+    for (u8 i = 0; i < digits; i++) {
+        OVERLAY_DISP = Gfx_TextureI8(OVERLAY_DISP, (u8*)digitTextures[digit[i]], 8, 16, (s16)spBC.x - i * width - (digits - 1) * width * 0.5f, (s16)spBC.y,
+                                        8, 16, 1 << 10, 1 << 10);
     }
 
     CLOSE_DISPS(play->state.gfxCtx);

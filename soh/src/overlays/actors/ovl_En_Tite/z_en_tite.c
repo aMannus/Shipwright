@@ -721,8 +721,8 @@ void EnTite_Stunned(EnTite* this, PlayState* play) {
          ((this->actor.params == TEKTITE_BLUE) && (this->actor.bgCheckFlags & 0x20)))) {
         this->actor.world.rot.y = this->actor.shape.rot.y;
         if (this->actor.colChkInfo.health == 0) {
-            EnTite_SetupDeathCry(this);
             Player_GainExperience(play, this->actor.exp);
+            EnTite_SetupDeathCry(this);
         } else if (this->flipState == TEKTITE_FLIPPED) {
             EnTite_SetupFlipUpright(this);
         } else if (((this->actor.xzDistToPlayer > 300.0f) && (this->actor.yDistToPlayer > 80.0f) &&
@@ -864,6 +864,7 @@ void EnTite_CheckDamage(Actor* thisx, PlayState* play) {
                     Actor_ApplyDamage(thisx);
                 }
                 if (thisx->colChkInfo.health == 0) {
+                    Player_GainExperience(play, this->actor.exp);
                     EnTite_SetupDeathCry(this);
                 } else {
                     // Flip tektite back up if it's on its back

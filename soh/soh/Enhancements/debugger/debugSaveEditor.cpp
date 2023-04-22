@@ -390,7 +390,7 @@ void DrawInfoTab() {
     const uint8_t magicMin = 0;
     const uint8_t magicMax = gSaveContext.magicCapacity;
     ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
-    ImGui::SliderScalar("Magic", ImGuiDataType_S8, &gSaveContext.magic, &magicMin, &magicMax);
+    ImGui::SliderScalar("Magic", ImGuiDataType_U8, &gSaveContext.magic, &magicMin, &magicMax);
     UIWidgets::InsertHelpHoverText("Current magic. 48 units per magic level");
 
     ImGui::InputScalar("Rupees", ImGuiDataType_S16, &gSaveContext.rupees);

@@ -1507,7 +1507,7 @@ void func_80862E6C(EnTest* this, PlayState* play) {
         }
     } else {
         if (this->actor.home.rot.x == 0) {
-            this->actor.colChkInfo.health = GetActorStat_EnemyMaxHealth(10 * HEALTH_ATTACK_MULTIPLIER, this->actor.level);
+            this->actor.colChkInfo.health = GetActorStat_EnemyMaxHealth(10, this->actor.level);
 
             if (this->actor.params == STALFOS_TYPE_4) {
                 this->actor.params = -1;
