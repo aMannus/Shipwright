@@ -4,6 +4,9 @@
 // I.E. game time counts frames at 20fps/2, pause time counts frames at 30fps/3
 // Frame counts in z_play.c and z_kaleido_scope_call.c
 #define GAMEPLAYSTAT_TOTAL_TIME (gSaveContext.sohStats.playTimer / 2 + gSaveContext.sohStats.pauseTimer / 3)
+#define CURRENT_MODE_TIMER (CVarGetInteger("gGameplayStatRoomBreakdown", 0) ?\
+    gSaveContext.sohStats.roomTimer :\
+    gSaveContext.sohStats.sceneTimer)
 
 void InitStatTracker();
 
@@ -21,7 +24,8 @@ typedef enum {
     /* 0xA7 */ TIMESTAMP_DEFEAT_TWINROVA,       // z_boss_tw.c
     /* 0xA8 */ TIMESTAMP_DEFEAT_GANONDORF,      // z_boss_ganon.c
     /* 0xA9 */ TIMESTAMP_DEFEAT_GANON,          // z_boss_ganon2.c
-    /* 0xAA */ TIMESTAMP_MAX
+    /* 0xAA */ TIMESTAMP_FOUND_GREG,            // z_parameter.c
+    /* 0xAB */ TIMESTAMP_MAX
 
 }GameplayStatTimestamp;
 

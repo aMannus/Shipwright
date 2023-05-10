@@ -5,7 +5,7 @@
 #include "Resource.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
     typedef struct {
         /* 0x00 */ uintptr_t start;
         /* 0x04 */ uintptr_t end;
@@ -41,6 +41,8 @@ namespace Ship {
 
     class AudioSample : public Resource {
         public:
+            using Resource::Resource;
+
             void* GetPointer();
             size_t GetPointerSize();
 
@@ -54,4 +56,4 @@ namespace Ship {
             uint32_t bookDataCount;
             std::vector<int16_t> bookData;
     };
-}; // namespace Ship
+}; // namespace LUS

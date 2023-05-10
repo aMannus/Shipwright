@@ -1,16 +1,16 @@
 #include "soh/resource/importer/scenecommand/SetMeshFactory.h"
 #include "soh/resource/type/scenecommand/SetMesh.h"
 #include "spdlog/spdlog.h"
-#include "libultraship/bridge.h"
+#include "libultraship/libultraship.h"
 
-namespace Ship {
-std::shared_ptr<Resource> SetMeshFactory::ReadResource(uint32_t version, std::shared_ptr<BinaryReader> reader)
-{
-    auto resource = std::make_shared<SetMesh>();
+namespace LUS {
+std::shared_ptr<Resource> SetMeshFactory::ReadResource(std::shared_ptr<ResourceManager> resourceMgr,
+                                                       std::shared_ptr<ResourceInitData> initData,
+                                                       std::shared_ptr<BinaryReader> reader) {
+    auto resource = std::make_shared<SetMesh>(resourceMgr, initData);
     std::shared_ptr<ResourceVersionFactory> factory = nullptr;
 
-    switch (version)
-    {
+    switch (resource->InitData->ResourceVersion) {
     case 0:
         factory = std::make_shared<SetMeshFactoryV0>();
         break;
@@ -18,7 +18,7 @@ std::shared_ptr<Resource> SetMeshFactory::ReadResource(uint32_t version, std::sh
 
     if (factory == nullptr)
     {
-        SPDLOG_ERROR("Failed to load SetMesh with version {}", version);
+        SPDLOG_ERROR("Failed to load SetMesh with version {}", resource->InitData->ResourceVersion);
         return nullptr;
     }
 
@@ -27,7 +27,7 @@ std::shared_ptr<Resource> SetMeshFactory::ReadResource(uint32_t version, std::sh
     return resource;
 }
 
-void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reader,
+void LUS::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reader,
                                         std::shared_ptr<Resource> resource)
 {
     std::shared_ptr<SetMesh> setMesh = std::static_pointer_cast<SetMesh>(resource);
@@ -65,8 +65,10 @@ void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reade
             std::string meshOpa = reader->ReadString();
             std::string meshXlu = reader->ReadString();
 
-            dlist.opa = meshOpa != "" ? (Gfx*)GetResourceDataByName(meshOpa.c_str(), true) : 0;
-            dlist.xlu = meshXlu != "" ? (Gfx*)GetResourceDataByName(meshXlu.c_str(), true) : 0;
+            auto opaRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(meshOpa.c_str());
+            auto xluRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(meshXlu.c_str());
+            dlist.opa = meshOpa != "" ? (Gfx*)(opaRes ? opaRes->GetPointer() : nullptr) : 0;
+            dlist.xlu = meshXlu != "" ? (Gfx*)(xluRes ? xluRes->GetPointer() : nullptr) : 0;
 
             setMesh->dlists.push_back(dlist);
         } else if (setMesh->meshHeader.base.type == 1) {
@@ -76,8 +78,10 @@ void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reade
             std::string imgOpa = reader->ReadString();
             std::string imgXlu = reader->ReadString();
 
-            pType.opa = imgOpa != "" ? (Gfx*)GetResourceDataByName(imgOpa.c_str(), true) : 0;
-            pType.xlu = imgXlu != "" ? (Gfx*)GetResourceDataByName(imgXlu.c_str(), true) : 0;
+            auto opaRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(imgOpa.c_str());
+            auto xluRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(imgXlu.c_str());
+            pType.opa = imgOpa != "" ? (Gfx*)(opaRes ? opaRes->GetPointer() : nullptr) : 0;
+            pType.xlu = imgXlu != "" ? (Gfx*)(xluRes ? xluRes->GetPointer() : nullptr) : 0;
 
             int32_t bgImageCount = reader->ReadUInt32();
             setMesh->images.reserve(bgImageCount);
@@ -86,9 +90,9 @@ void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reade
                 BgImage image;
                 image.unk_00 = reader->ReadUInt16();
                 image.id = reader->ReadUByte();
-                std::string sourceFile = reader->ReadString();
-                void* sourceData = GetResourceDataByName(sourceFile.c_str(), true);
-                image.source = sourceData;
+                std::string imagePath = "__OTR__" + reader->ReadString();
+                setMesh->imagePaths.push_back(imagePath);
+                image.source = (void*)setMesh->imagePaths.back().c_str();
                 image.unk_0C = reader->ReadUInt32();
                 image.tlut = reader->ReadUInt32();
                 image.width = reader->ReadUInt16();
@@ -122,8 +126,10 @@ void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reade
             std::string meshOpa = reader->ReadString();
             std::string meshXlu = reader->ReadString();
 
-            pType.opa = meshOpa != "" ? (Gfx*)GetResourceDataByName(meshOpa.c_str(), true) : 0;
-            pType.xlu = meshXlu != "" ? (Gfx*)GetResourceDataByName(meshXlu.c_str(), true) : 0;
+            opaRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(meshOpa.c_str());
+            xluRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(meshXlu.c_str());
+            pType.opa = meshOpa != "" ? (Gfx*)(opaRes ? opaRes->GetPointer() : nullptr) : 0;
+            pType.xlu = meshXlu != "" ? (Gfx*)(xluRes ? xluRes->GetPointer() : nullptr) : 0;
 
             setMesh->dlists.push_back(pType);
         } else if (setMesh->meshHeader.base.type == 2) {
@@ -138,8 +144,10 @@ void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reade
             std::string meshOpa = reader->ReadString();
             std::string meshXlu = reader->ReadString();
 
-            dlist.opa = meshOpa != "" ? (Gfx*)GetResourceDataByName(meshOpa.c_str(), true) : 0;
-            dlist.xlu = meshXlu != "" ? (Gfx*)GetResourceDataByName(meshXlu.c_str(), true) : 0;
+            auto opaRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(meshOpa.c_str());
+            auto xluRes = LUS::Context::GetInstance()->GetResourceManager()->LoadResourceProcess(meshXlu.c_str());
+            dlist.opa = meshOpa != "" ? (Gfx*)(opaRes ? opaRes->GetPointer() : nullptr) : 0;
+            dlist.xlu = meshXlu != "" ? (Gfx*)(xluRes ? xluRes->GetPointer() : nullptr) : 0;
 
             setMesh->dlists2.push_back(dlist);
         } else {
@@ -159,4 +167,4 @@ void Ship::SetMeshFactoryV0::ParseFileBinary(std::shared_ptr<BinaryReader> reade
     }
 }
 
-} // namespace Ship
+} // namespace LUS

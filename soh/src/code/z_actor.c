@@ -8,6 +8,7 @@
 #include "objects/object_bdoor/object_bdoor.h"
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/enemyrandomizer.h"
+#include "soh/Enhancements/game-interactor/GameInteractor.h"
 
 #if defined(_MSC_VER) || defined(__GNUC__)
 #include <string.h>
@@ -80,6 +81,9 @@ static s32 sCurCeilingBgId;
 
 // Used for animating the ice trap on the "Get Item" model.
 f32 iceTrapScale;
+
+// For Link's voice pitch SFX modifier
+static f32 freqMultiplier = 1;
 
 void ActorShape_Init(ActorShape* shape, f32 yOffset, ActorShadowFunc shadowDraw, f32 shadowScale) {
     shape->yOffset = yOffset;
@@ -795,9 +799,22 @@ void func_8002CDE4(PlayState* play, TitleCardContext* titleCtx) {
 
 void TitleCard_InitBossName(PlayState* play, TitleCardContext* titleCtx, void* texture, s16 x, s16 y, u8 width,
                             u8 height, s16 hasTranslation) {
-
-    if (ResourceMgr_OTRSigCheck(texture))
-        texture = GetResourceDataByName(texture, false);
+    static char newName[512];
+    
+    if (gSaveContext.language != LANGUAGE_ENG) {
+        size_t length = strlen(texture);
+        strcpy(newName, texture);
+        if (gSaveContext.language == LANGUAGE_FRA) {
+            newName[length - 6] = 'F';
+            newName[length - 5] = 'R';
+            newName[length - 4] = 'A';
+        } else if (gSaveContext.language == LANGUAGE_GER) {
+            newName[length - 6] = 'G';
+            newName[length - 5] = 'E';
+            newName[length - 4] = 'R';
+        }
+        texture = newName;
+    }
 
     titleCtx->texture = texture;
     titleCtx->isBossCard = true;
@@ -1001,7 +1018,7 @@ void TitleCard_InitPlaceName(PlayState* play, TitleCardContext* titleCtx, void* 
 
     }
 
-    char newName[512];
+    static char newName[512];
 
     if (gSaveContext.language != LANGUAGE_ENG) {
         size_t length = strlen(texture);
@@ -1019,9 +1036,7 @@ void TitleCard_InitPlaceName(PlayState* play, TitleCardContext* titleCtx, void* 
         texture = newName;
     }
 
-    titleCtx->texture = GetResourceDataByName(texture, false);
-
-    //titleCtx->texture = texture;
+    titleCtx->texture = texture;
     titleCtx->isBossCard = false;
     titleCtx->hasTranslation = false;
     titleCtx->x = x;
@@ -1044,6 +1059,10 @@ void TitleCard_Update(PlayState* play, TitleCardContext* titleCtx) {
     }
 
     if (DECR(titleCtx->delayTimer) == 0) {
+        if (titleCtx->durationTimer == 80) {
+            GameInteractor_ExecuteOnPresentTitleCard();
+        }
+        
         if (DECR(titleCtx->durationTimer) == 0) {
             Math_StepToS(&titleCtx->alpha, 0, 30);
             Math_StepToS(&titleCtx->intensityR, 0, 70);
@@ -1061,14 +1080,9 @@ void TitleCard_Update(PlayState* play, TitleCardContext* titleCtx) {
 void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
     s32 width;
     s32 height;
-    s32 unused;
     s32 titleX;
     s32 doubleWidth;
     s32 titleY;
-    s32 titleSecondY;
-    s32 textureLanguageOffset;
-    s32 shiftTopY;
-    s32 shiftBottomY;
 
     if (titleCtx->alpha != 0) {
         width = titleCtx->width;
@@ -1101,51 +1115,20 @@ void TitleCard_Draw(PlayState* play, TitleCardContext* titleCtx) {
 
         OPEN_DISPS(play->state.gfxCtx);
 
-        height = (width * height > 0x1000) ? 0x1000 / width : height;
-        titleSecondY = titleY + (height * 4);
-
-        textureLanguageOffset = 0x0;
-        shiftTopY = 0x0;
-        shiftBottomY = 0x1000;
-
-        //if this card is bosses cards, has translation and that is not using English language.
-        if (titleCtx->isBossCard && titleCtx->hasTranslation && gSaveContext.language != LANGUAGE_ENG) {
-            textureLanguageOffset = (width * height * gSaveContext.language);
-            if (gSaveContext.language == LANGUAGE_GER) {
-                shiftTopY = 0x400;
-                shiftBottomY = 0x1400;
-            } else if (gSaveContext.language == LANGUAGE_FRA) {
-                shiftTopY = 0x800;
-                shiftBottomY = 0x1800;
-            }
-        }
-
         // WORLD_OVERLAY_DISP Goes over POLY_XLU_DISP but under POLY_KAL_DISP
         WORLD_OVERLAY_DISP = Gfx_SetupDL_52NoCD(WORLD_OVERLAY_DISP);
 
         gDPSetPrimColor(WORLD_OVERLAY_DISP++, 0, 0, (u8)titleCtx->intensityR, (u8)titleCtx->intensityG, (u8)titleCtx->intensityB,
                         (u8)titleCtx->alpha);
 
-        gDPLoadTextureBlock(WORLD_OVERLAY_DISP++, (uintptr_t)titleCtx->texture + textureLanguageOffset + shiftTopY, G_IM_FMT_IA,
+        gDPLoadTextureBlock(WORLD_OVERLAY_DISP++, (uintptr_t)titleCtx->texture, G_IM_FMT_IA,
                             G_IM_SIZ_8b,
                             width, height, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
                             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        //Removing the -1 there remove the gap between top and bottom textures.
         gSPWideTextureRectangle(WORLD_OVERLAY_DISP++, titleX, titleY, ((doubleWidth * 2) + titleX) - 4, titleY + (height * 4),
                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 
         height = titleCtx->height - height;
-
-        // If texture is bigger than 0x1000, display the rest
-        if (height > 0) {
-            gDPLoadTextureBlock(WORLD_OVERLAY_DISP++, (uintptr_t)titleCtx->texture + textureLanguageOffset + shiftBottomY,
-                                G_IM_FMT_IA,
-                                G_IM_SIZ_8b, width, height, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-            //Removing the -1 there remove the gap between top and bottom textures.
-            gSPWideTextureRectangle(WORLD_OVERLAY_DISP++, titleX, titleSecondY, ((doubleWidth * 2) + titleX) - 4,
-                                titleSecondY + (height * 4), G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
-        }
 
         CLOSE_DISPS(play->state.gfxCtx);
     }
@@ -2182,7 +2165,17 @@ void func_8002F7A0(PlayState* play, Actor* actor, f32 arg2, s16 arg3, f32 arg4) 
 }
 
 void func_8002F7DC(Actor* actor, u16 sfxId) {
-    Audio_PlaySoundGeneral(sfxId, &actor->projectedPos, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+    if (actor->id != ACTOR_PLAYER || sfxId < NA_SE_VO_LI_SWORD_N || sfxId > NA_SE_VO_LI_ELECTRIC_SHOCK_LV_KID) {
+        Audio_PlaySoundGeneral(sfxId, &actor->projectedPos, 4, &D_801333E0 , &D_801333E0, &D_801333E8);
+    } else {
+        freqMultiplier = CVarGetFloat("gLinkVoiceFreqMultiplier", 1.0);
+        if (freqMultiplier <= 0) { 
+            freqMultiplier = 1;
+        }
+        // Authentic behavior uses D_801333E0 for both freqScale and a4
+        // Audio_PlaySoundGeneral(sfxId, &actor->projectedPos, 4, &D_801333E0 , &D_801333E0, &D_801333E8);
+        Audio_PlaySoundGeneral(sfxId, &actor->projectedPos, 4, &freqMultiplier, &D_801333E0, &D_801333E8);
+    }
 }
 
 void Audio_PlayActorSound2(Actor* actor, u16 sfxId) {
@@ -2513,6 +2506,7 @@ void Actor_UpdateAll(PlayState* play, ActorContext* actorCtx) {
             Actor_SpawnEntry(&play->actorCtx, actorEntry++, play);
         }
         play->numSetupActors = 0;
+        GameInteractor_ExecuteOnSceneSpawnActors();
     }
 
     if (actorCtx->unk_02 != 0) {
@@ -2595,6 +2589,7 @@ void Actor_UpdateAll(PlayState* play, ActorContext* actorCtx) {
                         actor->colorFilterTimer--;
                     }
                     actor->update(actor, play);
+                    GameInteractor_ExecuteOnActorUpdate(actor, play);
                     func_8003F8EC(play, &play->colCtx.dyna, actor);
                 }
 

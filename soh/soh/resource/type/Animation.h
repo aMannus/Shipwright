@@ -3,7 +3,7 @@
 #include "Resource.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
   enum class AnimationType {
       Normal = 0,
       Link = 1,
@@ -65,6 +65,8 @@ namespace Ship {
 
   class Animation : public Resource {
     public:
+      using Resource::Resource;
+
       void* GetPointer();
       size_t GetPointerSize();
 
@@ -80,4 +82,4 @@ namespace Ship {
       std::vector<TransformData> transformDataArr;
       std::vector<int16_t> copyValuesArr;
   };
-}; // namespace Ship
+}; // namespace LUS

@@ -10,7 +10,7 @@
 #include <libultraship/libultra/types.h>
 
 
-namespace Ship {
+namespace LUS {
 // typedef struct {
 //     /* 0x00 */ uintptr_t vromStart;
 //     /* 0x04 */ uintptr_t vromEnd;
@@ -19,6 +19,8 @@ namespace Ship {
 
 class SetRoomList : public SceneCommand {
   public:
+    using SceneCommand::SceneCommand;
+
     void* GetPointer();
     size_t GetPointerSize();
 
@@ -27,4 +29,4 @@ class SetRoomList : public SceneCommand {
     std::vector<std::string> fileNames;
     std::vector<RomFile> rooms;
 };
-}; // namespace Ship
+}; // namespace LUS

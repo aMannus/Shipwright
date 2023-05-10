@@ -6,7 +6,7 @@
 #include "Resource.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
 
 enum class SceneCommandID : uint8_t {
     SetStartPositionList = 0x00,
@@ -49,7 +49,8 @@ enum class SceneCommandID : uint8_t {
 
 class SceneCommand : public Resource {
 public:
+  using Resource::Resource;
   SceneCommandID cmdId;
 };
 
-}; // namespace Ship
+}; // namespace LUS

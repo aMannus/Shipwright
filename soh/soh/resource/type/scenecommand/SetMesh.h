@@ -8,7 +8,7 @@
 #include "libultraship/libultra.h"
 #include "z64math.h"
 
-namespace Ship {
+namespace LUS {
 typedef struct {
     /* 0x00 */ u8    type;
 } PolygonBase;
@@ -85,6 +85,8 @@ typedef struct {
 
 class SetMesh : public SceneCommand {
   public:
+    using SceneCommand::SceneCommand;
+
     void* GetPointer();
     size_t GetPointerSize();
 
@@ -94,7 +96,8 @@ class SetMesh : public SceneCommand {
 
     std::vector<PolygonDlist> dlists;
     std::vector<PolygonDlist2> dlists2;
+    std::vector<std::string> imagePaths;
     std::vector<BgImage> images;
     MeshHeader meshHeader;
 };
-}; // namespace Ship
+}; // namespace LUS

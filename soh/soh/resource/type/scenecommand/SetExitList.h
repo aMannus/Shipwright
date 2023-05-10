@@ -7,9 +7,11 @@
 #include "SceneCommand.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
 class SetExitList : public SceneCommand {
   public:
+    using SceneCommand::SceneCommand;
+
     void* GetPointer();
     size_t GetPointerSize();
 
@@ -17,4 +19,4 @@ class SetExitList : public SceneCommand {
 
     std::vector<uint16_t> exits;
 };
-}; // namespace Ship
+}; // namespace LUS

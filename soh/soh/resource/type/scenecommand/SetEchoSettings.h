@@ -7,16 +7,18 @@
 #include "SceneCommand.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
 typedef struct {
   int8_t echo;
 } EchoSettings;
 
 class SetEchoSettings : public SceneCommand {
   public:
+    using SceneCommand::SceneCommand;
+
     void* GetPointer();
     size_t GetPointerSize();
 
     EchoSettings settings;
 };
-}; // namespace Ship
+}; // namespace LUS

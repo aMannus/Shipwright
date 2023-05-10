@@ -7,7 +7,7 @@
 #include "Vec3f.h"
 #include "Color3b.h"
 
-namespace Ship {
+namespace LUS {
 
 enum class CutsceneCommands {
     Cmd00 = 0x0000,
@@ -46,6 +46,8 @@ enum class CutsceneCommands {
 
 class Cutscene : public Resource {
   public:
+    using Resource::Resource;
+
     void* GetPointer();
     size_t GetPointerSize();
 
@@ -53,7 +55,7 @@ class Cutscene : public Resource {
     uint32_t endFrame;
     std::vector<uint32_t> commands;
 };
-} // namespace Ship
+} // namespace LUS
 
 
 /////////////

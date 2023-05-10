@@ -5,7 +5,7 @@
 #include "Resource.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
 
 typedef struct {
     char* seqData;
@@ -19,10 +19,12 @@ typedef struct {
 
 class AudioSequence : public Resource {
 public:
+    using Resource::Resource;
+
     void* GetPointer();
     size_t GetPointerSize();
 
     Sequence sequence;
     std::vector<char> sequenceData;
 };
-}; // namespace Ship
+}; // namespace LUS

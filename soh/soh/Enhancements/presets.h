@@ -82,6 +82,7 @@ const std::vector<const char*> enhancementsCvars = {
     "gDamageMul",
     "gFallDamageMul",
     "gVoidDamageMul",
+    "gBonkDamageMul",
     "gNoRandomDrops",
     "gNoHeartDrops",
     "gBombchuDrops",
@@ -128,6 +129,7 @@ const std::vector<const char*> enhancementsCvars = {
     "gTimeFlowFileSelect",
     "gInjectItemCounts",
     "gDayGravePull",
+    "gDampeAllNight",
     "gSkipScarecrow",
     "gBlueFireArrows",
     "gSunlightArrows",
@@ -180,6 +182,26 @@ const std::vector<const char*> enhancementsCvars = {
     "gStaticExplosionRadius",
     "gNoInputForCredits",
     "gFastFarores",
+    "gNightGSAlwaysSpawn",
+    "gSkipText",
+    "gLinkDefaultName",
+    "gMarketSneak",
+    "gTimeTravel",
+    "gNutsExplodeBombs",
+    "gBowSlingShotAmmoFix",
+    "gBetterFW",
+    "gDisableFirstPersonChus",
+    "gHyperBosses",
+    "gRupeeDash",
+    "gDashInterval",
+    "gDogFollowsEverywhere",
+    "gDisableTunicWarningText",
+    "gDisableLOD",
+    "gDisableDrawDistance",
+    "gDisableKokiriDrawDistance",
+    "gLowResMode",
+    "gDrawLineupTick",
+    "gQuickBongoKill",
 };
 
 const std::vector<const char*> randomizerCvars = {
@@ -318,6 +340,8 @@ const std::vector<PresetEntry> vanillaPlusPresetEntries = {
 
     // Text Speed (1 to 5)
     PRESET_ENTRY_S32("gTextSpeed", 5),
+    // Skip Text
+    PRESET_ENTRY_S32("gSkipText", 1),
     // King Zora Speed (1 to 5)
     PRESET_ENTRY_S32("gMweepSpeed", 2),
     // Faster Block Push (+0 to +5)
@@ -385,6 +409,8 @@ const std::vector<PresetEntry> enhancedPresetEntries = {
 
     // Text Speed (1 to 5)
     PRESET_ENTRY_S32("gTextSpeed", 5),
+    // Skip Text
+    PRESET_ENTRY_S32("gSkipText", 1),
     // King Zora Speed (1 to 5)
     PRESET_ENTRY_S32("gMweepSpeed", 5),
     // Faster Block Push (+0 to +5)
@@ -456,6 +482,8 @@ const std::vector<PresetEntry> enhancedPresetEntries = {
     PRESET_ENTRY_S32("gInstantPutaway", 1),
     // Instant Boomerang Recall
     PRESET_ENTRY_S32("gFastBoomerang", 1),
+    // Nuts Explode Bombs
+    PRESET_ENTRY_S32("gNutsExplodeBombs", 1),
     // Ask to Equip New Items
     PRESET_ENTRY_S32("gAskToEquip", 1),
     // Mask Select in Inventory
@@ -504,6 +532,8 @@ const std::vector<PresetEntry> randomizerPresetEntries = {
 
     // Text Speed (1 to 5)
     PRESET_ENTRY_S32("gTextSpeed", 5),
+    // Skip Text
+    PRESET_ENTRY_S32("gSkipText", 1),
     // King Zora Speed (1 to 5)
     PRESET_ENTRY_S32("gMweepSpeed", 5),
     // Faster Block Push (+0 to +5)
@@ -572,6 +602,8 @@ const std::vector<PresetEntry> randomizerPresetEntries = {
     PRESET_ENTRY_S32("gInstantPutaway", 1),
     // Instant Boomerang Recall
     PRESET_ENTRY_S32("gFastBoomerang", 1),
+    // Nuts Explode Bombs
+    PRESET_ENTRY_S32("gNutsExplodeBombs", 1),
     // Ask to Equip New Items
     PRESET_ENTRY_S32("gAskToEquip", 1),
     // Mask Select in Inventory

@@ -1,4 +1,5 @@
 #include "CosmeticsEditor.h"
+#include "authenticGfxPatches.h"
 #include <ImGuiImpl.h>
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 
@@ -48,8 +49,6 @@ void ResourceMgr_PatchGfxByName(const char* path, const char* patchName, int ind
 void ResourceMgr_UnpatchGfxByName(const char* path, const char* patchName);
 u8 Randomizer_GetSettingValue(RandomizerSettingKey randoSettingKey);
 }
-
-void ApplyOrResetCustomGfxPatches(bool rainbowTick);
 
 // Not to be confused with tabs, groups are 1:1 with the boxes shown in the UI, grouping them allows us to reset/randomize
 // every item in a group at once. If you are looking for tabs they are rendered manually in ImGui in `DrawCosmeticsEditor`
@@ -319,11 +318,12 @@ static std::map<std::string, CosmeticOption> cosmeticOptions = {
     COSMETIC_OPTION("NPC_IronKnuckles",              "Iron Knuckles",        GROUP_NPC,          ImVec4(245, 255, 205, 255), false, true, false),
 };
 
-const char* MarginCvarList[] {
+static const char* MarginCvarList[] {
     "gHearts", "gHeartsCount", "gMagicBar", "gVSOA", "gBBtn", "gABtn", "gStartBtn", 
     "gCBtnU", "gCBtnD", "gCBtnL", "gCBtnR", "gDPad", "gMinimap", 
     "gSKC", "gRC", "gCarrots",  "gTimers", "gAS", "gTCM", "gTCB"
 };
+static const char* MarginCvarNonAnchor[]{ "gCarrots", "gTimers", "gAS", "gTCM","gTCB" };
 
 ImVec4 GetRandomValue(int MaximumPossible){
     ImVec4 NewColor;
@@ -345,25 +345,25 @@ ImVec4 GetRandomValue(int MaximumPossible){
 
 void SetMarginAll(const char* ButtonName, bool SetActivated) {
     if (ImGui::Button(ButtonName)) {
-        u8 arrayLength = sizeof(MarginCvarList) / sizeof(*MarginCvarList);
         //MarginCvarNonAnchor is an array that list every element that has No anchor by default, because if that the case this function will not touch it with pose type 0.
-        const char* MarginCvarNonAnchor[] { "gCarrots", "gTimers", "gAS", "gTCM","gTCB" };
         u8 arrayLengthNonMargin = sizeof(MarginCvarNonAnchor) / sizeof(*MarginCvarNonAnchor);
-        for (u8 s = 0; s < arrayLength; s++) {
-            std::string cvarName = MarginCvarList[s];
-            std::string cvarPosType = cvarName+"PosType";
-            std::string cvarNameMargins = cvarName+"UseMargins";
+        for (auto cvarName : MarginCvarList) {
+            std::string cvarPosType = std::string(cvarName).append("PosType");
+            std::string cvarNameMargins = std::string(cvarName).append("UseMargins");
             if (CVarGetInteger(cvarPosType.c_str(),0) <= 2 && SetActivated) { //Our element is not Hidden or Non anchor
-                for(int i = 0; i < arrayLengthNonMargin; i++){
-                    if(MarginCvarNonAnchor[i] == cvarName && CVarGetInteger(cvarPosType.c_str(),0) == 0){ //Our element is both in original position and do not have anchor by default so we skip it.
+                for (int i = 0; i < arrayLengthNonMargin; i++){
+                    if ((strcmp(cvarName, MarginCvarNonAnchor[i]) == 0) && (CVarGetInteger(cvarPosType.c_str(), 0) == 0)) { //Our element is both in original position and do not have anchor by default so we skip it.
                         CVarSetInteger(cvarNameMargins.c_str(), false); //force set off
-                    } else if(MarginCvarNonAnchor[i] == cvarName && CVarGetInteger(cvarPosType.c_str(),0) != 0){ //Our element is not in original position regarless it has no anchor by default since player made it anchored we can toggle margins
+                    } 
+                    else if ((strcmp(cvarName, MarginCvarNonAnchor[i]) == 0) && (CVarGetInteger(cvarPosType.c_str(), 0) != 0)) { //Our element is not in original position regarless it has no anchor by default since player made it anchored we can toggle margins
                         CVarSetInteger(cvarNameMargins.c_str(), SetActivated);
-                    } else if(MarginCvarNonAnchor[i] != cvarName){ //Our elements has an anchor by default so regarless of it's position right now that okay to toggle margins.
+                    } 
+                    else if (strcmp(cvarName, MarginCvarNonAnchor[i]) != 0) { //Our elements has an anchor by default so regarless of it's position right now that okay to toggle margins.
                         CVarSetInteger(cvarNameMargins.c_str(), SetActivated);
                     }
                 }
-            } else { //Since the user requested to turn all margin off no need to do any check there.
+            } 
+            else { //Since the user requested to turn all margin off no need to do any check there.
                 CVarSetInteger(cvarNameMargins.c_str(), SetActivated);
             }
         }
@@ -373,11 +373,11 @@ void ResetPositionAll() {
     if (ImGui::Button("Reset all positions")) {
         u8 arrayLength = sizeof(MarginCvarList) / sizeof(*MarginCvarList);
         for (u8 s = 0; s < arrayLength; s++) {
-            std::string cvarName = MarginCvarList[s];
-            std::string cvarPosType = cvarName+"PosType";
-            std::string cvarNameMargins = cvarName+"UseMargins";
-            CVarSetInteger(cvarPosType.c_str(), 0);
-            CVarSetInteger(cvarNameMargins.c_str(), false); //Turn margin off to everythings as that original position.
+            const char* cvarName = MarginCvarList[s];
+            const char* cvarPosType = std::string(cvarName).append("PosType").c_str();
+            const char* cvarNameMargins = std::string(cvarName).append("UseMargins").c_str();
+            CVarSetInteger(cvarPosType, 0);
+            CVarSetInteger(cvarNameMargins, false); //Turn margin off to everythings as that original position.
         }
     }
 }
@@ -425,7 +425,7 @@ void CosmeticsUpdateTick(bool& open) {
     4. GFX Command Index: Index of the GFX command you want to replace, the instructions on finding this are in the giant comment block above the cosmeticOptions map
     5. GFX Command: The GFX command you want to insert
 */
-void ApplyOrResetCustomGfxPatches(bool manualChange = true) {
+void ApplyOrResetCustomGfxPatches(bool manualChange) {
     static CosmeticOption& linkGoronTunic = cosmeticOptions.at("Link_GoronTunic");
     if (manualChange || CVarGetInteger(linkGoronTunic.rainbowCvar, 0)) {
         static Color_RGBA8 defaultColor = {linkGoronTunic.defaultColor.x, linkGoronTunic.defaultColor.y, linkGoronTunic.defaultColor.z, linkGoronTunic.defaultColor.w};
@@ -1094,30 +1094,30 @@ void DrawPositionSlider(const std::string CvarName, int MinY, int MaxY, int MinX
     std::string PosYCvar = CvarName+"PosY";
     std::string InvisibleLabelX = "##"+PosXCvar;
     std::string InvisibleLabelY = "##"+PosYCvar;
-    UIWidgets::EnhancementSliderInt("Up <-> Down : %d", InvisibleLabelY.c_str(), PosYCvar.c_str(), MinY, MaxY, "", 0, true);
+    UIWidgets::EnhancementSliderInt("Up <-> Down : %d", InvisibleLabelY.c_str(), PosYCvar.c_str(), MinY, MaxY, "", 0);
     UIWidgets::Tooltip("This slider is used to move Up and Down your elements.");
-    UIWidgets::EnhancementSliderInt("Left <-> Right : %d", InvisibleLabelX.c_str(), PosXCvar.c_str(), MinX, MaxX, "", 0, true);
+    UIWidgets::EnhancementSliderInt("Left <-> Right : %d", InvisibleLabelX.c_str(), PosXCvar.c_str(), MinX, MaxX, "", 0);
     UIWidgets::Tooltip("This slider is used to move Left and Right your elements.");
 }
 void DrawScaleSlider(const std::string CvarName,float DefaultValue){
     std::string InvisibleLabel = "##"+CvarName;
     std::string CvarLabel = CvarName+"Scale";
     //Disabled for now. feature not done and several fixes needed to be merged.
-    //UIWidgets::EnhancementSliderFloat("Scale : %dx", InvisibleLabel.c_str(), CvarLabel.c_str(), 0.1f, 3.0f,"",DefaultValue,true,true);
+    //UIWidgets::EnhancementSliderFloat("Scale : %dx", InvisibleLabel.c_str(), CvarLabel.c_str(), 0.1f, 3.0f,"",DefaultValue,true);
 }
 void Draw_Placements(){
     if (ImGui::BeginTable("tableMargins", 1, FlagsTable)) {
         ImGui::TableSetupColumn("General margins settings", FlagsCell, TablesCellsWidth);
         Table_InitHeader();
-        UIWidgets::EnhancementSliderInt("Top : %dx", "##UIMARGINT", "gHUDMargin_T", (ImGui::GetWindowViewport()->Size.y/2)*-1, 25, "", 0, true);
-        UIWidgets::EnhancementSliderInt("Left: %dx", "##UIMARGINL", "gHUDMargin_L", -25, ImGui::GetWindowViewport()->Size.x, "", 0, true);
-        UIWidgets::EnhancementSliderInt("Right: %dx", "##UIMARGINR", "gHUDMargin_R", (ImGui::GetWindowViewport()->Size.x)*-1, 25, "", 0, true);
-        UIWidgets::EnhancementSliderInt("Bottom: %dx", "##UIMARGINB", "gHUDMargin_B", (ImGui::GetWindowViewport()->Size.y/2)*-1, 25, "", 0, true);
+        UIWidgets::EnhancementSliderInt("Top : %dx", "##UIMARGINT", "gHUDMargin_T", (ImGui::GetWindowViewport()->Size.y/2)*-1, 25, "", 0);
+        UIWidgets::EnhancementSliderInt("Left: %dx", "##UIMARGINL", "gHUDMargin_L", -25, ImGui::GetWindowViewport()->Size.x, "", 0);
+        UIWidgets::EnhancementSliderInt("Right: %dx", "##UIMARGINR", "gHUDMargin_R", (ImGui::GetWindowViewport()->Size.x)*-1, 25, "", 0);
+        UIWidgets::EnhancementSliderInt("Bottom: %dx", "##UIMARGINB", "gHUDMargin_B", (ImGui::GetWindowViewport()->Size.y/2)*-1, 25, "", 0);
         SetMarginAll("All margins on",true);
-        UIWidgets::Tooltip("Set most of the element to use margin\nSome elements with default position will not be affected\nElements without Archor or Hidden will not be turned on");
+        UIWidgets::Tooltip("Set most of the elements to use margins\nSome elements with default position will not be affected\nElements without Anchor or Hidden will not be turned on");
         ImGui::SameLine();
         SetMarginAll("All margins off",false);
-        UIWidgets::Tooltip("Set all of the element to not use margin");
+        UIWidgets::Tooltip("Set all of the elements to not use margins");
         ImGui::SameLine();
         ResetPositionAll();
         UIWidgets::Tooltip("Revert every element to use their original position and no margins");
@@ -1132,7 +1132,7 @@ void Draw_Placements(){
             DrawPositionsRadioBoxes("gHeartsCount");
             DrawPositionSlider("gHeartsCount",-22,ImGui::GetWindowViewport()->Size.y,-125,ImGui::GetWindowViewport()->Size.x);
             DrawScaleSlider("gHeartsCount",0.7f);
-            UIWidgets::EnhancementSliderInt("Heart line length : %d", "##HeartLineLength", "gHeartsLineLength", 0, 20, "", 10, true);
+            UIWidgets::EnhancementSliderInt("Heart line length : %d", "##HeartLineLength", "gHeartsLineLength", 0, 20, "", 10);
             UIWidgets::Tooltip("This will set the length of a row of hearts. Set to 0 for unlimited length.");
             ImGui::NewLine();
             ImGui::EndTable();
@@ -1411,7 +1411,7 @@ void Draw_Placements(){
 void DrawSillyTab() {
     if (CVarGetInteger("gLetItSnow", 0)) {
         if (UIWidgets::EnhancementCheckbox("Let It Snow", "gLetItSnow")) {
-            SohImGui::RequestCvarSaveOnNextTick();
+            LUS::RequestCvarSaveOnNextTick();
         }
     }
     if (UIWidgets::EnhancementSliderFloat("Link Body Scale: %f", "##Link_BodyScale", "gCosmetics.Link_BodyScale.Value", 0.001f, 0.025f, "", 0.01f, false)) {
@@ -1421,7 +1421,7 @@ void DrawSillyTab() {
     if (ImGui::Button("Reset##Link_BodyScale")) {
         CVarClear("gCosmetics.Link_BodyScale.Value");
         CVarClear("gCosmetics.Link_BodyScale.Changed");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
         static Player* player = GET_PLAYER(gPlayState);
         player->actor.scale.x = 0.01f;
         player->actor.scale.y = 0.01f;
@@ -1434,7 +1434,7 @@ void DrawSillyTab() {
     if (ImGui::Button("Reset##Link_HeadScale")) {
         CVarClear("gCosmetics.Link_HeadScale.Value");
         CVarClear("gCosmetics.Link_HeadScale.Changed");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     if (UIWidgets::EnhancementSliderFloat("Link Sword Scale: %f", "##Link_SwordScale", "gCosmetics.Link_SwordScale.Value", 1.0f, 2.5f, "", 1.0f, false)) {
         CVarSetInteger("gCosmetics.Link_SwordScale.Changed", 1);
@@ -1443,44 +1443,44 @@ void DrawSillyTab() {
     if (ImGui::Button("Reset##Link_SwordScale")) {
         CVarClear("gCosmetics.Link_SwordScale.Value");
         CVarClear("gCosmetics.Link_SwordScale.Changed");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     UIWidgets::EnhancementSliderFloat("Bunny Hood Length: %f", "##BunnyHood_EarLength", "gCosmetics.BunnyHood_EarLength", -300.0f, 1000.0f, "", 0.0f, false);
     ImGui::SameLine();
     if (ImGui::Button("Reset##BunnyHood_EarLength")) {
         CVarClear("gCosmetics.BunnyHood_EarLength");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     UIWidgets::EnhancementSliderFloat("Bunny Hood Spread: %f", "##BunnyHood_EarSpread", "gCosmetics.BunnyHood_EarSpread", -300.0f, 500.0f, "", 0.0f, false);
     ImGui::SameLine();
     if (ImGui::Button("Reset##BunnyHood_EarSpread")) {
         CVarClear("gCosmetics.BunnyHood_EarSpread");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     UIWidgets::EnhancementSliderFloat("Goron Neck Length: %f", "##Goron_NeckLength", "gCosmetics.Goron_NeckLength", 0.0f, 1000.0f, "", 0.0f, false);
     ImGui::SameLine();
     if (ImGui::Button("Reset##Goron_NeckLength")) {
         CVarClear("gCosmetics.Goron_NeckLength");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     UIWidgets::EnhancementCheckbox("Unfix Goron Spin", "gUnfixGoronSpin");
     UIWidgets::EnhancementSliderFloat("Fairies Size: %f", "##Fairies_Size", "gCosmetics.Fairies_Size", 0.25f, 5.0f, "", 1.0f, false);
     ImGui::SameLine();
     if (ImGui::Button("Reset##Fairies_Size")) {
         CVarClear("gCosmetics.Fairies_Size");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     UIWidgets::EnhancementSliderFloat("N64 Logo Spin Speed: %f", "##N64Logo_SpinSpeed", "gCosmetics.N64Logo_SpinSpeed", 0.25f, 5.0f, "", 1.0f, false);
     ImGui::SameLine();
     if (ImGui::Button("Reset##N64Logo_SpinSpeed")) {
         CVarClear("gCosmetics.N64Logo_SpinSpeed");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     UIWidgets::EnhancementSliderFloat("Moon Size: %f", "##Moon_Size", "gCosmetics.Moon_Size", 0.5f, 2.0f, "", 1.0f, false);
     ImGui::SameLine();
     if (ImGui::Button("Reset##Moon_Size")) {
         CVarClear("gCosmetics.Moon_Size");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     if (UIWidgets::EnhancementSliderFloat("Kak Windmill Speed: %f", "##Kak_Windmill_Speed", "gCosmetics.Kak_Windmill_Speed.Value", 100.0f, 6000.0f, "", 100.0f, false)) {
         CVarSetInteger("gCosmetics.Kak_Windmill_Speed.Changed", 1);
@@ -1489,7 +1489,7 @@ void DrawSillyTab() {
     if (ImGui::Button("Reset##Kak_Windmill_Speed")) {
         CVarClear("gCosmetics.Kak_Windmill_Speed.Value");
         CVarClear("gCosmetics.Kak_Windmill_Speed.Changed");
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
 }
 
@@ -1597,7 +1597,7 @@ void DrawCosmeticRow(CosmeticOption& cosmeticOption) {
         CVarSetInteger((cosmeticOption.rainbowCvar), 0);
         CVarSetInteger((cosmeticOption.changedCvar), 1);
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     ImGui::SameLine();
     ImGui::Text(cosmeticOption.label.c_str());
@@ -1605,7 +1605,7 @@ void DrawCosmeticRow(CosmeticOption& cosmeticOption) {
     if (ImGui::Button(("Random##" + cosmeticOption.label).c_str())) {
         RandomizeColor(cosmeticOption);
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     ImGui::SameLine();
     bool isRainbow = (bool)CVarGetInteger((cosmeticOption.rainbowCvar), 0);
@@ -1613,20 +1613,20 @@ void DrawCosmeticRow(CosmeticOption& cosmeticOption) {
         CVarSetInteger((cosmeticOption.rainbowCvar), isRainbow);
         CVarSetInteger((cosmeticOption.changedCvar), 1);
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     ImGui::SameLine();
     bool isLocked = (bool)CVarGetInteger((cosmeticOption.lockedCvar), 0);
     if (ImGui::Checkbox(("Locked##" + cosmeticOption.label).c_str(), &isLocked)) {
         CVarSetInteger((cosmeticOption.lockedCvar), isLocked);
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     if (CVarGetInteger((cosmeticOption.changedCvar), 0)) {
         ImGui::SameLine();
         if (ImGui::Button(("Reset##" + cosmeticOption.label).c_str())) {
             ResetColor(cosmeticOption);
             ApplyOrResetCustomGfxPatches();
-            SohImGui::RequestCvarSaveOnNextTick();
+            LUS::RequestCvarSaveOnNextTick();
         }
     }
 }
@@ -1642,7 +1642,7 @@ void DrawCosmeticGroup(CosmeticGroup cosmeticGroup) {
             }
         }
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     ImGui::SameLine();
     if (ImGui::Button(("Reset##" + label).c_str())) {
@@ -1652,7 +1652,7 @@ void DrawCosmeticGroup(CosmeticGroup cosmeticGroup) {
             }
         }
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     for (auto& [id, cosmeticOption] : cosmeticOptions) {
         if (cosmeticOption.group == cosmeticGroup && (!cosmeticOption.advancedOption || CVarGetInteger("gCosmetics.AdvancedMode", 0))) {
@@ -1661,7 +1661,7 @@ void DrawCosmeticGroup(CosmeticGroup cosmeticGroup) {
     }
 }
 
-const char* colorSchemes[2] = {
+static const char* colorSchemes[2] = {
     "N64",
     "Gamecube",
 };
@@ -1680,7 +1680,7 @@ void DrawCosmeticsEditor(bool& open) {
 
     ImGui::Text("Color Scheme");
     ImGui::SameLine();
-    UIWidgets::EnhancementCombobox("gCosmetics.DefaultColorScheme", colorSchemes, 2, 0);
+    UIWidgets::EnhancementCombobox("gCosmetics.DefaultColorScheme", colorSchemes, 0);
     UIWidgets::EnhancementCheckbox("Advanced Mode", "gCosmetics.AdvancedMode");
     if (CVarGetInteger("gCosmetics.AdvancedMode", 0)) {
         if (ImGui::Button("Lock All Advanced", ImVec2(ImGui::GetContentRegionAvail().x / 2, 30.0f))) {
@@ -1689,7 +1689,7 @@ void DrawCosmeticsEditor(bool& open) {
                     CVarSetInteger(cosmeticOption.lockedCvar, 1);
                 }
             }
-            SohImGui::RequestCvarSaveOnNextTick();
+            LUS::RequestCvarSaveOnNextTick();
         }
         ImGui::SameLine();
         if (ImGui::Button("Unlock All Advanced", ImVec2(ImGui::GetContentRegionAvail().x, 30.0f))) {
@@ -1698,7 +1698,7 @@ void DrawCosmeticsEditor(bool& open) {
                     CVarSetInteger(cosmeticOption.lockedCvar, 0);
                 }
             }
-            SohImGui::RequestCvarSaveOnNextTick();
+            LUS::RequestCvarSaveOnNextTick();
         }
     }
     UIWidgets::EnhancementCheckbox("Sync Rainbow colors", "gCosmetics.RainbowSync");
@@ -1710,7 +1710,7 @@ void DrawCosmeticsEditor(bool& open) {
             }
         }
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     ImGui::SameLine();
     if (ImGui::Button("Reset All", ImVec2(ImGui::GetContentRegionAvail().x, 30.0f))) {
@@ -1720,7 +1720,7 @@ void DrawCosmeticsEditor(bool& open) {
             }
         }
         ApplyOrResetCustomGfxPatches();
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
 
     if (ImGui::Button("Lock All", ImVec2(ImGui::GetContentRegionAvail().x / 2, 30.0f))) {
@@ -1729,7 +1729,7 @@ void DrawCosmeticsEditor(bool& open) {
                 CVarSetInteger(cosmeticOption.lockedCvar, 1);
             }
         }
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
     ImGui::SameLine();
     if (ImGui::Button("Unlock All", ImVec2(ImGui::GetContentRegionAvail().x, 30.0f))) {
@@ -1738,7 +1738,7 @@ void DrawCosmeticsEditor(bool& open) {
                 CVarSetInteger(cosmeticOption.lockedCvar, 0);
             }
         }
-        SohImGui::RequestCvarSaveOnNextTick();
+        LUS::RequestCvarSaveOnNextTick();
     }
 
     if (ImGui::BeginTabBar("CosmeticsContextTabBar", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) {
@@ -1756,14 +1756,14 @@ void DrawCosmeticsEditor(bool& open) {
             DrawCosmeticGroup(GROUP_ARROWS);
             DrawCosmeticGroup(GROUP_SPIN_ATTACK);
             DrawCosmeticGroup(GROUP_TRAILS);
-            if (UIWidgets::EnhancementSliderInt("Trails Duration: %d", "##Trails_Duration", "gCosmetics.Trails_Duration.Value", 2, 20, "", 4, false)) {
+            if (UIWidgets::EnhancementSliderInt("Trails Duration: %d", "##Trails_Duration", "gCosmetics.Trails_Duration.Value", 2, 20, "", 4)) {
                 CVarSetInteger("gCosmetics.Trails_Duration.Changed", 1);
             }
             ImGui::SameLine();
             if (ImGui::Button("Reset##Trails_Duration")) {
                 CVarClear("gCosmetics.Trails_Duration.Value");
                 CVarClear("gCosmetics.Trails_Duration.Changed");
-                SohImGui::RequestCvarSaveOnNextTick();
+                LUS::RequestCvarSaveOnNextTick();
             }
             ImGui::EndTabItem();
         }
@@ -1791,8 +1791,8 @@ void DrawCosmeticsEditor(bool& open) {
     ImGui::End();
 }
 
-void RegisterOnLoadFileHook() {
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnLoadFile>([](int32_t fileNum) {
+void RegisterOnLoadGameHook() {
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnLoadGame>([](int32_t fileNum) {
         ApplyOrResetCustomGfxPatches();
     });
 }
@@ -1800,10 +1800,10 @@ void RegisterOnLoadFileHook() {
 void InitCosmeticsEditor() {
     // There's probably a better way to do this, but leaving as is for historical reasons. Even though there is no
     // real window being rendered here, it calls this every frame allowing us to rotate through the rainbow hue for cosmetics
-    SohImGui::AddWindow("Enhancements", "Cosmetics Update Tick", CosmeticsUpdateTick, true, true);
+    LUS::AddWindow("Enhancements", "Cosmetics Update Tick", CosmeticsUpdateTick, true, true);
 
     // Draw the bar in the menu.
-    SohImGui::AddWindow("Enhancements", "Cosmetics Editor", DrawCosmeticsEditor);
+    LUS::AddWindow("Enhancements", "Cosmetics Editor", DrawCosmeticsEditor);
     // Convert the `current color` into the format that the ImGui color picker expects
     for (auto& [id, cosmeticOption] : cosmeticOptions) {
         Color_RGBA8 defaultColor = {cosmeticOption.defaultColor.x, cosmeticOption.defaultColor.y, cosmeticOption.defaultColor.z, cosmeticOption.defaultColor.w};
@@ -1814,20 +1814,22 @@ void InitCosmeticsEditor() {
         cosmeticOption.currentColor.z = cvarColor.b / 255.0;
         cosmeticOption.currentColor.w = cvarColor.a / 255.0;
     }
-    SohImGui::RequestCvarSaveOnNextTick();
+    LUS::RequestCvarSaveOnNextTick();
     ApplyOrResetCustomGfxPatches();
+    ApplyAuthenticGfxPatches();
 
-    RegisterOnLoadFileHook();
+    RegisterOnLoadGameHook();
 }
 
 void CosmeticsEditor_RandomizeAll() {
     for (auto& [id, cosmeticOption] : cosmeticOptions) {
-        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0)) {
+        if (!CVarGetInteger(cosmeticOption.lockedCvar, 0) &&
+            (!cosmeticOption.advancedOption || CVarGetInteger("gCosmetics.AdvancedMode", 0))) {
             RandomizeColor(cosmeticOption);
         }
     }
 
-    SohImGui::RequestCvarSaveOnNextTick();
+    LUS::RequestCvarSaveOnNextTick();
     ApplyOrResetCustomGfxPatches();
 }
 
@@ -1838,6 +1840,6 @@ void CosmeticsEditor_ResetAll() {
         }
     }
 
-    SohImGui::RequestCvarSaveOnNextTick();
+    LUS::RequestCvarSaveOnNextTick();
     ApplyOrResetCustomGfxPatches();
 }

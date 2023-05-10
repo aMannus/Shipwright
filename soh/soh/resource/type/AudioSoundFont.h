@@ -6,7 +6,7 @@
 #include "soh/resource/type/AudioSample.h"
 #include <libultraship/libultra/types.h>
 
-namespace Ship {
+namespace LUS {
 
 typedef struct {
     /* 0x0 */ s16 delay;
@@ -54,6 +54,8 @@ typedef struct {
 
 class AudioSoundFont : public Resource {
 public:
+    using Resource::Resource;
+
     void* GetPointer();
     size_t GetPointerSize();
 
@@ -77,4 +79,4 @@ public:
 
     SoundFont soundFont;
 };
-}; // namespace Ship
+}; // namespace LUS

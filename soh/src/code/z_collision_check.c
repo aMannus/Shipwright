@@ -1,6 +1,7 @@
 #include "global.h"
 #include "vt.h"
 #include "overlays/effects/ovl_Effect_Ss_HitMark/z_eff_ss_hitmark.h"
+#include "soh/Enhancements/game-interactor/GameInteractor.h"
 
 typedef s32 (*ColChkResetFunc)(PlayState*, Collider*);
 typedef void (*ColChkBloodFunc)(PlayState*, Collider*, Vec3f*);
@@ -1177,6 +1178,10 @@ static ColChkResetFunc sATResetFuncs[] = {
 s32 CollisionCheck_SetAT(PlayState* play, CollisionCheckContext* colChkCtx, Collider* collider) {
     s32 index;
 
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
+
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
     }
@@ -1206,9 +1211,15 @@ s32 CollisionCheck_SetAT(PlayState* play, CollisionCheckContext* colChkCtx, Coll
 s32 CollisionCheck_SetAT_SAC(PlayState* play, CollisionCheckContext* colChkCtx, Collider* collider,
                              s32 index) {
     ASSERT(collider->shape <= COLSHAPE_QUAD);
+
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
+
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
     }
+
     sATResetFuncs[collider->shape](play, collider);
     if (collider->actor != NULL && collider->actor->update == NULL) {
         return -1;
@@ -1246,6 +1257,10 @@ static ColChkResetFunc sACResetFuncs[] = {
 s32 CollisionCheck_SetAC(PlayState* play, CollisionCheckContext* colChkCtx, Collider* collider) {
     s32 index;
 
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
+
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
     }
@@ -1275,9 +1290,15 @@ s32 CollisionCheck_SetAC(PlayState* play, CollisionCheckContext* colChkCtx, Coll
 s32 CollisionCheck_SetAC_SAC(PlayState* play, CollisionCheckContext* colChkCtx, Collider* collider,
                              s32 index) {
     ASSERT(collider->shape <= COLSHAPE_QUAD);
+
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
+
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
     }
+
     sACResetFuncs[collider->shape](play, collider);
     if (collider->actor != NULL && collider->actor->update == NULL) {
         return -1;
@@ -1315,6 +1336,10 @@ static ColChkResetFunc sOCResetFuncs[] = {
 s32 CollisionCheck_SetOC(PlayState* play, CollisionCheckContext* colChkCtx, Collider* collider) {
     s32 index;
 
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
+
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
     }
@@ -1345,9 +1370,15 @@ s32 CollisionCheck_SetOC(PlayState* play, CollisionCheckContext* colChkCtx, Coll
  */
 s32 CollisionCheck_SetOC_SAC(PlayState* play, CollisionCheckContext* colChkCtx, Collider* collider,
                              s32 index) {
+
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
+
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
     }
+
     ASSERT(collider->shape <= COLSHAPE_QUAD);
     sOCResetFuncs[collider->shape](play, collider);
     if (collider->actor != NULL && collider->actor->update == NULL) {
@@ -1379,6 +1410,10 @@ s32 CollisionCheck_SetOC_SAC(PlayState* play, CollisionCheckContext* colChkCtx, 
  */
 s32 CollisionCheck_SetOCLine(PlayState* play, CollisionCheckContext* colChkCtx, OcLine* collider) {
     s32 index;
+
+    if (GameInteractor_SecondCollisionUpdate()) {
+        return -1;
+    }
 
     if (FrameAdvance_IsEnabled(play) == true) {
         return -1;
@@ -3010,6 +3045,10 @@ void CollisionCheck_ApplyDamage(PlayState* play, CollisionCheckContext* colChkCt
     if (!(collider->acFlags & AC_HARD)) {
         collider->actor->colChkInfo.damage += damage;
     }
+
+    if (CVarGetInteger("gIvanCoopModeEnabled", 0)) {
+        collider->actor->colChkInfo.damage *= GET_PLAYER(play)->ivanDamageMultiplier;
+    }
 }
 
 /**
@@ -3614,7 +3653,7 @@ s32 CollisionCheck_CylSideVsLineSeg(f32 radius, f32 height, f32 offset, Vec3f* a
  * Gets damage from a sword strike using generic values, and returns 0 if the attack is
  * not sword-type. Used by bosses to require that a sword attack deal the killing blow.
  */
-u8 CollisionCheck_GetSwordDamage(s32 dmgFlags) {
+u8 CollisionCheck_GetSwordDamage(s32 dmgFlags, PlayState* play) {
     u8 damage = 0;
 
     if (dmgFlags & 0x00400100) {
@@ -3625,6 +3664,10 @@ u8 CollisionCheck_GetSwordDamage(s32 dmgFlags) {
         damage = 4;
     } else if (dmgFlags & 0x04000000) {
         damage = 8;
+    }
+
+    if (CVarGetInteger("gIvanCoopModeEnabled", 0)) {
+        damage *= GET_PLAYER(play)->ivanDamageMultiplier;
     }
 
     KREG(7) = damage;

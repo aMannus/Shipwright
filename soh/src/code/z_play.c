@@ -7,6 +7,7 @@
 #include <ImGuiImpl.h>
 #include "soh/frame_interpolation.h"
 #include "soh/Enhancements/debugconsole.h"
+#include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/randomizer/randomizer_entrance.h"
 #include <overlays/actors/ovl_En_Niw/z_en_niw.h>
 
@@ -427,10 +428,12 @@ void Play_Init(GameState* thisx) {
         }
     }
 
+    // Invalid entrance, so immediately exit the game to opening title
     if (gSaveContext.entranceIndex == -1) {
         gSaveContext.entranceIndex = 0;
         play->state.running = false;
         SET_NEXT_GAMESTATE(&play->state, Opening_Init, OpeningContext);
+        GameInteractor_ExecuteOnExitGame(gSaveContext.fileNum);
         return;
     }
 
@@ -460,7 +463,7 @@ void Play_Init(GameState* thisx) {
     play->cameraPtrs[MAIN_CAM]->uid = 0;
     play->activeCamera = MAIN_CAM;
     func_8005AC48(&play->mainCamera, 0xFF);
-    func_80112098(play);
+    Regs_InitData(play);
     Message_Init(play);
     GameOver_Init(play);
     SoundSource_InitAll(play);
@@ -644,6 +647,33 @@ void Play_Init(GameState* thisx) {
     gSaveContext.natureAmbienceId = play->sequenceCtx.natureAmbienceId;
     func_8002DF18(play, GET_PLAYER(play));
     AnimationContext_Update(play, &play->animationCtx);
+
+    if (gSaveContext.sohStats.sceneNum != gPlayState->sceneNum) {
+        u16 idx = gSaveContext.sohStats.tsIdx;
+        gSaveContext.sohStats.sceneTimestamps[idx].sceneTime = gSaveContext.sohStats.sceneTimer / 2;
+        gSaveContext.sohStats.sceneTimestamps[idx].roomTime = gSaveContext.sohStats.roomTimer / 2;    
+        gSaveContext.sohStats.sceneTimestamps[idx].scene = gSaveContext.sohStats.sceneNum;
+        gSaveContext.sohStats.sceneTimestamps[idx].room = gSaveContext.sohStats.roomNum;
+        gSaveContext.sohStats.sceneTimestamps[idx].isRoom = 
+            gPlayState->sceneNum == gSaveContext.sohStats.sceneTimestamps[idx].scene &&
+            gPlayState->roomCtx.curRoom.num != gSaveContext.sohStats.sceneTimestamps[idx].room;
+        gSaveContext.sohStats.tsIdx++;
+        gSaveContext.sohStats.sceneTimer = 0;
+        gSaveContext.sohStats.roomTimer = 0;
+    } else if (gSaveContext.sohStats.roomNum != gPlayState->roomCtx.curRoom.num) {
+        u16 idx = gSaveContext.sohStats.tsIdx;
+        gSaveContext.sohStats.sceneTimestamps[idx].roomTime = gSaveContext.sohStats.roomTimer / 2;
+        gSaveContext.sohStats.sceneTimestamps[idx].scene = gSaveContext.sohStats.sceneNum;
+        gSaveContext.sohStats.sceneTimestamps[idx].room = gSaveContext.sohStats.roomNum;
+        gSaveContext.sohStats.sceneTimestamps[idx].isRoom = 
+            gPlayState->sceneNum == gSaveContext.sohStats.sceneTimestamps[idx].scene &&
+            gPlayState->roomCtx.curRoom.num != gSaveContext.sohStats.sceneTimestamps[idx].room;
+        gSaveContext.sohStats.tsIdx++;
+        gSaveContext.sohStats.roomTimer = 0;
+    }
+
+    gSaveContext.sohStats.sceneNum = gPlayState->sceneNum;
+    gSaveContext.sohStats.roomNum = gPlayState->roomCtx.curRoom.num;
     gSaveContext.respawnFlag = 0;
     #if 0
     if (dREG(95) != 0) {
@@ -652,6 +682,12 @@ void Play_Init(GameState* thisx) {
         DmaMgr_DmaRomToRam(0x03FEB000, D_8012D1F0, sizeof(D_801614D0));
     }
     #endif
+
+    if (CVarGetInteger("gIvanCoopModeEnabled", 0)) {
+        Actor_Spawn(&play->actorCtx, play, ACTOR_EN_PARTNER, GET_PLAYER(play)->actor.world.pos.x,
+                    GET_PLAYER(play)->actor.world.pos.y + Player_GetHeight(GET_PLAYER(play)) + 5.0f,
+                    GET_PLAYER(play)->actor.world.pos.z, 0, 0, 0, 1, true);
+    }
 }
 
 void Play_Update(PlayState* play) {
@@ -866,13 +902,8 @@ void Play_Update(PlayState* play) {
                                 gTrnsnUnkState = 0;
                                 R_UPDATE_RATE = 3;
                             }
-
-                            // Don't autosave in grottos or cutscenes
-                            // Also don't save when you first load a file
-                            if (CVarGetInteger("gAutosave", 0) && (gSaveContext.cutsceneIndex == 0) && (play->gameplayFrames > 60) &&
-                                (play->sceneNum != SCENE_YOUSEI_IZUMI_TATE) && (play->sceneNum != SCENE_KAKUSIANA) && (play->sceneNum != SCENE_KENJYANOMA)) {
-                                Play_PerformSave(play);
-                            }
+                            
+                            GameInteractor_ExecuteOnTransitionEndHooks(play->sceneNum);
                         }
                         play->sceneLoadFlag = 0;
                     } else {
@@ -1087,6 +1118,8 @@ void Play_Update(PlayState* play) {
                 // Gameplay stat tracking
                 if (!gSaveContext.sohStats.gameComplete) {
                       gSaveContext.sohStats.playTimer++;
+                      gSaveContext.sohStats.sceneTimer++;
+                      gSaveContext.sohStats.roomTimer++;
 
                       if (CVarGetInteger("gMMBunnyHood", 0) && Player_GetMask(play) == PLAYER_MASK_BUNNY) {
                           gSaveContext.sohStats.count[COUNT_TIME_BUNNY_HOOD]++;

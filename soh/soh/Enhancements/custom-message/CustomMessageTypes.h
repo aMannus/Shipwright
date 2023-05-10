@@ -25,6 +25,7 @@ typedef enum {
     TEXT_HUGE_RUPEE = 0xF2,
     TEXT_BEAN_SALESMAN = 0x405E,
     TEXT_MEDIGORON = 0x304C,
+    TEXT_GRANNYS_SHOP = 0x500C,
     TEXT_CARPET_SALESMAN_1 = 0x6077,
     TEXT_CARPET_SALESMAN_2 = 0x6078,
     TEXT_MARKET_GUARD_NIGHT = 0x7003,
@@ -41,6 +42,7 @@ typedef enum {
     TEXT_WARP_RANDOM_REPLACED_TEXT = 0x9200,
     TEXT_LAKE_HYLIA_WATER_SWITCH_SIGN = 0x346, // 0x3yy for cuttable sign range
     TEXT_LAKE_HYLIA_WATER_SWITCH_NAVI = 0x1B3, // 0x1yy for Navi msg range
+    TEXT_RANDO_SAVE_VERSION_WARNING = 0x9300,
 } TextIDs;
 
 #ifdef __cplusplus
