@@ -599,6 +599,17 @@ void RegisterMirrorModeHandler() {
     });
 }
 
+void RegisterPots() {
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
+        // ACTOR_OBJ_TSUBO = 273
+        for (uint16_t i = 0; i <= 10; i++) {
+            for (uint16_t x = 0; x <= 10; x++) {
+                Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_OBJ_TSUBO, -481 + (i * 25), 100, 304 + (x * 25), 0, 0, 0, 30464, 0);
+            }
+        }
+    });
+}
+
 void InitMods() {
     RegisterTTS();
     RegisterInfiniteMoney();
@@ -621,4 +632,5 @@ void InitMods() {
     RegisterBonkDamage();
     RegisterMenuPathFix();
     RegisterMirrorModeHandler();
+    RegisterPots();
 }
