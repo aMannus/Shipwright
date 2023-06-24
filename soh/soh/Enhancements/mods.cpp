@@ -602,9 +602,12 @@ void RegisterMirrorModeHandler() {
 void RegisterPots() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
         // ACTOR_OBJ_TSUBO = 273
-        for (uint16_t i = 0; i <= 10; i++) {
-            for (uint16_t x = 0; x <= 10; x++) {
-                Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_OBJ_TSUBO, -481 + (i * 25), 100, 304 + (x * 25), 0, 0, 0, 30464, 0);
+        if (gPlayState->sceneNum == 82) {
+            for (uint16_t i = 0; i <= 13; i++) {
+                for (uint16_t x = 0; x <= 13; x++) {
+                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_OBJ_TSUBO, -834 + (i * 50), 5000,
+                                105 + (x * 50), 0, 0, 0, 30464, 0);
+                }
             }
         }
     });
