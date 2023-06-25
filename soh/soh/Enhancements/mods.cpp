@@ -599,14 +599,24 @@ void RegisterMirrorModeHandler() {
     });
 }
 
+static CollisionPoly potPoly;
+static Vec3f potPos;
+static f32 raycastResult;
+
 void RegisterPots() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
         // ACTOR_OBJ_TSUBO = 273
-        if (gPlayState->sceneNum == 82) {
-            for (uint16_t i = 0; i <= 13; i++) {
-                for (uint16_t x = 0; x <= 13; x++) {
-                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_OBJ_TSUBO, -834 + (i * 50), 5000,
-                                105 + (x * 50), 0, 0, 0, 30464, 0);
+        for (uint16_t x = 0; x <= 240; x++) {
+            for (uint16_t z = 0; z <= 240; z++) {
+
+                potPos.x = -6000 + (x * 100);
+                potPos.y = 5000;
+                potPos.z = -6000 + (z * 100);
+                raycastResult = BgCheck_AnyRaycastFloor1(&gPlayState->colCtx, &potPoly, &potPos);
+
+                if (raycastResult > BGCHECK_Y_MIN) {
+                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_OBJ_TSUBO, potPos.x, potPos.y,
+                                potPos.z, 0, 0, 0, 30464, 0);
                 }
             }
         }

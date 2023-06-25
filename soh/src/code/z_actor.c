@@ -3165,7 +3165,7 @@ Actor* Actor_Spawn(ActorContext* actorCtx, PlayState* play, s16 actorId, f32 pos
         return NULL;
     }
 
-    ASSERT(dbEntry->numLoaded < 255);
+    ASSERT(dbEntry->numLoaded < 50000);
 
     dbEntry->numLoaded++;
 
