@@ -952,6 +952,34 @@ void RegisterAltTrapTypes() {
     });
 }
 
+void RegisterChaosRaceStuff() {
+
+    // Random Enemy Sizes
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* refActor) {
+        Player* player = GET_PLAYER(gPlayState);
+        Actor* actor = static_cast<Actor*>(refActor);
+
+        float randomNumber;
+        float randomScale;
+
+        uint8_t bigOrSmallActor = rand() % 100;
+
+        // Big actor
+        if (bigOrSmallActor > 50) {
+            randomNumber = rand() % 200;
+            randomScale = 1.0f + (randomNumber / 100);
+        // Small actor
+        } else {
+            randomNumber = rand() % 90;
+            randomScale = 0.1f + (randomNumber / 100);
+        }
+
+        if (actor->category == ACTORCAT_ENEMY) {
+            Actor_SetScale(actor, actor->scale.z * randomScale);
+        }
+    });
+}
+
 void InitMods() {
     RegisterTTS();
     RegisterInfiniteMoney();
@@ -977,4 +1005,5 @@ void InitMods() {
     RegisterEnemyDefeatCounts();
     RegisterAltTrapTypes();
     NameTag_RegisterHooks();
+    RegisterChaosRaceStuff();
 }
