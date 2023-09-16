@@ -952,10 +952,57 @@ void RegisterAltTrapTypes() {
     });
 }
 
+// bools for queueing timed effects
+bool secondUpdate = false;
+bool timedCuccoStorm = false;
+bool timedRequiem = false;
+bool timedKnockback = false;
+bool timedLinksHouse = false;
+
+
 void RegisterChaosRaceStuff() {
 
-    // Random Enemy Sizes
+    // Effects on a timer
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+        switch (GAMEPLAYSTAT_TOTAL_TIME) {
+            // 60 seconds (1 minute), Requiem TP
+            case 600:
+                timedRequiem = true;
+                secondUpdate = false;
+                break;
+            // 600 seconds (10 minutes), Cucco Storm
+            case 6000:
+                timedCuccoStorm = true;
+                secondUpdate = false;
+                break;
+            // 3600 seconds (10 minutes), Link's House TP
+            case 36000:
+                timedCuccoStorm = true;
+                secondUpdate = false;
+                break;
+            // Use secondUpdate bool to make sure an effect doesn't execute twice, as GAMEPLAYSTAT_TOTAL_TIME
+            // is being divided by 2 so is the same for 2 frames.
+            default:
+                secondUpdate = true;
+                break;
+        }
+
+        // Apply timed effects
+        if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused() && secondUpdate) {
+            if (timedRequiem) {
+                GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_REQUIEM);
+                timedRequiem = false;
+            }
+
+            if (timedCuccoStorm) {
+                GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0);
+                timedCuccoStorm = false;
+            }
+        }
+    });
+
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* refActor) {
+        // Random Enemy Sizes
         Player* player = GET_PLAYER(gPlayState);
         Actor* actor = static_cast<Actor*>(refActor);
 
