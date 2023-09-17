@@ -955,37 +955,81 @@ void RegisterAltTrapTypes() {
 // bools for queueing timed effects
 bool secondUpdate = false;
 bool timedCuccoStorm = false;
-bool timedRequiem = false;
+bool timedRequiemTP = false;
 bool timedKnockback = false;
-bool timedLinksHouse = false;
+bool timedLinksHouseTP = false;
+bool timedEmptyBombs = false;
 
 
 void RegisterChaosRaceStuff() {
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+
+        // Cycle effects every 2 hours
+        uint32_t currentTimer = GAMEPLAYSTAT_TOTAL_TIME % 7200;
+
         // Effects on a timer
-        switch (GAMEPLAYSTAT_TOTAL_TIME) {
-            // 120 seconds (2 minutes), Requiem TP
+        switch (currentTimer) {
+            // 120 seconds (2 minutes) | Requiem TP
             case 1200:
-                timedRequiem = true;
+                timedRequiemTP = true;
                 secondUpdate = false;
                 break;
-            // 600 seconds (10 minutes), Cucco Storm
+            // 600 seconds (10 minutes) | Cucco Storm
             case 6000:
                 timedCuccoStorm = true;
                 secondUpdate = false;
                 break;
-            // 1200 seconds (20 minutes), Start rotating link
+            // 1200 seconds (20 minutes) | Start Rotating Link
             case 12000:
                 GameInteractor::State::RotatingLink = 1;
                 break;
-            // 1320 seconds (22 minutes), Stop Link Rotating
+            // 1320 seconds (22 minutes) | Stop Rotating Link
             case 13200:
                 GameInteractor::State::RotatingLink = 0;
                 break;
-            // 3600 seconds (60 minutes), Link's House TP
-            case 36000:
-                timedCuccoStorm = true;
+            // 1680 seconds (28 minutes) | Knockback
+            case 16800:
+            // 1740 seconds (29 minutes) | Knockback
+            case 17400:
+            // 1800 seconds (30 minutes) | Knockback
+            case 18000:
+                timedKnockback = true;
+                secondUpdate = false;
+                break;
+            // 2640 seconds (44 minutes) | ???
+            case 26400:
+                
+                secondUpdate = false;
+                break;
+            // 3540 seconds (59 minutes) | Teleport to Link's House
+            case 35400:
+                timedLinksHouseTP = true;
+                secondUpdate = false;
+                break;
+            // 4140 seconds (69 minutes. 1 hour 6 minutes) | ???
+            case 41400:
+
+                secondUpdate = false;
+                break;
+            // 4560 seconds (76 minutes. 1 hour 16 minutes) | Empty Bombs
+            case 45600:
+                timedEmptyBombs = true;
+                secondUpdate = false;
+                break;
+            // 5520 seconds (92 minutes. 1 hour 32 minutes) | ???
+            case 55200:
+
+                secondUpdate = false;
+                break;
+            // 6300 seconds (105 minutes. 1 hour 45 minutes) | ???
+            case 63000:
+
+                secondUpdate = false;
+                break;
+            // 6720 seconds (112 minutes. 1 hour 52 minutes) | ???
+            case 67200:
+
                 secondUpdate = false;
                 break;
             // Use secondUpdate bool to make sure an effect doesn't execute twice, as GAMEPLAYSTAT_TOTAL_TIME
@@ -997,9 +1041,14 @@ void RegisterChaosRaceStuff() {
 
         // Apply timed effects
         if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused() && secondUpdate) {
-            if (timedRequiem) {
+            if (timedRequiemTP) {
                 GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_REQUIEM);
-                timedRequiem = false;
+                timedRequiemTP = false;
+            }
+
+            if (timedLinksHouseTP) {
+                GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_LINKSHOUSE);
+                timedLinksHouseTP = false;
             }
 
             if (timedCuccoStorm) {
@@ -1008,16 +1057,29 @@ void RegisterChaosRaceStuff() {
                 }
                 timedCuccoStorm = false;
             }
+
+            if (timedEmptyBombs) {
+                Inventory_ChangeAmmo(ITEM_BOMBCHU, -50);
+                Inventory_ChangeAmmo(ITEM_BOMB, -50);
+                timedEmptyBombs = false;
+            }
+
+            if (timedKnockback) {
+                GameInteractor::RawAction::KnockbackPlayer(6.0f);
+                timedKnockback = false;
+            }
         }
 
-        // Unequip ocarina on dpad down
-        if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
-            gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
-            gSaveContext.equips.buttonItems[5] = ITEM_NONE;
-        }
-        // Unequip bunny hood on dpad up
-        if (gSaveContext.equips.buttonItems[4] == ITEM_MASK_BUNNY) {
-            gSaveContext.equips.buttonItems[4] = ITEM_NONE;
+        if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
+            // Unequip ocarina on dpad down
+            if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
+                gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
+                gSaveContext.equips.buttonItems[5] = ITEM_NONE;
+            }
+            // Unequip bunny hood on dpad up
+            if (gSaveContext.equips.buttonItems[4] == ITEM_MASK_BUNNY) {
+                gSaveContext.equips.buttonItems[4] = ITEM_NONE;
+            }
         }
     });
 
