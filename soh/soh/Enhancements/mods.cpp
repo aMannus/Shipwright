@@ -962,11 +962,11 @@ bool timedLinksHouse = false;
 
 void RegisterChaosRaceStuff() {
 
-    // Effects on a timer
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+        // Effects on a timer
         switch (GAMEPLAYSTAT_TOTAL_TIME) {
-            // 60 seconds (1 minute), Requiem TP
-            case 600:
+            // 120 seconds (2 minutes), Requiem TP
+            case 1200:
                 timedRequiem = true;
                 secondUpdate = false;
                 break;
@@ -975,7 +975,15 @@ void RegisterChaosRaceStuff() {
                 timedCuccoStorm = true;
                 secondUpdate = false;
                 break;
-            // 3600 seconds (10 minutes), Link's House TP
+            // 1200 seconds (20 minutes), Start rotating link
+            case 12000:
+                GameInteractor::State::RotatingLink = 1;
+                break;
+            // 1320 seconds (22 minutes), Stop Link Rotating
+            case 13200:
+                GameInteractor::State::RotatingLink = 0;
+                break;
+            // 3600 seconds (60 minutes), Link's House TP
             case 36000:
                 timedCuccoStorm = true;
                 secondUpdate = false;
@@ -995,9 +1003,21 @@ void RegisterChaosRaceStuff() {
             }
 
             if (timedCuccoStorm) {
-                GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0);
+                for (uint8_t i = 0; i < 5; i++) {
+                    GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0);
+                }
                 timedCuccoStorm = false;
             }
+        }
+
+        // Unequip ocarina on dpad down
+        if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
+            gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
+            gSaveContext.equips.buttonItems[5] = ITEM_NONE;
+        }
+        // Unequip bunny hood on dpad up
+        if (gSaveContext.equips.buttonItems[4] == ITEM_MASK_BUNNY) {
+            gSaveContext.equips.buttonItems[4] = ITEM_NONE;
         }
     });
 
