@@ -959,7 +959,11 @@ bool timedRequiemTP = false;
 bool timedKnockback = false;
 bool timedLinksHouseTP = false;
 bool timedEmptyBombs = false;
-
+bool timedRandomWindActive = false;
+bool timedRandomWindDisable = false;
+bool timedSetRupeeCount = false;
+bool timedSpazzingLink = false;
+bool timedSpazzingLink = false;
 
 void RegisterChaosRaceStuff() {
 
@@ -997,9 +1001,14 @@ void RegisterChaosRaceStuff() {
                 timedKnockback = true;
                 secondUpdate = false;
                 break;
-            // 2640 seconds (44 minutes) | ???
+            // 2640 seconds (44 minutes) | Start Super Random Wind
             case 26400:
-                
+                timedRandomWindActive = true;
+                secondUpdate = false;
+                break;
+            // 2760 seconds (46 minutes) | Stop Super Random Wind
+            case 27600:
+                timedRandomWindDisable = true;
                 secondUpdate = false;
                 break;
             // 3540 seconds (59 minutes) | Teleport to Link's House
@@ -1067,6 +1076,16 @@ void RegisterChaosRaceStuff() {
             if (timedKnockback) {
                 GameInteractor::RawAction::KnockbackPlayer(6.0f);
                 timedKnockback = false;
+            }
+
+            if (timedRandomWindActive) {
+                GameInteractor::RawAction::SetRandomWind(true);
+            }
+
+            if (timedRandomWindDisable) {
+                GameInteractor::RawAction::SetRandomWind(false);
+                timedRandomWindActive = false;
+                timedRandomWindDisable = false;
             }
         }
 

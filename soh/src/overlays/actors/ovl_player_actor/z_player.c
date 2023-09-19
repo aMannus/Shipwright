@@ -11053,6 +11053,15 @@ void Player_Update(Actor* thisx, PlayState* play) {
         this->actor.shape.rot.z += 100;
     }
 
+    if (GameInteractor_SpazzingLink()) {
+        uint32_t randomNumber1 = rand();
+        uint32_t randomNumber2 = rand();
+        uint32_t randomNumber3 = rand();
+        this->actor.scale.x = 0.01f;
+        this->actor.scale.y = 0.01f;
+        this->actor.scale.z = 0.01f;
+    }
+
     // Make Link normal size when going through doors and crawlspaces and when climbing ladders.
     // Otherwise Link can glitch out, being in unloaded rooms or falling OoB.
     if (this->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER || this->stateFlags1 & PLAYER_STATE1_IN_CUTSCENE ||
@@ -11111,7 +11120,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
 
     if (GameInteractor_GetRandomWindActive()) {
         Player* player = GET_PLAYER(play);
-        player->windSpeed = 3.0f;
+        player->windSpeed = 5.0f;
         // Play fan sound (too annoying)
         //func_8002F974(&player->actor, NA_SE_EV_WIND_TRAP - SFX_FLAG);
     }

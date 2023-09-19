@@ -21,6 +21,7 @@ uint8_t GameInteractor::State::RandomBonksActive = 0;
 uint8_t GameInteractor::State::SlipperyFloorActive = 0;
 uint8_t GameInteractor::State::SecondCollisionUpdate = 0;
 uint8_t GameInteractor::State::RotatingLink = 0;
+uint8_t GameInteractor::State::SpazzingLink = 0;
 
 void GameInteractor::State::SetPacifistMode(bool active) {
     PacifistModeActive = active;
@@ -132,4 +133,9 @@ uint8_t GameInteractor_SecondCollisionUpdate() {
 // MARK: - GameInteractor::State::RotatingLink
 uint8_t GameInteractor_RotatingLink() {
     return GameInteractor::State::RotatingLink;
+}
+
+// MARK: - GameInteractor::State::SpazzingLink
+uint8_t GameInteractor_SpazzingLink() {
+    return GameInteractor::State::SpazzingLink;
 }
