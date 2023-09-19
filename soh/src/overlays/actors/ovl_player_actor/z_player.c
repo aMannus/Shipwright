@@ -11054,12 +11054,12 @@ void Player_Update(Actor* thisx, PlayState* play) {
     }
 
     if (GameInteractor_SpazzingLink()) {
-        uint32_t randomNumber1 = rand();
-        uint32_t randomNumber2 = rand();
-        uint32_t randomNumber3 = rand();
-        this->actor.scale.x = 0.01f;
-        this->actor.scale.y = 0.01f;
-        this->actor.scale.z = 0.01f;
+        float randomNumber1 = rand() % 100;
+        float randomNumber2 = rand() % 100;
+        float randomNumber3 = rand() % 100;
+        this->actor.scale.x = randomNumber1 / 1000;
+        this->actor.scale.y = randomNumber2 / 1000;
+        this->actor.scale.z = randomNumber3 / 1000;
     }
 
     // Make Link normal size when going through doors and crawlspaces and when climbing ladders.

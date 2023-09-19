@@ -962,8 +962,8 @@ bool timedEmptyBombs = false;
 bool timedRandomWindActive = false;
 bool timedRandomWindDisable = false;
 bool timedSetRupeeCount = false;
-bool timedSpazzingLink = false;
-bool timedSpazzingLink = false;
+bool timedEmptyHealth = false;
+bool timedRandomButtons = false;
 
 void RegisterChaosRaceStuff() {
 
@@ -1016,9 +1016,9 @@ void RegisterChaosRaceStuff() {
                 timedLinksHouseTP = true;
                 secondUpdate = false;
                 break;
-            // 4140 seconds (69 minutes. 1 hour 6 minutes) | ???
+            // 4140 seconds (69 minutes. 1 hour 9 minutes) | Set rupees to 69
             case 41400:
-
+                timedSetRupeeCount = true;
                 secondUpdate = false;
                 break;
             // 4560 seconds (76 minutes. 1 hour 16 minutes) | Empty Bombs
@@ -1026,20 +1026,26 @@ void RegisterChaosRaceStuff() {
                 timedEmptyBombs = true;
                 secondUpdate = false;
                 break;
-            // 5520 seconds (92 minutes. 1 hour 32 minutes) | ???
+            // 5520 seconds (92 minutes. 1 hour 32 minutes) | Start Spazzing Link
             case 55200:
-
-                secondUpdate = false;
+                GameInteractor::State::SpazzingLink = 1;
                 break;
-            // 6300 seconds (105 minutes. 1 hour 45 minutes) | ???
+            // 5580 seconds (93 minutes. 1 hour 33 minutes) | Stop Spazzing Link
+            case 55800:
+                GameInteractor::State::SpazzingLink = 0;
+                break;
+            // 6300 seconds (105 minutes. 1 hour 45 minutes) | Set Health to 1/4 heart
             case 63000:
-
+                timedEmptyHealth = true;
                 secondUpdate = false;
                 break;
-            // 6720 seconds (112 minutes. 1 hour 52 minutes) | ???
-            case 67200:
-
-                secondUpdate = false;
+            // 6600 seconds (110 minutes. 1 hour 50 minutes) | Start Random Buttons
+            case 66000:
+                timedRandomButtons = true;
+                break;
+            // 6780 seconds (113 minutes. 1 hour 53 minutes) | Stop Random Buttons
+            case 67800:
+                timedRandomButtons = false;
                 break;
             // Use secondUpdate bool to make sure an effect doesn't execute twice, as GAMEPLAYSTAT_TOTAL_TIME
             // is being divided by 2 so is the same for 2 frames.
@@ -1087,6 +1093,20 @@ void RegisterChaosRaceStuff() {
                 timedRandomWindActive = false;
                 timedRandomWindDisable = false;
             }
+
+            if (timedSetRupeeCount) {
+                gSaveContext.rupees = 69;
+                timedSetRupeeCount = false;
+            }
+
+            if (timedEmptyHealth) {
+                gSaveContext.health = 4;
+                timedEmptyHealth = false;
+            }
+        }
+
+        if (timedRandomButtons) {
+            GameInteractor::RawAction::EmulateRandomButtonPress(3);
         }
 
         if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
