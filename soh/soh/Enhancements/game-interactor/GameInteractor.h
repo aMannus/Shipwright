@@ -85,6 +85,7 @@ uint8_t GameInteractor_GetSlipperyFloorActive();
 uint8_t GameInteractor_SecondCollisionUpdate();
 uint8_t GameInteractor_RotatingLink();
 uint8_t GameInteractor_SpazzingLink();
+void GameInteractor_SpawnCuccoStorm();
 #ifdef __cplusplus
 }
 #endif

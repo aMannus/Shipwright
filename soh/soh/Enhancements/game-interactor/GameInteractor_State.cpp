@@ -139,3 +139,8 @@ uint8_t GameInteractor_RotatingLink() {
 uint8_t GameInteractor_SpazzingLink() {
     return GameInteractor::State::SpazzingLink;
 }
+
+// MARK: - GameInteractor::State::SpazzingLink
+void GameInteractor_SpawnCuccoStorm() {
+    GameInteractor::RawAction::SpawnActor(25, 0);
+}
