@@ -1143,7 +1143,7 @@ void RegisterChaosRaceStuff() {
             randomScale = 0.1f + (randomNumber / 100);
         }
 
-        if (actor->category == ACTORCAT_ENEMY) {
+        if (actor->category == ACTORCAT_ENEMY || actor->category == ACTORCAT_BOSS) {
             Actor_SetScale(actor, actor->scale.z * randomScale);
         }
     });
