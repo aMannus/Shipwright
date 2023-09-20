@@ -86,6 +86,7 @@ uint8_t GameInteractor_SecondCollisionUpdate();
 uint8_t GameInteractor_RotatingLink();
 uint8_t GameInteractor_SpazzingLink();
 void GameInteractor_SpawnCuccoStorm();
+void GameInteractor_SetRandomInvertedAxis();
 #ifdef __cplusplus
 }
 #endif

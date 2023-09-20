@@ -1,4 +1,5 @@
 #include "GameInteractor.h"
+#include "libultraship/libultraship.h"
 
 // MARK: - State Definitions
 
@@ -140,7 +141,15 @@ uint8_t GameInteractor_SpazzingLink() {
     return GameInteractor::State::SpazzingLink;
 }
 
-// MARK: - GameInteractor::State::SpazzingLink
+// MARK: - 
 void GameInteractor_SpawnCuccoStorm() {
     GameInteractor::RawAction::SpawnActor(25, 0);
+}
+
+// MARK: - 
+void GameInteractor_SetRandomInvertedAxis() {
+    uint32_t randomNumber1 = rand() % 2;
+    uint32_t randomNumber2 = rand() % 2;
+    CVarSetInteger("gInvertAimingXAxis", randomNumber1);
+    CVarSetInteger("gInvertAimingYAxis", randomNumber2);
 }

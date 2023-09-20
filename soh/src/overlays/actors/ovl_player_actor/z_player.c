@@ -5173,6 +5173,7 @@ s32 func_8083B040(Player* this, PlayState* play) {
                     func_8083B010(this);
                 }
                 this->stateFlags1 |= PLAYER_STATE1_FIRST_PERSON;
+                GameInteractor_SetRandomInvertedAxis();
                 func_80078884(NA_SE_SY_CAMERA_ZOOM_UP);
                 Player_ZeroSpeedXZ(this);
                 return 1;
@@ -11560,6 +11561,7 @@ s32 func_8084B3CC(PlayState* play, Player* this) {
         }
 
         this->stateFlags1 |= PLAYER_STATE1_FIRST_PERSON;
+        GameInteractor_SetRandomInvertedAxis();
         func_80832264(play, this, func_80833338(this));
         Player_ZeroSpeedXZ(this);
         func_8083B010(this);
