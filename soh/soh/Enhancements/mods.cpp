@@ -1173,8 +1173,16 @@ void RegisterChaosRaceStuff() {
         uint32_t randomNumber = rand() % 20;
         if (randomNumber == 0) {
             gPlayState->linkAgeOnLoad ^= 1;
+            GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_CBUTTONS);
+            GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_DPAD);
         }
         GameInteractor::State::RandomBombFuseTimerActive = 1;
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
+        Player* player = GET_PLAYER(gPlayState);
+        player->currentTunic = PLAYER_TUNIC_KOKIRI;
+        Inventory_ChangeEquipment(EQUIP_TUNIC, PLAYER_TUNIC_KOKIRI + 1);
     });
 }
 
