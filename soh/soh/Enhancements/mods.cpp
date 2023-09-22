@@ -1134,6 +1134,13 @@ void RegisterChaosRaceStuff() {
                 }
                 UpdateMirrorModeState(gPlayState->sceneNum);
             }
+
+            Player* player = GET_PLAYER(gPlayState);
+            if (player->currentMask == PLAYER_MASK_BUNNY) {
+                GameInteractor::State::ReverseControlsActive = 1;
+            } else {
+                GameInteractor::State::ReverseControlsActive = 0;
+            }
         }
     });
 
