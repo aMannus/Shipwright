@@ -400,11 +400,12 @@ void GetItem_Draw(PlayState* play, s16 drawId) {
  * Uses the Custom Draw Function if it exists, or just calls `GetItem_Draw`
  */
 void GetItemEntry_Draw(PlayState* play, GetItemEntry getItemEntry) {
-    if (getItemEntry.drawFunc != NULL) {
+    /*if (getItemEntry.drawFunc != NULL) {
         getItemEntry.drawFunc(play, &getItemEntry);
     } else {
         GetItem_Draw(play, getItemEntry.gid);
-    }
+    }*/
+    GetItem_Draw(play, 109);
 }
 
 // All remaining functions in this file are draw functions referenced in the table and called by the function above
