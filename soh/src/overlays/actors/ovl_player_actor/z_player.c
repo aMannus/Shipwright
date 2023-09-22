@@ -7783,6 +7783,10 @@ void func_80842180(Player* this, PlayState* play) {
             if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) != BUNNY_HOOD_VANILLA && this->currentMask == PLAYER_MASK_BUNNY) {
                 sp2C *= 1.5f;
             }
+
+            if (this->heldActor != NULL) {
+                sp2C *= 3.0f;
+            }
             
             if (CVarGetInteger("gEnableWalkModify", 0)) {
                 if (CVarGetInteger("gWalkSpeedToggle", 0)) {
