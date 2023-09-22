@@ -1147,6 +1147,13 @@ void RegisterChaosRaceStuff() {
             Actor_SetScale(actor, actor->scale.z * randomScale);
         }
     });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnTransitionEnd>([](int32_t sceneNum) { 
+        uint32_t randomNumber = rand() % 20;
+        if (randomNumber == 0) {
+            gPlayState->linkAgeOnLoad ^= 1;
+        }
+    });
 }
 
 void InitMods() {
