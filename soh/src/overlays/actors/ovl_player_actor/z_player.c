@@ -8709,6 +8709,9 @@ void func_80844708(Player* this, PlayState* play) {
             f32 rand = Rand_ZeroOne();
             uint8_t randomBonk = (rand <= .05) && GameInteractor_GetRandomBonksActive();
             if (this->linearVelocity >= 7.0f) {
+                this->actor.scale.x = 0.01f;
+                this->actor.scale.y = 0.01f;
+                this->actor.scale.z = 0.01f;
                 if (randomBonk || ((this->actor.bgCheckFlags & 0x200) && (D_8085360C < 0x2000)) ||
                     ((this->cylinder.base.ocFlags1 & OC1_HIT) &&
                      (cylinderOc = this->cylinder.base.oc,
@@ -11069,47 +11072,42 @@ void Player_Update(Actor* thisx, PlayState* play) {
         this->actor.scale.x = randomNumber1 / 1000;
         this->actor.scale.y = randomNumber2 / 1000;
         this->actor.scale.z = randomNumber3 / 1000;
+    } else if (this->stateFlags2 & PLAYER_STATE2_DISABLE_ROTATION_Z_TARGET && this->actor.scale.y > 0.001f) {
+        this->actor.scale.x -= 0.00001f;
+        this->actor.scale.y -= 0.00001f;
+        this->actor.scale.z -= 0.00001f;
     }
 
-    // Make Link normal size when going through doors and crawlspaces and when climbing ladders.
-    // Otherwise Link can glitch out, being in unloaded rooms or falling OoB.
-    if (this->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER || this->stateFlags1 & PLAYER_STATE1_IN_CUTSCENE ||
-        this->stateFlags2 & PLAYER_STATE2_CRAWLING) {
-        this->actor.scale.x = 0.01f;
-        this->actor.scale.y = 0.01f;
-        this->actor.scale.z = 0.01f;
-    } else {
-        switch (GameInteractor_GetLinkSize()) {
-            case GI_LINK_SIZE_RESET:
-                this->actor.scale.x = 0.01f;
-                this->actor.scale.y = 0.01f;
-                this->actor.scale.z = 0.01f;
-                GameInteractor_SetLinkSize(GI_LINK_SIZE_NORMAL);
-                break;
-            case GI_LINK_SIZE_GIANT:
-                this->actor.scale.x = 0.02f;
-                this->actor.scale.y = 0.02f;
-                this->actor.scale.z = 0.02f;
-                break;
-            case GI_LINK_SIZE_MINISH:
-                this->actor.scale.x = 0.001f;
-                this->actor.scale.y = 0.001f;
-                this->actor.scale.z = 0.001f;
-                break;
-            case GI_LINK_SIZE_PAPER:
-                this->actor.scale.x = 0.001f;
-                this->actor.scale.y = 0.01f;
-                this->actor.scale.z = 0.01f;
-                break;
-            case GI_LINK_SIZE_SQUISHED:
-                this->actor.scale.x = 0.015f;
-                this->actor.scale.y = 0.001f;
-                this->actor.scale.z = 0.015f;
-                break;
-            case GI_LINK_SIZE_NORMAL:
-            default:
-                break;
-        }
+    switch (GameInteractor_GetLinkSize()) {
+        case GI_LINK_SIZE_RESET:
+            this->actor.scale.x = 0.01f;
+            this->actor.scale.y = 0.01f;
+            this->actor.scale.z = 0.01f;
+            GameInteractor_SetLinkSize(GI_LINK_SIZE_NORMAL);
+            break;
+        case GI_LINK_SIZE_GIANT:
+            this->actor.scale.x = 0.02f;
+            this->actor.scale.y = 0.02f;
+            this->actor.scale.z = 0.02f;
+            break;
+        case GI_LINK_SIZE_MINISH:
+            this->actor.scale.x = 0.001f;
+            this->actor.scale.y = 0.001f;
+            this->actor.scale.z = 0.001f;
+            break;
+        case GI_LINK_SIZE_PAPER:
+            this->actor.scale.x = 0.001f;
+            this->actor.scale.y = 0.01f;
+            this->actor.scale.z = 0.01f;
+            break;
+        case GI_LINK_SIZE_SQUISHED:
+            this->actor.scale.x = 0.015f;
+            this->actor.scale.y = 0.001f;
+            this->actor.scale.z = 0.015f;
+            break;
+        case GI_LINK_SIZE_NORMAL:
+        default:
+            break;
     }
 
     // Don't apply gravity when Link is in water, otherwise
