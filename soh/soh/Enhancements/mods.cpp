@@ -1121,6 +1121,14 @@ void RegisterChaosRaceStuff() {
                 gSaveContext.equips.buttonItems[4] = ITEM_NONE;
             }
 
+            // Reverse controls with bunny hood
+            Player* player = GET_PLAYER(gPlayState);
+            if (player->currentMask == PLAYER_MASK_BUNNY) {
+                GameInteractor::State::ReverseControlsActive = 1;
+            } else {
+                GameInteractor::State::ReverseControlsActive = 0;
+            }
+
             // Effects on a random chance
 
             // Random swap Mirror Mode, average once every 30 minutes.
@@ -1135,11 +1143,14 @@ void RegisterChaosRaceStuff() {
                 UpdateMirrorModeState(gPlayState->sceneNum);
             }
 
-            Player* player = GET_PLAYER(gPlayState);
-            if (player->currentMask == PLAYER_MASK_BUNNY) {
-                GameInteractor::State::ReverseControlsActive = 1;
-            } else {
-                GameInteractor::State::ReverseControlsActive = 0;
+            // Random dpad hud location, average once every 10 minutes.
+            uint32_t randomDpadPos = rand() % 12000;
+            if (randomDpadPos == 0) {
+                CVarSetInteger("gDPadPosType", 2);
+                uint32_t randomXPos = rand() % 200;
+                uint32_t randomYPos = rand() % 200;
+                CVarSetInteger("gDPadPosX", 290 - randomXPos);
+                CVarSetInteger("gDPadPosY", 0 + randomYPos);
             }
         }
     });
