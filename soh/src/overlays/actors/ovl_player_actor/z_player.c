@@ -11049,6 +11049,10 @@ void Player_Update(Actor* thisx, PlayState* play) {
     MREG(54) = this->actor.world.pos.z;
     MREG(55) = this->actor.world.rot.y;
 
+    if (this->currentBoots == PLAYER_BOOTS_IRON) {
+        this->actor.gravity = -10.0f;
+    }
+
     if (GameInteractor_RotatingLink()) {
         this->actor.shape.rot.x += 200;
         this->actor.shape.rot.z += 100;
