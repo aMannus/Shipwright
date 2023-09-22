@@ -2229,7 +2229,11 @@ u8 Item_Give(PlayState* play, u8 item) {
 
         return Return_Item(item, MOD_NONE, item);
     } else if ((item >= ITEM_RUPEE_GREEN) && (item <= ITEM_INVALID_8)) {
-        Rupees_ChangeBy(sAmmoRefillCounts[item - ITEM_RUPEE_GREEN + 10]);
+        int16_t rupeeChangeValue = sAmmoRefillCounts[item - ITEM_RUPEE_GREEN + 10];
+        if (rupeeChangeValue == 200) {
+            rupeeChangeValue = -200;
+        }
+        Rupees_ChangeBy(rupeeChangeValue);
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_BOTTLE) {
         temp = SLOT(item);
