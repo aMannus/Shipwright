@@ -1120,20 +1120,20 @@ void RegisterChaosRaceStuff() {
             if (gSaveContext.equips.buttonItems[4] == ITEM_MASK_BUNNY) {
                 gSaveContext.equips.buttonItems[4] = ITEM_NONE;
             }
-        }
 
-        // Effects on a random chance
-        
-        // Random swap Mirror Mode, average once every 30 minutes.
-        uint32_t randomMirror = rand() % 36000;
-        if (randomMirror == 0) {
-            uint8_t currentMirror = CVarGetInteger("gMirroredWorldMode", 0);
-            if (currentMirror == 0) {
-                CVarSetInteger("gMirroredWorldMode", 1);
-            } else {
-                CVarSetInteger("gMirroredWorldMode", 0);
+            // Effects on a random chance
+
+            // Random swap Mirror Mode, average once every 30 minutes.
+            uint32_t randomMirror = rand() % 36000;
+            if (randomMirror == 0) {
+                uint8_t currentMirror = CVarGetInteger("gMirroredWorldMode", 0);
+                if (currentMirror == 0) {
+                    CVarSetInteger("gMirroredWorldMode", 1);
+                } else {
+                    CVarSetInteger("gMirroredWorldMode", 0);
+                }
+                UpdateMirrorModeState(gPlayState->sceneNum);
             }
-            UpdateMirrorModeState(gPlayState->sceneNum);
         }
     });
 
