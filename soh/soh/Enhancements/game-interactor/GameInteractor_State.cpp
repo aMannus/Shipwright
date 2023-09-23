@@ -153,3 +153,7 @@ void GameInteractor_SetRandomInvertedAxis() {
     CVarSetInteger("gInvertAimingXAxis", randomNumber1);
     CVarSetInteger("gInvertAimingYAxis", randomNumber2);
 }
+
+void GameInteractor_ToggleSlipperyFloor() {
+    GameInteractor::State::SlipperyFloorActive ^= 1;
+}
