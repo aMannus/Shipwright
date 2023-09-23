@@ -1548,6 +1548,13 @@ void HintTable_Init() {
     |      JUNK HINT TEXT      |
     ---------------------------*/
 
+    hintTable[JUNK01] = HintText::Junk({
+        // obscure text
+        Text{ "They say rolling makes you stronger.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+    
     hintTable[JUNK02] = HintText::Junk({
         // obscure text
         Text{ "I bet you'd like to have more bombs right now.",
@@ -1670,6 +1677,153 @@ void HintTable_Init() {
     hintTable[JUNK19] = HintText::Junk({
         // obscure text
         Text{ "They say Ship of Harkinian is on the way of the hero.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK20] = HintText::Junk({
+        // obscure text
+        Text{ "They say using Deku Nuts attracts the local wildlife.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK21] = HintText::Junk({
+        // obscure text
+        Text{ "They say Lake Hylia is considered an indoor area.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK22] = HintText::Junk({
+        // obscure text
+        Text{ "<<Chaos Race Hint System has broken. Please contact an administrator if this issue persists.>>",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK23] = HintText::Junk({
+        // obscure text
+        Text{ "They say lifting weights makes you run faster.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK24] = HintText::Junk({
+        // obscure text
+        Text{ "They say you never know when a bomb is going to blow up.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK25] = HintText::Junk({
+        // obscure text
+        Text{ "They say Raul has ascended to Godhood.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK26] = HintText::Junk({
+        // obscure text
+        Text{ "They say blue rupees might not be what they appear to be at first sight.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK27] = HintText::Junk({
+        // obscure text
+        Text{ "They say attempting the treasure chest minigame has a 1/1 chance of winning.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK28] = HintText::Junk({
+        // obscure text
+        Text{ "They say some of these hints are actually useful. This one is not. Or is it?",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK29] = HintText::Junk({
+        // obscure text
+        Text{ "They say the best players don't need multiple tunics.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK30] = HintText::Junk({
+        // obscure text
+        Text{ "They say you shouldn't worry so much about your HUD layout.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK31] = HintText::Junk({
+        // obscure text
+        Text{ "They say the desert calls to everyone.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK32] = HintText::Junk({
+        // obscure text
+        Text{ "They say Mellar21 and Fredomato are fellow Chaos Lords.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK33] = HintText::Junk({
+        // obscure text
+        Text{ "aMannus was here.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK34] = HintText::Junk({
+        // obscure text
+        Text{ "They say Stone Tower is on the way of the hero.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK35] = HintText::Junk({
+        // obscure text
+        Text{ "They say Ancient Cistern is on the way of the hero.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK36] = HintText::Junk({
+        // obscure text
+        Text{ "They say the fowl are foul in Hyrule.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK37] = HintText::Junk({
+        // obscure text
+        Text{ "They say Zelda is a strong and dependent woman.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK38] = HintText::Junk({
+        // obscure text
+        Text{ "They say using the Megaton Hammer changes the floor's compound.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK39] = HintText::Junk({
+        // obscure text
+        Text{ "They say",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK40] = HintText::Junk({
+        // obscure text
+        Text{ "A golden piece of poo is what I’ve always wanted!",
               /*french*/ "Bwarg!",
               /*spanish*/ "Bwarg." },
     });

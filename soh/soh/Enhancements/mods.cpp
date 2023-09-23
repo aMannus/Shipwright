@@ -1184,8 +1184,6 @@ void RegisterChaosRaceStuff() {
         uint32_t randomNumber = rand() % 20;
         if (randomNumber == 0) {
             gPlayState->linkAgeOnLoad ^= 1;
-            GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_CBUTTONS);
-            GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_DPAD);
         }
         GameInteractor::State::RandomBombFuseTimerActive = 1;
     });
