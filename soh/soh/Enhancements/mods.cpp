@@ -971,7 +971,7 @@ void RegisterChaosRaceStuff() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
 
         // Cycle effects every 2 hours
-        uint32_t currentTimer = GAMEPLAYSTAT_TOTAL_TIME % 7200;
+        uint32_t currentTimer = GAMEPLAYSTAT_TOTAL_TIME % 72000;
 
         // Effects on a timer
         switch (currentTimer) {

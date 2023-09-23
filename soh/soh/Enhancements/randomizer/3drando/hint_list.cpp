@@ -1564,7 +1564,7 @@ void HintTable_Init() {
 
     hintTable[JUNK04] = HintText::Junk({
         // obscure text
-        Text{ "Hi @, I’m dad!",
+        Text{ "Hi @, I'm dad!",
               /*french*/ "Bwarg!",
               /*spanish*/ "Bwarg." },
     });
@@ -1585,7 +1585,7 @@ void HintTable_Init() {
 
     hintTable[JUNK07] = HintText::Junk({
         // obscure text
-        Text{ "They say there’s a rare kind of Goron that doesn’t have a long neck.",
+        Text{ "They say there's a rare kind of Goron that doesn't have a long neck.",
               /*french*/ "Bwarg!",
               /*spanish*/ "Bwarg." },
     });
