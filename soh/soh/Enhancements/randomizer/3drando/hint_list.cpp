@@ -1555,6 +1555,125 @@ void HintTable_Init() {
               /*spanish*/ "Bwarg." },
     });
 
+    hintTable[JUNK03] = HintText::Junk({
+        // obscure text
+        Text{ "Well excuuuuuse me, @.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK04] = HintText::Junk({
+        // obscure text
+        Text{ "Hi @, I’m dad!",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK05] = HintText::Junk({
+        // obscure text
+        Text{ "They say in Hyrule, nobody raves harder than the dead.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK06] = HintText::Junk({
+        // obscure text
+        Text{ "They say that the longer the neck, the stupider the goron.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK07] = HintText::Junk({
+        // obscure text
+        Text{ "They say there’s a rare kind of Goron that doesn’t have a long neck.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK08] = HintText::Junk({
+        // obscure text
+        Text{ "They say the holder of Greg should ask him if it's OK first.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK09] = HintText::Junk({
+        // obscure text
+        Text{ "BeN dRoWnEd",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK10] = HintText::Junk({
+        // obscure text
+        Text{ "Quit cheating!",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK11] = HintText::Junk({
+        // obscure text
+        Text{ "I bet you regret joining this race now.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK12] = HintText::Junk({
+        // obscure text
+        Text{ "Loading...",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK13] = HintText::Junk({
+        // obscure text
+        Text{ "soh.exe has encountered a fatal exception and needs to close, please submit a crash report.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK14] = HintText::Junk({
+        // obscure text
+        Text{ "Do you want to give up yet?",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK15] = HintText::Junk({
+        // obscure text
+        Text{ "Do you even know where you are going?",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK16] = HintText::Junk({
+        // obscure text
+        Text{ "Wrong way!",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK17] = HintText::Junk({
+        // obscure text
+        Text{ "Dead end!",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK18] = HintText::Junk({
+        // obscure text
+        Text{ "They say playing Ocarina of Time is a foolish choice.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
+    hintTable[JUNK19] = HintText::Junk({
+        // obscure text
+        Text{ "They say Ship of Harkinian is on the way of the hero.",
+              /*french*/ "Bwarg!",
+              /*spanish*/ "Bwarg." },
+    });
+
     /*--------------------------
     |     DUNGEON HINT TEXT    |
     ---------------------------*/
