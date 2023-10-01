@@ -1198,7 +1198,7 @@ f32 EnGo2_GetTargetXZSpeed(EnGo2* this) {
         (this->actor.xzDistToPlayer < 400.0f)) {
         return 12.0f;
     } else {
-        return index == GORON_CITY_ROLLING_BIG ? 12.0f : 3.0f;
+        return index == GORON_CITY_ROLLING_BIG ? 9.0f : 3.0f;
     }
 }
 
