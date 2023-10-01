@@ -8,6 +8,7 @@
 #include "overlays/effects/ovl_Effect_Ss_Kakera/z_eff_ss_kakera.h"
 #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
 #include "objects/object_tsubo/object_tsubo.h"
+#include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 
 #define FLAGS (ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_ALWAYS_THROWN)
 
@@ -246,6 +247,18 @@ void ObjTsubo_Idle(ObjTsubo* this, PlayState* play) {
     s32 pad;
     s16 temp_v0;
     s32 phi_v1;
+
+    if (this->actor.xzDistToPlayer < 100.0f) {
+        EnBom* bomb = (EnBom*)Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_BOM, this->actor.world.pos.x,
+                                this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOMB_BODY, true);
+
+        bomb->timer = 2;
+
+        ObjTsubo_AirBreak(this, play);
+        ObjTsubo_SpawnCollectible(this, play);
+        SoundSource_PlaySfxAtFixedWorldPos(play, &this->actor.world.pos, 20, NA_SE_EV_POT_BROKEN);
+        Actor_Kill(&this->actor);
+    }
 
     if (Actor_HasParent(&this->actor, play)) {
         ObjTsubo_SetupLiftedUp(this);
