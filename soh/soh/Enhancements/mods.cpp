@@ -471,7 +471,7 @@ void RegisterHyperBosses() {
              gSaveContext.bossRushOptions[BR_OPTIONS_HYPERBOSSES] == BR_CHOICE_HYPERBOSSES_YES);
 
         // Don't apply during cutscenes because it causes weird behaviour and/or crashes on some bosses.
-        if (gPlayState->sceneNum == SCENE_GANONDORF_BOSS && isBossActor &&
+        if (gPlayState->sceneNum == SCENE_SPIRIT_TEMPLE_BOSS && isBossActor &&
             !Player_InBlockingCsMode(gPlayState, player)) {
             // Barinade needs to be updated in sequence to avoid unintended behaviour.
             if (actor->id == ACTOR_BOSS_VA) {
