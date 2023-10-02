@@ -127,3 +127,7 @@ uint8_t GameInteractor_GetSlipperyFloorActive() {
 uint8_t GameInteractor_SecondCollisionUpdate() {
     return GameInteractor::State::SecondCollisionUpdate;
 }
+
+bool GameInteractor_IsSaveLoaded() {
+    return GameInteractor::IsSaveLoaded();
+}

@@ -232,6 +232,7 @@ void GivePlayerRandoRewardSongOfTime(PlayState* play, RandomizerCheck check) {
     if (gSaveContext.entranceIndex == 0x050F && player != NULL && !Player_InBlockingCsMode(play, player) &&
         !Flags_GetTreasure(play, 0x1F) && gSaveContext.nextTransitionType == 0xFF && !gSaveContext.pendingIceTrapCount) {
         GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(check, RG_SONG_OF_TIME);
+        GET_PLAYER(play)->getItemCheck = check; // for OnCollectCheck
         GiveItemEntryWithoutActor(play, getItemEntry);
         player->pendingFlag.flagID = 0x1F;
         player->pendingFlag.flagType = FLAG_SCENE_TREASURE;
@@ -247,6 +248,7 @@ void GivePlayerRandoRewardNocturne(PlayState* play, RandomizerCheck check) {
         CHECK_QUEST_ITEM(QUEST_MEDALLION_FIRE) && CHECK_QUEST_ITEM(QUEST_MEDALLION_WATER) && player != NULL &&
         !Player_InBlockingCsMode(play, player) && !Flags_GetEventChkInf(EVENTCHKINF_BONGO_BONGO_ESCAPED_FROM_WELL)) {
         GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(check, RG_NOCTURNE_OF_SHADOW);
+        GET_PLAYER(play)->getItemCheck = check; // for OnCollectCheck
         GiveItemEntryWithoutActor(play, getItemEntry);
         player->pendingFlag.flagID = 0xAA;
         player->pendingFlag.flagType = FLAG_EVENT_CHECK_INF;
@@ -260,6 +262,7 @@ void GivePlayerRandoRewardRequiem(PlayState* play, RandomizerCheck check) {
         if ((gSaveContext.entranceIndex == 0x01E1) && !Flags_GetEventChkInf(EVENTCHKINF_LEARNED_REQUIEM_OF_SPIRIT) && player != NULL &&
             !Player_InBlockingCsMode(play, player)) {
             GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(check, RG_SONG_OF_TIME);
+            GET_PLAYER(play)->getItemCheck = check; // for OnCollectCheck
             GiveItemEntryWithoutActor(play, getItemEntry);
             player->pendingFlag.flagID = 0xAC;
             player->pendingFlag.flagType = FLAG_EVENT_CHECK_INF;
@@ -432,6 +435,7 @@ void GivePlayerRandoRewardZeldaLightArrowsGift(PlayState* play, RandomizerCheck 
         !Flags_GetTreasure(play, 0x1E) && player != NULL && !Player_InBlockingCsMode(play, player) &&
         play->sceneLoadFlag == 0) {
         GetItemEntry getItem = Randomizer_GetItemFromKnownCheck(check, GI_ARROW_LIGHT);
+        GET_PLAYER(play)->getItemCheck = check; // for OnCollectCheck
         if (GiveItemEntryWithoutActor(play, getItem)) {
             player->pendingFlag.flagID = 0x1E;
             player->pendingFlag.flagType = FLAG_SCENE_TREASURE;
@@ -445,6 +449,7 @@ void GivePlayerRandoRewardSariaGift(PlayState* play, RandomizerCheck check) {
         GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(check, RG_ZELDAS_LULLABY);
 
         if (!Flags_GetEventChkInf(EVENTCHKINF_SPOKE_TO_SARIA_ON_BRIDGE) && player != NULL && !Player_InBlockingCsMode(play, player)) {
+            GET_PLAYER(play)->getItemCheck = check; // for OnCollectCheck
             GiveItemEntryWithoutActor(play, getItemEntry);
             player->pendingFlag.flagType = FLAG_EVENT_CHECK_INF;
             player->pendingFlag.flagID = 0xC1;

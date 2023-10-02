@@ -489,9 +489,9 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
         Randomizer_GetCheckFromActor(this->actor.id, play->sceneNum, this->ogParams);
 
     if (gSaveContext.n64ddFlag && randoCheck != RC_UNKNOWN_CHECK) {
-        this->randoGiEntry =
-            Randomizer_GetItemFromKnownCheck(randoCheck, getItemId);
+        this->randoGiEntry = Randomizer_GetItemFromKnownCheck(randoCheck, getItemId);
         this->randoGiEntry.getItemFrom = ITEM_FROM_FREESTANDING;
+        this->randoCheck = randoCheck;
     }
 
     if (!spawnParam8000) {
@@ -581,6 +581,7 @@ void EnItem00_Init(Actor* thisx, PlayState* play) {
             if (!gSaveContext.n64ddFlag || this->randoGiEntry.getItemId == GI_NONE) {
                 func_8002F554(&this->actor, play, getItemId);
             } else {
+                GET_PLAYER(play)->rangeCheck = this->randoCheck;
                 GiveItemEntryFromActorWithFixedRange(&this->actor, play, this->randoGiEntry);
             }
         }
@@ -962,6 +963,7 @@ void EnItem00_Update(Actor* thisx, PlayState* play) {
             func_8002F554(&this->actor, play, getItemId);
         } else {
             getItemId = this->randoGiEntry.getItemId;
+            GET_PLAYER(play)->rangeCheck = this->randoCheck;
             GiveItemEntryFromActorWithFixedRange(&this->actor, play, this->randoGiEntry);
         }
     }
@@ -1374,8 +1376,7 @@ void EnItem00_DrawCollectible(EnItem00* this, PlayState* play) {
             Randomizer_GetCheckFromActor(this->actor.id, play->sceneNum, this->ogParams);
 
         if (randoCheck != RC_UNKNOWN_CHECK) {
-            this->randoGiEntry =
-                Randomizer_GetItemFromKnownCheck(randoCheck, GI_NONE);
+            this->randoGiEntry = Randomizer_GetItemFromKnownCheck(randoCheck, GI_NONE);
             this->randoGiEntry.getItemFrom = ITEM_FROM_FREESTANDING;
         }
         

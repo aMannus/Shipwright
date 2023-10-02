@@ -5,6 +5,7 @@
 
 #include "GameInteractionEffect.h"
 #include "soh/Enhancements/item-tables/ItemTableTypes.h"
+#include "soh/Enhancements/randomizer/randomizerTypes.h"
 
 typedef enum {
     GI_SCHEME_BUILT_IN,
@@ -89,6 +90,7 @@ uint8_t GameInteractor_GetRandomWindActive();
 uint8_t GameInteractor_GetRandomBonksActive();
 uint8_t GameInteractor_GetSlipperyFloorActive();
 uint8_t GameInteractor_SecondCollisionUpdate();
+bool GameInteractor_IsSaveLoaded();
 #ifdef __cplusplus
 }
 #endif
@@ -170,6 +172,7 @@ public:
     DEFINE_HOOK(OnExitGame, void(int32_t fileNum));
     DEFINE_HOOK(OnGameFrameUpdate, void());
     DEFINE_HOOK(OnItemReceive, void(GetItemEntry itemEntry));
+    DEFINE_HOOK(OnCollectCheck, void(RandomizerCheck check));
     DEFINE_HOOK(OnSaleEnd, void(GetItemEntry itemEntry));
     DEFINE_HOOK(OnTransitionEnd, void(int16_t sceneNum));
     DEFINE_HOOK(OnSceneInit, void(int16_t sceneNum));

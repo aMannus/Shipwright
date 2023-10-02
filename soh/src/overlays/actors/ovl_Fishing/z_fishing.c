@@ -5089,6 +5089,7 @@ void Fishing_HandleOwnerDialog(Fishing* this, PlayState* play) {
                 if (!gSaveContext.n64ddFlag || getItemEntry.getItemId == GI_NONE) {
                     func_8002F434(&this->actor, play, getItemId, 2000.0f, 1000.0f);
                 } else {
+                    GET_PLAYER(play)->rangeCheck = LINK_IS_ADULT ? RC_LH_ADULT_FISHING : RC_LH_CHILD_FISHING; // for OnCollectCheck
                     GiveItemEntryFromActor(&this->actor, play, getItemEntry, 2000.0f, 1000.0f);
                 }
                 this->unk_15C = 23;
@@ -5155,6 +5156,7 @@ void Fishing_HandleOwnerDialog(Fishing* this, PlayState* play) {
                     func_8002F434(&this->actor, play, GI_SCALE_GOLD, 2000.0f, 1000.0f);
                 } else {
                     GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(RC_LH_ADULT_FISHING, GI_SCALE_GOLD);
+                    GET_PLAYER(play)->rangeCheck = RC_LH_ADULT_FISHING; // for OnCollectCheck
                     GiveItemEntryFromActor(&this->actor, play, getItemEntry, 2000.0f, 1000.0f);
                 }
             }
