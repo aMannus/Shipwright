@@ -23,6 +23,9 @@ typedef struct {
 class GameInteractorAnchor {
     private:
         bool isEnabled;
+        bool isMultiWorld;
+        uint32_t multiWorldId;
+        std::map<RandomizerCheck, uint32_t> multiWorldIdMap;
 
         void HandleRemoteJson(nlohmann::json payload);
     public:
@@ -35,6 +38,14 @@ class GameInteractorAnchor {
         void Enable();
         void Disable();
 
+        void SetMultiWorld(bool isMulti);
+        bool IsMultiWorld();
+        void SetMultiWorldId(uint32_t worldId);
+        uint32_t GetMultiWorldId();
+        void AddMultiworldCheck(RandomizerCheck check, uint32_t worldId);
+        void LoadMultiworldCheckMap();
+        std::map<RandomizerCheck, uint32_t> GetMultiworldCheckMap();
+        bool IsOwnItem(RandomizerCheck check);
         void TransmitJsonToRemote(nlohmann::json payload);
 };
 
@@ -89,6 +100,8 @@ void Anchor_UpdateBeansCount(uint8_t amount);
 void Anchor_ConsumeAdultTradeItem(uint8_t itemId);
 void Anchor_UpdateKeyCount(int16_t sceneNum, int8_t amount);
 void Anchor_GameComplete();
+bool Anchor_IsMultiWorld();
+bool Anchor_IsOwnItem(RandomizerCheck check);
 
 #ifdef __cplusplus
 }

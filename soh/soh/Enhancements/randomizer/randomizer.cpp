@@ -27,8 +27,12 @@
 #include "draw.h"
 #include "rando_hash.h"
 #include <boost_custom/container_hash/hash_32.hpp>
+#include <boost/algorithm/string.hpp>
 #include <libultraship/libultraship.h>
 #include "randomizer_settings_window.h"
+#ifdef ENABLE_REMOTE_CONTROL
+#include "soh/Enhancements/game-interactor/GameInteractor_Anchor.h"
+#endif
 
 extern "C" uint32_t ResourceMgr_IsGameMasterQuest();
 extern "C" uint32_t ResourceMgr_IsSceneMasterQuest(s16 sceneNum);
@@ -615,6 +619,9 @@ void Randomizer::LoadMerchantMessages(const char* spoilerFileName) {
 
 void Randomizer::LoadItemLocations(const char* spoilerFileName, bool silent) {
     if (strcmp(spoilerFileName, "") != 0) {
+#ifdef ENABLE_REMOTE_CONTROL
+        GameInteractorAnchor::Instance->GetMultiworldCheckMap().clear();
+#endif
         ParseItemLocationsFile(spoilerFileName, silent);
     }
 
@@ -660,6 +667,12 @@ void Randomizer::ParseRandomizerSettingsFile(const char* spoilerFileName) {
 
         json spoilerFileJson;
         spoilerFileStream >> spoilerFileJson;
+#ifdef ENABLE_REMOTE_CONTROL
+        if (spoilerFileJson.find("multiworldId") != spoilerFileJson.end()) {
+            GameInteractorAnchor::Instance->SetMultiWorld(true);
+            GameInteractorAnchor::Instance->SetMultiWorldId(spoilerFileJson["multiworldId"]);
+        }
+#endif
         json settingsJson = spoilerFileJson["settings"];
 
         for (auto it = settingsJson.begin(); it != settingsJson.end(); ++it) {
@@ -1530,6 +1543,11 @@ void Randomizer::ParseItemLocationsFile(const char* spoilerFileName, bool silent
                         strncpy(gSaveContext.itemLocations[randomizerCheck].get.trickName,
                                 std::string(itemit.value()).c_str(), MAX_TRICK_NAME_SIZE);
                     }
+#ifdef ENABLE_REMOTE_CONTROL
+                    else if (itemit.key() == "worldId") {
+                        GameInteractorAnchor::Instance->AddMultiworldCheck(randomizerCheck, itemit.value());
+                    }
+#endif
                 }
             } else {
                 gSaveContext.itemLocations[randomizerCheck].check = SpoilerfileCheckNameToEnum[it.key()];
@@ -2807,7 +2825,7 @@ RandomizerCheck Randomizer::GetCheckFromRandomizerInf(RandomizerInf randomizerIn
 
 std::thread randoThread;
 
-void GenerateRandomizerImgui(std::string seed = "") {
+void GenerateRandomizerImgui(std::string seed = "", bool preventUnlock = false) {
     CVarSetInteger("gRandoGenerating", 1);
     CVarSave();
 
@@ -3030,16 +3048,92 @@ void GenerateRandomizerImgui(std::string seed = "") {
 
     RandoMain::GenerateRando(cvarSettings, excludedLocations, enabledTricks, seed);
 
-    CVarSetInteger("gRandoGenerating", 0);
+    if (!preventUnlock) {
+        CVarSetInteger("gRandoGenerating", 0);
+        generated = 1;
+    }
     CVarSave();
     CVarLoad();
+}
 
+void GenerateNoLogicMulti(std::string seed = "") {
+    uint32_t seedCount = CVarGetInteger("gRandoNlMwNumber", 2);
+    std::list<std::string>spoilers;
+    std::string lastSeed = CVarGetString("gSpoilerLog", "");
+    for (int i = 0; i < seedCount; i++) {
+        if (seed != "") {
+            seed += std::to_string(i);
+        }
+        GenerateRandomizerImgui(seed, true);
+        std::string newSeed = CVarGetString("gSpoilerLog", "");
+        if (newSeed.compare(lastSeed) != 0) {
+            spoilers.push_back(newSeed);
+            lastSeed = newSeed;
+        }
+        Sleep(500);
+    }
+
+    std::list<std::pair<std::pair<std::string,nlohmann::ordered_json>, uint32_t>> locations;
+    std::vector<std::pair<uint32_t,std::string>> items;
+    std::map<uint32_t, nlohmann::ordered_json> spoilerBlocks;
+    uint32_t worldId = 1;
+    for (std::string spoiler : spoilers) {
+        std::ifstream input(sanitize(spoiler));
+
+        nlohmann::ordered_json spoilerBlock = nlohmann::ordered_json::object();
+        input >> spoilerBlock;
+        spoilerBlock["multiworldId"] = worldId;
+        for (auto it = spoilerBlock["locations"].begin(); it != spoilerBlock["locations"].end(); it++) {
+            json value = it.value();
+            std::string item = "";
+            if (value.find("item") != value.end()) {
+                value["worldId"] = worldId;
+                items.push_back(std::make_pair(worldId, value["item"]));
+                locations.push_back(std::make_pair(make_pair(it.key(), value), worldId));
+            } else {
+                nlohmann::json newValue = nlohmann::json::object();
+                newValue["item"] = value;
+                items.push_back(std::make_pair(worldId, value));
+                newValue["worldId"] = worldId;
+                locations.push_back(std::make_pair(make_pair(it.key(), newValue), worldId));
+            }
+        }
+        spoilerBlock["locations"] = nlohmann::ordered_json::object();
+        spoilerBlocks.emplace(worldId, spoilerBlock);
+        worldId++;
+    }
+    for (auto pair : locations) {
+        uint32_t rand = Random(0, items.size());
+        std::pair<uint32_t, std::string> item = items.at(rand);
+        spoilerBlocks.at(pair.second)["locations"][pair.first.first] = pair.first.second;
+        spoilerBlocks.at(pair.second)["locations"][pair.first.first]["item"] = item.second;
+        spoilerBlocks.at(pair.second)["locations"][pair.first.first]["worldId"] = item.first;
+        items.erase(items.begin() + rand);
+    }
+    std::string hashBase = boost::algorithm::join(spoilers, "-");
+    if (!std::filesystem::exists(LUS::Context::GetPathRelativeToAppDirectory(std::string("Anchor/")))) {
+        std::filesystem::create_directories(LUS::Context::GetPathRelativeToAppDirectory(std::string("Anchor/")));
+    }
+    std::string fileNameBase = std::to_string(boost::hash_32<std::string>{}(hashBase));
+    for (const auto &[key, value] : spoilerBlocks) {
+        std::string fileName = std::string("Anchor/") + fileNameBase + "-Player" + std::to_string(key) + std::string(".json").c_str();
+        std::ofstream jsonFile(LUS::Context::GetPathRelativeToAppDirectory(fileName));
+        jsonFile << std::setw(4) << value << std::endl;
+        jsonFile.close();
+    }
+    CVarSetInteger("gRandoGenerating", 0);
     generated = 1;
+    CVarSave();
+    CVarLoad();
 }
 
 bool GenerateRandomizer(std::string seed /*= ""*/) {
     if (CVarGetInteger("gRandoGenerating", 0) == 0) {
-        randoThread = std::thread(&GenerateRandomizerImgui, seed);
+        if (CVarGetInteger("gRandoNlMw", 0)) {
+            randoThread = std::thread(&GenerateNoLogicMulti, seed);
+        } else {
+            randoThread = std::thread(&GenerateRandomizerImgui, seed, false);
+        }
         return true;
     }
     return false;
@@ -4690,7 +4784,16 @@ void RandomizerSettingsWindow::DrawElement() {
                         "required items and locations to beat the game "
                         "will be guaranteed reachable."
                     );
+                } 
+#ifdef ENABLE_REMOTE_CONTROL
+                else {
+                    ImGui::SameLine();
+                    UIWidgets::EnhancementCheckbox("Anchor Multiworld", "gRandoNlMw", false, "");
+                    if (CVarGetInteger("gRandoNlMw", 0)) {
+                        UIWidgets::EnhancementSliderInt("Number of worlds", "##RandoNlMwNumber", "gRandoNlMwNumber", 2, 20, "%d", 2);
+                    }
                 }
+#endif
 
                 UIWidgets::PaddedSeparator();
 

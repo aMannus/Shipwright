@@ -5,8 +5,10 @@
 #include <soh/Enhancements/item-tables/ItemTableManager.h>
 #include <soh/Enhancements/randomizer/randomizerTypes.h>
 #include <soh/Enhancements/randomizer/adult_trade_shuffle.h>
+#include <soh/OTRGlobals.h>
 #include <soh/Enhancements/nametag.h>
 #include <soh/util.h>
+#include <soh/SaveManager.h>
 #include <nlohmann/json.hpp>
 
 extern "C" {
@@ -246,7 +248,41 @@ void GameInteractorAnchor::Disable() {
     }
 }
 
+void GameInteractorAnchor::SetMultiWorld(bool isMulti) {
+    this->isMultiWorld = isMulti;
+}
+
+bool GameInteractorAnchor::IsMultiWorld() {
+    return this->isMultiWorld;
+}
+
+void GameInteractorAnchor::SetMultiWorldId(uint32_t id) {
+    this->multiWorldId = id;
+}
+
+uint32_t GameInteractorAnchor::GetMultiWorldId() {
+    return this->multiWorldId;
+}
+
+void GameInteractorAnchor::AddMultiworldCheck(RandomizerCheck check, uint32_t worldId) {
+    this->multiWorldIdMap.emplace(check, worldId);
+}
+
+std::map<RandomizerCheck, uint32_t> GameInteractorAnchor::GetMultiworldCheckMap() {
+    return this->multiWorldIdMap;
+}
+
+bool GameInteractorAnchor::IsOwnItem(RandomizerCheck check) {
+    if (this->multiWorldIdMap.contains(check)) {
+        if (this->multiWorldIdMap.at(check) == this->multiWorldId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GameInteractorAnchor::TransmitJsonToRemote(nlohmann::json payload) {
+    if (GameInteractorAnchor::Instance->IsMultiWorld() && payload["type"] != "GIVE_ITEM") return; // TODO: allow for co-op multiworld communication in the same room
     payload["roomId"] = CVarGetString("gRemote.AnchorRoomId", "");
     if (!payload.contains("quiet")) {
         SPDLOG_INFO("Sending payload:\n{}", payload.dump());
@@ -270,6 +306,12 @@ void GameInteractorAnchor::HandleRemoteJson(nlohmann::json payload) {
         auto effect = new GameInteractionEffect::GiveItem();
         effect->parameters[0] = payload["modId"].get<uint16_t>();
         effect->parameters[1] = payload["getItemId"].get<int16_t>();
+        if (isMultiWorld) {
+            effect->parameters[2] = payload["worldId"].get<uint16_t>();
+            if (effect->parameters[2] != multiWorldId) {
+                return;
+            }
+        }
         CVarSetInteger("gFromGI", 1);
         receivedItems.push_back({ payload["modId"].get<uint16_t>(), payload["getItemId"].get<int16_t>() });
         if (effect->Apply() == Possible) {
@@ -594,7 +636,34 @@ void Anchor_SpawnClientFairies() {
     }
 }
 
+void GameInteractorAnchor::LoadMultiworldCheckMap() {
+    this->multiWorldIdMap.clear();
+    SaveManager::Instance->LoadData("idCheckMap", this->multiWorldIdMap);
+}
+
+void LoadAnchorVersion1() {
+    bool isMulti;
+    SaveManager::Instance->LoadData("isMultiWorld", isMulti, false);
+    GameInteractorAnchor::Instance->SetMultiWorld(isMulti);
+    if (isMulti) {
+        uint32_t multiId;
+        SaveManager::Instance->LoadData("multiId", multiId, (uint32_t)0);
+        GameInteractorAnchor::Instance->SetMultiWorldId(multiId);
+        GameInteractorAnchor::Instance->LoadMultiworldCheckMap();
+    }
+}
+
+void SaveAnchor(SaveContext* saveContext, int sectionID, bool fullSave) {
+    if (GameInteractorAnchor::Instance->IsMultiWorld()) {
+        SaveManager::Instance->SaveData("isMultiWorld", GameInteractorAnchor::Instance->IsMultiWorld());
+        SaveManager::Instance->SaveData("multiWorldId", GameInteractorAnchor::Instance->GetMultiWorldId());
+        SaveManager::Instance->SaveData("idCheckMap", GameInteractorAnchor::Instance->GetMultiworldCheckMap());
+    }
+}
+
 void Anchor_RegisterHooks() {
+    SaveManager::Instance->AddLoadFunction("Anchor", 1, LoadAnchorVersion1);
+    SaveManager::Instance->AddSaveFunction("Anchor", 1, SaveAnchor, true, SECTION_PARENT_NONE);
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnLoadGame>([](int32_t fileNum) {
         if (!GameInteractor::Instance->isRemoteInteractorConnected || gSaveContext.fileNum > 2) return;
 
@@ -622,6 +691,9 @@ void Anchor_RegisterHooks() {
         payload["type"] = "GIVE_ITEM";
         payload["modId"] = itemEntry.tableId;
         payload["getItemId"] = itemEntry.getItemId;
+        if (GameInteractorAnchor::Instance->IsMultiWorld()) {
+            payload["worldId"] = GameInteractorAnchor::Instance->GetMultiWorldId();
+        }
 
         GameInteractorAnchor::Instance->TransmitJsonToRemote(payload);
     });
@@ -769,6 +841,14 @@ void Anchor_GameComplete() {
 
     GameInteractorAnchor::Instance->TransmitJsonToRemote(payload);
     Anchor_SendClientData();
+}
+
+bool Anchor_IsMultiWorld() {
+    return GameInteractorAnchor::Instance->IsMultiWorld();
+}
+
+bool Anchor_IsOwnItem(RandomizerCheck check) {
+    return GameInteractorAnchor::Instance->IsOwnItem(check);
 }
 
 const ImVec4 GRAY = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);

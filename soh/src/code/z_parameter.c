@@ -1784,6 +1784,12 @@ u8 Item_Give(PlayState* play, u8 item) {
     GetItemID returnItem = ITEM_NONE;
     if (GameInteractor_IsSaveLoaded() && GET_PLAYER(play)->getItemCheck != RC_MAX && GET_PLAYER(play)->getItemCheck != RC_UNKNOWN_CHECK) {
         GameInteractor_ExecuteOnCollectCheckHooks(GET_PLAYER(play)->getItemCheck);
+#ifdef ENABLE_REMOTE_CONTROL
+        if (Anchor_IsMultiWorld() && Anchor_IsOwnItem(GET_PLAYER(play)->getItemCheck)) {
+            GET_PLAYER(play)->getItemCheck = RC_MAX;
+            return;
+        }
+#endif
         GET_PLAYER(play)->getItemCheck = RC_MAX;
     }
 
@@ -2353,6 +2359,12 @@ u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     GetItemID returnItem = ITEM_NONE;
     if (GameInteractor_IsSaveLoaded() && GET_PLAYER(play)->getItemCheck != RC_MAX && GET_PLAYER(play)->getItemCheck != RC_UNKNOWN_CHECK) {
         GameInteractor_ExecuteOnCollectCheckHooks(GET_PLAYER(play)->getItemCheck);
+#ifdef ENABLE_REMOTE_CONTROL
+        if (Anchor_IsMultiWorld() && Anchor_IsOwnItem(GET_PLAYER(play)->getItemCheck)) {
+            GET_PLAYER(play)->getItemCheck = RC_MAX;
+            return;
+        }
+#endif
         GET_PLAYER(play)->getItemCheck = RC_MAX;
     }
 
