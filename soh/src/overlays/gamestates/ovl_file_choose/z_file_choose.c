@@ -3196,40 +3196,49 @@ static const char* noRandoGeneratedText[] = {
     #endif
 };
 
+uint8_t FileChoose_ShowNoRandoGeneratedMessage(FileChooseContext* this) {
+    if (this->configMode == CM_QUEST_MENU && this->questType[this->buttonIndex] == QUEST_RANDOMIZER && !hasRandomizerQuest()) {
+        return 1;
+    }
+    return 0;
+}
+
 void FileChoose_DrawNoRandoGeneratedWarning(GameState* thisx) {
     FileChooseContext* this = (FileChooseContext*)thisx;
 
     OPEN_DISPS(this->state.gfxCtx);
 
     // Draw rando seed warning when build version doesn't match for Major or Minor number
-    if (this->configMode == CM_QUEST_MENU && this->questType[this->buttonIndex] == QUEST_RANDOMIZER && !hasRandomizerQuest()) {
+    if (FileChoose_ShowNoRandoGeneratedMessage(this)) {
         u8 textAlpha = 225;
+        u8 textboxAlpha = 170;
+        f32 textboxScale = 0.7f;
 
-        // Compute the height for a "squished" textbox texture
-        #if defined(__WIIU__) || defined(__SWITCH__)
-            s16 height = 32;// 2 lines
-        #else
-            s16 height = 40;// 3 lines
-        #endif
         // float math to get a S5.10 number that will squish the texture
-        f32 texCoordinateHeightF = 512 / ((f32)height / 64);
+        f32 texCoordinateHeightF = 512 / textboxScale;
         s16 texCoordinateHeightScale = texCoordinateHeightF + 0.5f;
-        s16 bottomOffset = 4;
+        f32 texCoordinateWidthF = 512 / textboxScale;
+        s16 texCoordinateWidthScale = texCoordinateWidthF + 0.5f;
+        s16 textboxWidth = 256 * textboxScale;
+        s16 textboxHeight = 64 * textboxScale;
+        s8 leftOffset = 72;
+        s16 bottomOffset = 84;
 
         Gfx_SetupDL_39Opa(this->state.gfxCtx);
         gDPSetAlphaDither(POLY_OPA_DISP++, G_AD_DISABLE);
         gSPClearGeometryMode(POLY_OPA_DISP++, G_SHADE);
         gDPSetCombineLERP(POLY_OPA_DISP++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0,
                           0, PRIMITIVE, 0);
-        gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 0, 0, 0, textAlpha);
+        gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 0, 0, 0, textboxAlpha);
         gDPLoadTextureBlock_4b(POLY_OPA_DISP++, gDefaultMessageBackgroundTex, G_IM_FMT_I, 128, 64, 0, G_TX_MIRROR,
                                G_TX_MIRROR, 7, 0, G_TX_NOLOD, G_TX_NOLOD);
-        gSPTextureRectangle(POLY_OPA_DISP++, 32 << 2, (SCREEN_HEIGHT - height - bottomOffset) << 2,
-                            (SCREEN_WIDTH - 32) << 2, (SCREEN_HEIGHT - bottomOffset) << 2, G_TX_RENDERTILE, 0, 0,
-                            1 << 10, texCoordinateHeightScale << 1);
 
-        Interface_DrawTextLine(this->state.gfxCtx, noRandoGeneratedText[gSaveContext.language], 36,
-                               SCREEN_HEIGHT - height, 255, 255, 255, textAlpha, 0.8f, 1);
+        gSPTextureRectangle(POLY_OPA_DISP++, leftOffset << 2, (SCREEN_HEIGHT - bottomOffset - textboxHeight) << 2,
+                            (textboxWidth + leftOffset) << 2, (SCREEN_HEIGHT - bottomOffset) << 2, G_TX_RENDERTILE, 0, 0,
+                            texCoordinateWidthScale << 1, texCoordinateHeightScale << 1);
+
+        Interface_DrawTextLine(this->state.gfxCtx, noRandoGeneratedText[gSaveContext.language], 82,
+                               122, 255, 255, 255, textAlpha, 0.65f, 1);
     }
     
     CLOSE_DISPS(this->state.gfxCtx);
