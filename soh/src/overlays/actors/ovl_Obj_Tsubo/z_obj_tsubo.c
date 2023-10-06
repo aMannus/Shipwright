@@ -248,7 +248,7 @@ void ObjTsubo_Idle(ObjTsubo* this, PlayState* play) {
     s16 temp_v0;
     s32 phi_v1;
 
-    if (this->actor.xzDistToPlayer < 100.0f) {
+    if (this->actor.xzDistToPlayer < 120.0f) {
         EnBom* bomb = (EnBom*)Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_BOM, this->actor.world.pos.x,
                                 this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, BOMB_BODY, true);
 

@@ -1181,7 +1181,7 @@ void RegisterChaosRaceStuff() {
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnTransitionEnd>([](int32_t sceneNum) { 
-        uint32_t randomNumber = rand() % 20;
+        uint32_t randomNumber = rand() % 30;
         if (randomNumber == 0) {
             gPlayState->linkAgeOnLoad ^= 1;
         }

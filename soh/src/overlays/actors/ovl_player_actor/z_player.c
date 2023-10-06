@@ -7781,9 +7781,11 @@ void func_80842180(Player* this, PlayState* play) {
             }
 
             if (this->currentBoots == PLAYER_BOOTS_HOVER) {
-                sp2C *= -2.0f;
+                sp2C *= -1.5f;
             } else if (this->heldActor != NULL) {
-                sp2C *= 3.0f;
+                if (this->heldActor->id != 102) {
+                    sp2C *= 3.0f;
+                }
             } else if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) != BUNNY_HOOD_VANILLA && this->currentMask == PLAYER_MASK_BUNNY) {
                 sp2C *= 1.5f;
             }
@@ -11074,9 +11076,9 @@ void Player_Update(Actor* thisx, PlayState* play) {
         this->actor.scale.y = randomNumber2 / 1000;
         this->actor.scale.z = randomNumber3 / 1000;
     } else if (this->stateFlags2 & PLAYER_STATE2_DISABLE_ROTATION_Z_TARGET && this->actor.scale.y > 0.001f) {
-        this->actor.scale.x -= 0.00001f;
-        this->actor.scale.y -= 0.00001f;
-        this->actor.scale.z -= 0.00001f;
+        this->actor.scale.x -= 0.000008f;
+        this->actor.scale.y -= 0.000008f;
+        this->actor.scale.z -= 0.000008f;
     }
 
     switch (GameInteractor_GetLinkSize()) {
