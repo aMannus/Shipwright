@@ -3182,26 +3182,26 @@ void FileChoose_DrawRandoSaveVersionWarning(GameState* thisx) {
 static const char* noRandoGeneratedText[] = {
     // English
     "No Randomizer seed currently available.\nGenerate one in the Randomizer Settings"
-    #if defined(__WIIU__) || defined(__SWITCH__)
-        ".",
-    #else
-        ",\nor drop a spoiler log on the game window.",
-    #endif
+#if defined(__WIIU__) || defined(__SWITCH__)
+    ".",
+#else
+    ",\nor drop a spoiler log on the game window.",
+#endif
     // German
-    "!!!",
+    "No Randomizer seed currently available.\nGenerate one in the Randomizer Settings"
+#if defined(__WIIU__) || defined(__SWITCH__)
+    ".",
+#else
+    ",\nor drop a spoiler log on the game window.",
+#endif
     // French
     "Aucune Seed de Randomizer actuellement disponoble.\nGénérez-en une dans les \"Randomizer Settings\""
-    #if !(defined(__WIIU__) || defined(__SWITCH__))
-        "\nou glissez un spoiler log sur la fenêtre du jeu"
-    #endif
+#if (defined(__WIIU__) || defined(__SWITCH__))
+    "."
+#else
+    "\nou glissez un spoilerlog sur la fenêtre du jeu."
+#endif
 };
-
-uint8_t FileChoose_ShowNoRandoGeneratedMessage(FileChooseContext* this) {
-    if (this->configMode == CM_QUEST_MENU && this->questType[this->buttonIndex] == QUEST_RANDOMIZER && !hasRandomizerQuest()) {
-        return 1;
-    }
-    return 0;
-}
 
 void FileChoose_DrawNoRandoGeneratedWarning(GameState* thisx) {
     FileChooseContext* this = (FileChooseContext*)thisx;
@@ -3209,20 +3209,26 @@ void FileChoose_DrawNoRandoGeneratedWarning(GameState* thisx) {
     OPEN_DISPS(this->state.gfxCtx);
 
     // Draw rando seed warning when build version doesn't match for Major or Minor number
-    if (FileChoose_ShowNoRandoGeneratedMessage(this)) {
-        u8 textAlpha = 225;
-        u8 textboxAlpha = 170;
-        f32 textboxScale = 0.7f;
+    if (this->configMode == CM_QUEST_MENU && this->questType[this->buttonIndex] == QUEST_RANDOMIZER && !hasRandomizerQuest()) {
+        uint8_t textAlpha = 225;
+        uint8_t textboxAlpha = 170;
+        float textboxScale = 0.7f;
 
         // float math to get a S5.10 number that will squish the texture
-        f32 texCoordinateHeightF = 512 / textboxScale;
-        s16 texCoordinateHeightScale = texCoordinateHeightF + 0.5f;
-        f32 texCoordinateWidthF = 512 / textboxScale;
-        s16 texCoordinateWidthScale = texCoordinateWidthF + 0.5f;
-        s16 textboxWidth = 256 * textboxScale;
-        s16 textboxHeight = 64 * textboxScale;
-        s8 leftOffset = 72;
-        s16 bottomOffset = 84;
+        float texCoordinateHeightF = 512 / textboxScale;
+        uint16_t texCoordinateHeightScale = texCoordinateHeightF + 0.5f;
+        float texCoordinateWidthF = 512 / textboxScale;
+        uint16_t texCoordinateWidthScale = texCoordinateWidthF + 0.5f;
+        uint16_t textboxWidth = 256 * textboxScale;
+        uint16_t textboxHeight = 64 * textboxScale;
+        uint8_t leftOffset = 72;
+        uint8_t bottomOffset = 84;
+        uint8_t textVerticalOffset;
+#if defined(__WIIU__) || defined(__SWITCH__)
+        textVerticalOffset = 127; // 2 lines
+#else
+        textVerticalOffset = 122; // 3 lines
+#endif
 
         Gfx_SetupDL_39Opa(this->state.gfxCtx);
         gDPSetAlphaDither(POLY_OPA_DISP++, G_AD_DISABLE);
@@ -3237,8 +3243,8 @@ void FileChoose_DrawNoRandoGeneratedWarning(GameState* thisx) {
                             (textboxWidth + leftOffset) << 2, (SCREEN_HEIGHT - bottomOffset) << 2, G_TX_RENDERTILE, 0, 0,
                             texCoordinateWidthScale << 1, texCoordinateHeightScale << 1);
 
-        Interface_DrawTextLine(this->state.gfxCtx, noRandoGeneratedText[gSaveContext.language], 82,
-                               122, 255, 255, 255, textAlpha, 0.65f, 1);
+        Interface_DrawTextLine(this->state.gfxCtx, noRandoGeneratedText[gSaveContext.language], 80, textVerticalOffset,
+                               255, 255, 255, textAlpha, 0.6f, 1);
     }
     
     CLOSE_DISPS(this->state.gfxCtx);
