@@ -262,9 +262,7 @@ void EnClearTag_Init(Actor* thisx, PlayState* play) {
 
         // Change Arwing to regular enemy instead of boss with enemy randomizer and crowd control.
         // This way Arwings will be considered for "clear enemy" rooms properly.
-        if (CVarGetInteger("gRandomizedEnemies", 0) || CVarGetInteger("gCrowdControl", 0)) {
-            Actor_ChangeCategory(play, &play->actorCtx, thisx, ACTORCAT_ENEMY);
-        }
+        Actor_ChangeCategory(play, &play->actorCtx, thisx, ACTORCAT_ENEMY);
 
         this->actor.flags |= ACTOR_FLAG_TARGETABLE;
         this->actor.targetMode = 5;

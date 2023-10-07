@@ -8,6 +8,7 @@
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
 #include "soh/Enhancements/cosmetics/authenticGfxPatches.h"
 #include "soh/Enhancements/nametag.h"
+#include "soh/Enhancements/enemyrandomizer.h"
 
 #include "src/overlays/actors/ovl_En_Bb/z_en_bb.h"
 #include "src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.h"
@@ -1111,6 +1112,9 @@ void RegisterChaosRaceStuff() {
         }
 
         if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
+
+            Player* player = GET_PLAYER(gPlayState);
+
             // Unequip ocarina on dpad down
             if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
                 gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
@@ -1122,7 +1126,6 @@ void RegisterChaosRaceStuff() {
             }
 
             // Reverse controls with bunny hood
-            Player* player = GET_PLAYER(gPlayState);
             if (player->currentMask == PLAYER_MASK_BUNNY) {
                 GameInteractor::State::ReverseControlsActive = 1;
             } else {
@@ -1131,8 +1134,8 @@ void RegisterChaosRaceStuff() {
 
             // Effects on a random chance
 
-            // Random swap Mirror Mode, average once every 30 minutes.
-            uint32_t randomMirror = rand() % 36000;
+            // Random swap Mirror Mode, average once every 10 minutes.
+            uint32_t randomMirror = rand() % 12000;
             if (randomMirror == 0) {
                 uint8_t currentMirror = CVarGetInteger("gMirroredWorldMode", 0);
                 if (currentMirror == 0) {
@@ -1153,10 +1156,30 @@ void RegisterChaosRaceStuff() {
                 CVarSetInteger("gDPadPosY", 0 + randomYPos);
             }
 
-            // Random Iron Knuckle spawn, average once every 15 minutes
-            uint32_t randomKnuckle = rand() % 18000;
-            if (randomKnuckle == 0) {
-                GameInteractor::RawAction::SpawnEnemyWithOffset(ACTOR_EN_IK, 2);
+            // Random Enemy spawn, average once every minute
+            uint32_t randomEnemy = rand() % 1200;
+            uint32_t seed = rand() % 20000;
+            EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
+            if (randomEnemy == 0) {
+                GameInteractor::RawAction::SpawnEnemyWithOffset(enemyToSpawn.id, enemyToSpawn.params);
+            }
+
+            // Random unequip shield, average once every 2 minutes
+            uint32_t randomShield = rand() % 2400;
+            if (randomShield == 0) {
+                player->currentShield = PLAYER_SHIELD_NONE;
+            }
+
+            // Random unequip c-buttons, average once every 10 minutes
+            uint32_t randomUnequipCButtons = rand() % 12000;
+            if (randomUnequipCButtons == 0) {
+                GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_CBUTTONS);
+            }
+
+            // Random unequip d-pad, average once every 10 minutes
+            uint32_t randomUnequipDPad = rand() % 12000;
+            if (randomUnequipDPad == 0) {
+                GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_DPAD);
             }
         }
     });
