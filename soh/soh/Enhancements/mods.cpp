@@ -1166,7 +1166,8 @@ void RegisterChaosRaceStuff() {
         uint8_t bigOrSmallActor = rand() % 100;
 
         // Big actor
-        if (bigOrSmallActor > 50) {
+        if (bigOrSmallActor > 50 && actor->id != ACTOR_BOSS_DODONGO && actor->id != ACTOR_BOSS_FD &&
+            actor->id != ACTOR_BOSS_FD2) {
             randomNumber = rand() % 200;
             randomScale = 1.0f + (randomNumber / 100);
         // Small actor
@@ -1175,13 +1176,13 @@ void RegisterChaosRaceStuff() {
             randomScale = 0.1f + (randomNumber / 100);
         }
 
-        if (actor->category == ACTORCAT_ENEMY || actor->category == ACTORCAT_BOSS) {
+        if ((actor->category == ACTORCAT_ENEMY || actor->category == ACTORCAT_BOSS) && actor->id != ACTOR_EN_BROB) {
             Actor_SetScale(actor, actor->scale.z * randomScale);
         }
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnTransitionEnd>([](int32_t sceneNum) { 
-        uint32_t randomNumber = rand() % 30;
+        uint32_t randomNumber = rand() % 100;
         if (randomNumber == 0) {
             gPlayState->linkAgeOnLoad ^= 1;
         }
