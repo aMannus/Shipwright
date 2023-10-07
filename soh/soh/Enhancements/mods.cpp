@@ -1156,7 +1156,7 @@ void RegisterChaosRaceStuff() {
                 CVarSetInteger("gDPadPosY", 0 + randomYPos);
             }
 
-            // Random Enemy spawn, average once every minute
+            // Random Enemy spawn, average once every 30 seconds
             uint32_t randomEnemy = rand() % 600;
             uint32_t seed = rand() % 20000;
             EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
