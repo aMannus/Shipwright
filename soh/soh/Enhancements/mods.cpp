@@ -1152,6 +1152,12 @@ void RegisterChaosRaceStuff() {
                 CVarSetInteger("gDPadPosX", 290 - randomXPos);
                 CVarSetInteger("gDPadPosY", 0 + randomYPos);
             }
+
+            // Random Iron Knuckle spawn, average once every 15 minutes
+            uint32_t randomKnuckle = rand() % 18000;
+            if (randomKnuckle == 0) {
+                GameInteractor::RawAction::SpawnEnemyWithOffset(ACTOR_EN_IK, 2);
+            }
         }
     });
 

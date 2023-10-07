@@ -1487,7 +1487,7 @@ void EnIk_Init(Actor* thisx, PlayState* play) {
     }
 
     // Immediately trigger Iron Knuckle for Enemy Rando and Crowd Control
-    if ((CVarGetInteger("gRandomizedEnemies", 0) || CVarGetInteger("gCrowdControl", 0)) && (thisx->params == 2 || thisx->params == 3)) {
+    if ((thisx->params == 2 || thisx->params == 3)) {
         this->skelAnime.playSpeed = 1.0f;
     }
 }
