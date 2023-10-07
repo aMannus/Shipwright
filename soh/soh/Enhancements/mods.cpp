@@ -1157,7 +1157,7 @@ void RegisterChaosRaceStuff() {
             }
 
             // Random Enemy spawn, average once every minute
-            uint32_t randomEnemy = rand() % 1200;
+            uint32_t randomEnemy = rand() % 600;
             uint32_t seed = rand() % 20000;
             EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
             if (randomEnemy == 0) {
