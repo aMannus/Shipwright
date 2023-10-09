@@ -1947,14 +1947,26 @@ extern "C" ItemObtainability Randomizer_GetItemObtainabilityFromRandomizerCheck(
     return OTRGlobals::Instance->gRandomizer->GetItemObtainabilityFromRandomizerCheck(randomizerCheck);
 }
 
-CustomMessage Randomizer_GetCustomGetItemMessage(Player* player) {
+CustomMessage Randomizer_GetCustomVanillaGetItemMessage(Player* player) {
+    CustomMessage getItemText;
+    GetItemEntry getItemEntry = player->getItemEntry;
+    if (getItemEntry.objectId == OBJECT_GI_MEDAL || getItemEntry.objectId == OBJECT_GI_JEWEL ||
+        getItemEntry.objectId == OBJECT_GI_MELODY) {
+        getItemText = CustomMessageManager::Instance->RetrieveMessage(Randomizer::randomizerTableGetItemMessageTableID, getItemEntry.getItemId);
+    } else {
+        getItemText = CustomMessageManager::Instance->RetrieveMessage(Randomizer::vanillaTableGetItemMessageTableID, getItemEntry.getItemId);
+    }
+    return getItemText;
+}
+
+CustomMessage Randomizer_GetCustomRandomizerGetItemMessage(Player* player) {
     s16 giid;
     if (player->getItemEntry.objectId != OBJECT_INVALID) {
         giid = player->getItemEntry.getItemId;
     } else {
         giid = player->getItemId;
     }
-    const CustomMessage getItemText = CustomMessageManager::Instance->RetrieveMessage(Randomizer::getItemMessageTableID, giid);
+    const CustomMessage getItemText = CustomMessageManager::Instance->RetrieveMessage(Randomizer::randomizerTableGetItemMessageTableID, giid);
     return getItemText;
 }
 
@@ -1978,34 +1990,34 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
             } else if (player->getItemEntry.getItemId == RG_TRIFORCE_PIECE) {
                 messageEntry = Randomizer::GetTriforcePieceMessage();
             } else {
-                messageEntry = Randomizer_GetCustomGetItemMessage(player);
+                messageEntry = Randomizer_GetCustomRandomizerGetItemMessage(player);
             }
         } else if (textId == TEXT_ITEM_DUNGEON_MAP || textId == TEXT_ITEM_COMPASS) {
             if (DUNGEON_ITEMS_CAN_BE_OUTSIDE_DUNGEON(RSK_STARTING_MAPS_COMPASSES)) {
                 if (textId == TEXT_ITEM_DUNGEON_MAP) {
                     messageEntry = OTRGlobals::Instance->gRandomizer->GetMapGetItemMessageWithHint(player->getItemEntry);
                 } else {
-                    messageEntry = Randomizer_GetCustomGetItemMessage(player);
+                    messageEntry = Randomizer_GetCustomRandomizerGetItemMessage(player);
                 }
             }
         } else if (textId == TEXT_ITEM_KEY_BOSS) {
             if (player->getItemEntry.getItemId == RG_GANONS_CASTLE_BOSS_KEY) {
                 if (DUNGEON_ITEMS_CAN_BE_OUTSIDE_DUNGEON(RSK_GANONS_BOSS_KEY)) {
-                    messageEntry = Randomizer_GetCustomGetItemMessage(player);
+                    messageEntry = Randomizer_GetCustomRandomizerGetItemMessage(player);
                 }
             } else {
                 if (DUNGEON_ITEMS_CAN_BE_OUTSIDE_DUNGEON(RSK_BOSS_KEYSANITY)) {
-                    messageEntry = Randomizer_GetCustomGetItemMessage(player);
+                    messageEntry = Randomizer_GetCustomRandomizerGetItemMessage(player);
                 }
             }
         } else if (textId == TEXT_ITEM_KEY_SMALL) {
             if (player->getItemEntry.getItemId == RG_GERUDO_FORTRESS_SMALL_KEY) {
                 if (Randomizer_GetSettingValue(RSK_GERUDO_KEYS) != RO_GERUDO_KEYS_VANILLA) {
-                    messageEntry = Randomizer_GetCustomGetItemMessage(player);
+                    messageEntry = Randomizer_GetCustomRandomizerGetItemMessage(player);
                 }
             } else {
                 if (DUNGEON_ITEMS_CAN_BE_OUTSIDE_DUNGEON(RSK_KEYSANITY)) {
-                    messageEntry = Randomizer_GetCustomGetItemMessage(player);
+                    messageEntry = Randomizer_GetCustomRandomizerGetItemMessage(player);
                 }
             }
         } else if (textId == TEXT_RANDOMIZER_GOSSIP_STONE_HINTS && Randomizer_GetSettingValue(RSK_GOSSIP_STONE_HINTS) != RO_GOSSIP_STONES_NONE &&
@@ -2119,6 +2131,9 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                 textId == TEXT_SARIAS_SONG_FOREST_TEMPLE) {
                 messageEntry = OTRGlobals::Instance->gRandomizer->GetSariaMessage(textId);
             }
+        // Get custom textbox for items in the vanilla item table and the extended vanilla item table.
+        } else if (player->getItemEntry.objectId != OBJECT_INVALID && player->getItemEntry.modIndex == 0) {
+            messageEntry = Randomizer_GetCustomVanillaGetItemMessage(player);
         }
     }
     if (textId == TEXT_GS_NO_FREEZE || textId == TEXT_GS_FREEZE) {

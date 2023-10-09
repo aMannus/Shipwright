@@ -44,7 +44,8 @@ class Randomizer {
     Randomizer();
     ~Randomizer();
 
-    static const std::string getItemMessageTableID;
+    static const std::string vanillaTableGetItemMessageTableID;
+    static const std::string randomizerTableGetItemMessageTableID;
     static const std::string hintMessageTableID;
     static const std::string merchantMessageTableID;
     static const std::string rupeeMessageTableID;
