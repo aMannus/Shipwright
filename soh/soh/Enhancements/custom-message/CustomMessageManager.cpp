@@ -188,9 +188,6 @@ const std::string CustomMessage::MESSAGE_END() const {
 }
 
 const std::string CustomMessage::ITEM_OBTAINED(uint8_t x) const {
-    if (x == ITEM_NONE) {
-        return "";
-    }
     return "\x13"s + char(x);
 }
 
