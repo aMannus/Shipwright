@@ -54,7 +54,7 @@ std::set<std::map<RandomizerCheck, RandomizerCheckTrackerData>> checkTrackerStat
 u8 generated;
 char* seedString;
 
-const std::string Randomizer::vanillaTableGetItemMessageTableID = "RandomizerTableGetItem";
+const std::string Randomizer::vanillaTableGetItemMessageTableID = "VanillaTableGetItem";
 const std::string Randomizer::randomizerTableGetItemMessageTableID = "RandomizerTableGetItem";
 const std::string Randomizer::hintMessageTableID = "RandomizerHints";
 const std::string Randomizer::merchantMessageTableID = "RandomizerMerchants";
@@ -5464,8 +5464,7 @@ CustomMessage Randomizer::GetMapGetItemMessageWithHint(GetItemEntry itemEntry) {
     return messageEntry;
 }
 
-template<size_t N>
-void CreateVanillaGetItemMessages(const std::array<GetItemMessage, N>* messageEntries) {
+void CreateVanillaGetItemMessages(const std::vector<GetItemMessage>* messageEntries) {
     CustomMessageManager* customMessageManager = CustomMessageManager::Instance;
     customMessageManager->AddCustomMessageTable(Randomizer::vanillaTableGetItemMessageTableID);
     for (const GetItemMessage& messageEntry : *messageEntries) {
@@ -5476,8 +5475,7 @@ void CreateVanillaGetItemMessages(const std::array<GetItemMessage, N>* messageEn
     }
 }
 
-template<size_t N>
-void CreateRandomizerGetItemMessages(const std::array<GetItemMessage, N>* messageEntries) {
+void CreateRandomizerGetItemMessages(const std::vector<GetItemMessage>* messageEntries) {
     CustomMessageManager* customMessageManager = CustomMessageManager::Instance;
     customMessageManager->AddCustomMessageTable(Randomizer::randomizerTableGetItemMessageTableID);
     for (const GetItemMessage& messageEntry : *messageEntries) {
@@ -5879,7 +5877,7 @@ CustomMessage Randomizer::GetGoronMessage(u16 index) {
 void Randomizer::CreateCustomMessages() {
     // RANDTODO: Translate into french and german and replace GIMESSAGE_UNTRANSLATED
     // with GIMESSAGE(getItemID, itemID, english, german, french).
-    const std::array<GetItemMessage, 123> vanillaTableGetItemMessages = {{
+    const std::vector<GetItemMessage> vanillaTableGetItemMessages = {{
         GIMESSAGE(GI_BOMBS_5, ITEM_NONE,
             "",
             "",
@@ -6099,7 +6097,7 @@ void Randomizer::CreateCustomMessages() {
         GIMESSAGE(GI_SCALE_SILVER, ITEM_SCALE_SILVER,
             "You got the %bSilver Scale%w!&You can dive deeper than you&could before.",
             "You got the %bSilver Scale%w!&You can dive deeper than you&could before.",
-            "Vous recevez l'%bEcaille&d'argent%w! Vous pouvez&désormais&plonger plus&profondément. "),
+            "Vous recevez l'%bEcaille&d'argent%w! Vous pouvez&désormais&plonger plus&profondément."),
         GIMESSAGE(GI_SCALE_GOLD, ITEM_SCALE_GOLDEN,
             "You got the %bGolden Scale%w!&Now you can dive much&deeper than you could before!",
             "You got the %bGolden Scale%w!&Now you can dive much&deeper than you could before!",
@@ -6374,7 +6372,7 @@ void Randomizer::CreateCustomMessages() {
             "")
     }};
 
-    const std::array<GetItemMessage, 77> randomizerTableGetItemMessages = {{ 
+    const std::vector<GetItemMessage> randomizerTableGetItemMessages = {{ 
         GIMESSAGE(RG_ZELDAS_LULLABY, ITEM_NONE,
 			" ",
 			" ",

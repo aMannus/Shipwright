@@ -222,7 +222,11 @@ bool CustomMessageManager::InsertCustomMessage(std::string tableID, uint16_t tex
 
 bool CustomMessageManager::CreateGetItemMessage(std::string tableID, uint16_t giid, ItemID iid,
                                                 CustomMessage messageEntry) {
-    messageEntry.Format(iid);
+    if (iid != ITEM_NONE) {
+        messageEntry.Format(iid);
+    } else {
+        messageEntry.Format();
+    }
     const uint16_t textID = giid;
     return InsertCustomMessage(tableID, textID, messageEntry);
 }
