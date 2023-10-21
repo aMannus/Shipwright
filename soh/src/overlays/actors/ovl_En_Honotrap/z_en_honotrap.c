@@ -203,7 +203,7 @@ void EnHonotrap_InitFlame(Actor* thisx, PlayState* play) {
     Audio_PlayActorSound2(&this->actor, NA_SE_EV_FLAME_IGNITION);
     if (this->actor.params == HONOTRAP_FLAME_DROP) {
         this->actor.room = -1;
-        this->collider.cyl.dim.radius = 12;
+        this->collider.cyl.dim.radius = 0;
         this->collider.cyl.dim.height = 30;
         this->actor.shape.yOffset = -1000.0f;
     }

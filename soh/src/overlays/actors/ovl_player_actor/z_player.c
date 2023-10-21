@@ -5173,6 +5173,7 @@ s32 func_8083B040(Player* this, PlayState* play) {
                     func_8083B010(this);
                 }
                 this->stateFlags1 |= PLAYER_STATE1_FIRST_PERSON;
+                GameInteractor_SetRandomInvertedAxis();
                 func_80078884(NA_SE_SY_CAMERA_ZOOM_UP);
                 Player_ZeroSpeedXZ(this);
                 return 1;
@@ -7779,7 +7780,13 @@ void func_80842180(Player* this, PlayState* play) {
                 }
             }
 
-            if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) != BUNNY_HOOD_VANILLA && this->currentMask == PLAYER_MASK_BUNNY) {
+            if (this->currentBoots == PLAYER_BOOTS_HOVER) {
+                sp2C *= -1.5f;
+            } else if (this->heldActor != NULL) {
+                if (this->heldActor->id != 102) {
+                    sp2C *= 3.0f;
+                }
+            } else if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) != BUNNY_HOOD_VANILLA && this->currentMask == PLAYER_MASK_BUNNY) {
                 sp2C *= 1.5f;
             }
             
@@ -7995,6 +8002,7 @@ void func_80842A28(PlayState* play, Player* this) {
     play->actorCtx.unk_02 = 4;
     Player_RequestRumble(this, 255, 20, 150, 0);
     Player_PlaySfx(&this->actor, NA_SE_IT_HAMMER_HIT);
+    GameInteractor_ToggleSlipperyFloor();
 }
 
 void func_80842A88(PlayState* play, Player* this) {
@@ -8704,6 +8712,9 @@ void func_80844708(Player* this, PlayState* play) {
             f32 rand = Rand_ZeroOne();
             uint8_t randomBonk = (rand <= .05) && GameInteractor_GetRandomBonksActive();
             if (this->linearVelocity >= 7.0f) {
+                this->actor.scale.x = 0.01f;
+                this->actor.scale.y = 0.01f;
+                this->actor.scale.z = 0.01f;
                 if (randomBonk || ((this->actor.bgCheckFlags & 0x200) && (D_8085360C < 0x2000)) ||
                     ((this->cylinder.base.ocFlags1 & OC1_HIT) &&
                      (cylinderOc = this->cylinder.base.oc,
@@ -11048,45 +11059,58 @@ void Player_Update(Actor* thisx, PlayState* play) {
     MREG(54) = this->actor.world.pos.z;
     MREG(55) = this->actor.world.rot.y;
 
-    // Make Link normal size when going through doors and crawlspaces and when climbing ladders.
-    // Otherwise Link can glitch out, being in unloaded rooms or falling OoB.
-    if (this->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER || this->stateFlags1 & PLAYER_STATE1_IN_CUTSCENE ||
-        this->stateFlags2 & PLAYER_STATE2_CRAWLING) {
-        this->actor.scale.x = 0.01f;
-        this->actor.scale.y = 0.01f;
-        this->actor.scale.z = 0.01f;
-    } else {
-        switch (GameInteractor_GetLinkSize()) {
-            case GI_LINK_SIZE_RESET:
-                this->actor.scale.x = 0.01f;
-                this->actor.scale.y = 0.01f;
-                this->actor.scale.z = 0.01f;
-                GameInteractor_SetLinkSize(GI_LINK_SIZE_NORMAL);
-                break;
-            case GI_LINK_SIZE_GIANT:
-                this->actor.scale.x = 0.02f;
-                this->actor.scale.y = 0.02f;
-                this->actor.scale.z = 0.02f;
-                break;
-            case GI_LINK_SIZE_MINISH:
-                this->actor.scale.x = 0.001f;
-                this->actor.scale.y = 0.001f;
-                this->actor.scale.z = 0.001f;
-                break;
-            case GI_LINK_SIZE_PAPER:
-                this->actor.scale.x = 0.001f;
-                this->actor.scale.y = 0.01f;
-                this->actor.scale.z = 0.01f;
-                break;
-            case GI_LINK_SIZE_SQUISHED:
-                this->actor.scale.x = 0.015f;
-                this->actor.scale.y = 0.001f;
-                this->actor.scale.z = 0.015f;
-                break;
-            case GI_LINK_SIZE_NORMAL:
-            default:
-                break;
-        }
+    if (this->currentBoots == PLAYER_BOOTS_IRON) {
+        this->actor.gravity = -10.0f;
+    }
+
+    if (GameInteractor_RotatingLink()) {
+        this->actor.shape.rot.x += 200;
+        this->actor.shape.rot.z += 100;
+    }
+
+    if (GameInteractor_SpazzingLink()) {
+        float randomNumber1 = rand() % 100;
+        float randomNumber2 = rand() % 100;
+        float randomNumber3 = rand() % 100;
+        this->actor.scale.x = randomNumber1 / 1000;
+        this->actor.scale.y = randomNumber2 / 1000;
+        this->actor.scale.z = randomNumber3 / 1000;
+    } else if (this->stateFlags2 & PLAYER_STATE2_DISABLE_ROTATION_Z_TARGET && this->actor.scale.y > 0.001f) {
+        this->actor.scale.x -= 0.000008f;
+        this->actor.scale.y -= 0.000008f;
+        this->actor.scale.z -= 0.000008f;
+    }
+
+    switch (GameInteractor_GetLinkSize()) {
+        case GI_LINK_SIZE_RESET:
+            this->actor.scale.x = 0.01f;
+            this->actor.scale.y = 0.01f;
+            this->actor.scale.z = 0.01f;
+            GameInteractor_SetLinkSize(GI_LINK_SIZE_NORMAL);
+            break;
+        case GI_LINK_SIZE_GIANT:
+            this->actor.scale.x = 0.02f;
+            this->actor.scale.y = 0.02f;
+            this->actor.scale.z = 0.02f;
+            break;
+        case GI_LINK_SIZE_MINISH:
+            this->actor.scale.x = 0.001f;
+            this->actor.scale.y = 0.001f;
+            this->actor.scale.z = 0.001f;
+            break;
+        case GI_LINK_SIZE_PAPER:
+            this->actor.scale.x = 0.001f;
+            this->actor.scale.y = 0.01f;
+            this->actor.scale.z = 0.01f;
+            break;
+        case GI_LINK_SIZE_SQUISHED:
+            this->actor.scale.x = 0.015f;
+            this->actor.scale.y = 0.001f;
+            this->actor.scale.z = 0.015f;
+            break;
+        case GI_LINK_SIZE_NORMAL:
+        default:
+            break;
     }
 
     // Don't apply gravity when Link is in water, otherwise
@@ -11106,7 +11130,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
 
     if (GameInteractor_GetRandomWindActive()) {
         Player* player = GET_PLAYER(play);
-        player->windSpeed = 3.0f;
+        player->windSpeed = 5.0f;
         // Play fan sound (too annoying)
         //func_8002F974(&player->actor, NA_SE_EV_WIND_TRAP - SFX_FLAG);
     }
@@ -11546,6 +11570,7 @@ s32 func_8084B3CC(PlayState* play, Player* this) {
         }
 
         this->stateFlags1 |= PLAYER_STATE1_FIRST_PERSON;
+        GameInteractor_SetRandomInvertedAxis();
         func_80832264(play, this, func_80833338(this));
         Player_ZeroSpeedXZ(this);
         func_8083B010(this);

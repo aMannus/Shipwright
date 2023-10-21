@@ -83,6 +83,11 @@ uint8_t GameInteractor_GetRandomWindActive();
 uint8_t GameInteractor_GetRandomBonksActive();
 uint8_t GameInteractor_GetSlipperyFloorActive();
 uint8_t GameInteractor_SecondCollisionUpdate();
+uint8_t GameInteractor_RotatingLink();
+uint8_t GameInteractor_SpazzingLink();
+void GameInteractor_SpawnCuccoStorm();
+void GameInteractor_SetRandomInvertedAxis();
+void GameInteractor_ToggleSlipperyFloor();
 #ifdef __cplusplus
 }
 #endif
@@ -123,6 +128,8 @@ public:
         static uint8_t RandomBonksActive;
         static uint8_t SlipperyFloorActive;
         static uint8_t SecondCollisionUpdate;
+        static uint8_t RotatingLink;
+        static uint8_t SpazzingLink;
 
         static void SetPacifistMode(bool active);
     };

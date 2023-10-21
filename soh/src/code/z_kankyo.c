@@ -927,10 +927,12 @@ void Environment_Update(PlayState* play, EnvironmentContext* envCtx, LightContex
                 if ((envCtx->unk_1A == 0) && !FrameAdvance_IsEnabled(play) &&
                     (play->transitionMode == 0 || ((void)0, gSaveContext.gameMode) != 0)) {
 
-                    if (IS_DAY || gTimeIncrement >= 0x190) {
-                        gSaveContext.dayTime += gTimeIncrement;
-                    } else {
-                        gSaveContext.dayTime += gTimeIncrement * 2; // time moves twice as fast at night
+                    if (play->sceneNum != SCENE_LAKE_HYLIA || gTimeIncrement != 10) {
+                        if (IS_DAY || gTimeIncrement >= 0x190) {
+                            gSaveContext.dayTime += gTimeIncrement;
+                        } else {
+                            gSaveContext.dayTime += gTimeIncrement * 2; // time moves twice as fast at night
+                        }
                     }
                 }
             }

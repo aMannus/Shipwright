@@ -125,28 +125,16 @@ void EnChanger_Init(Actor* thisx, PlayState* play2) {
 
     temp_v1_3 = minigameRoomNum;
     // Set up items in chests, swap them round with probability 1/2
-    leftChestParams = (sLoserGetItemIds[play->roomCtx.curRoom.num] << 5) | 0x4000;
+    
     new_var = temp_v1_3;
-    this->leftChestNum = new_var;
-    this->leftChestGetItemId = sLoserGetItemIds[play->roomCtx.curRoom.num];
-    leftChestItem = sItemEtcTypes[play->roomCtx.curRoom.num];
-    leftChestParams |= new_var;
+    leftChestParams = new_var | 0x4E21;
     rightChestParams = new_var | 0x4E21;
+    this->leftChestNum = new_var | 1;
     this->rightChestNum = new_var | 1;
+    this->leftChestGetItemId = GI_DOOR_KEY;
     this->rightChestGetItemId = GI_DOOR_KEY;
+    leftChestItem = ITEM_ETC_KEY_SMALL_CHEST_GAME;
     rightChestItem = ITEM_ETC_KEY_SMALL_CHEST_GAME;
-
-    if (Rand_ZeroFloat(1.99f) < 1.0f) {
-        rightChestParams = (sLoserGetItemIds[play->roomCtx.curRoom.num] << 5) | 0x4000;
-        this->rightChestNum = new_var;
-        this->rightChestGetItemId = sLoserGetItemIds[play->roomCtx.curRoom.num];
-        rightChestItem = sItemEtcTypes[play->roomCtx.curRoom.num];
-        leftChestParams = new_var | 0x4E21;
-        rightChestParams |= new_var;
-        this->leftChestNum = temp_v1_3 | 1;
-        this->leftChestGetItemId = GI_DOOR_KEY;
-        leftChestItem = ITEM_ETC_KEY_SMALL_CHEST_GAME;
-    }
 
     this->leftChest = (EnBox*)Actor_SpawnAsChild(
         &play->actorCtx, &this->actor, play, ACTOR_EN_BOX, sLeftChestPos[play->roomCtx.curRoom.num].x,
