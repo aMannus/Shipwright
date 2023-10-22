@@ -8,6 +8,7 @@
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
 #include "soh/Enhancements/cosmetics/authenticGfxPatches.h"
 #include "soh/Enhancements/nametag.h"
+#include "soh/Enhancements/enemyrandomizer.h"
 
 #include "src/overlays/actors/ovl_En_Bb/z_en_bb.h"
 #include "src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.h"
@@ -471,7 +472,8 @@ void RegisterHyperBosses() {
              gSaveContext.bossRushOptions[BR_OPTIONS_HYPERBOSSES] == BR_CHOICE_HYPERBOSSES_YES);
 
         // Don't apply during cutscenes because it causes weird behaviour and/or crashes on some bosses.
-        if (hyperBossesActive && isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
+        if (gPlayState->sceneNum == SCENE_SPIRIT_TEMPLE_BOSS && isBossActor &&
+            !Player_InBlockingCsMode(gPlayState, player)) {
             // Barinade needs to be updated in sequence to avoid unintended behaviour.
             if (actor->id == ACTOR_BOSS_VA) {
                 // params -1 is BOSSVA_BODY
@@ -952,6 +954,164 @@ void RegisterAltTrapTypes() {
     });
 }
 
+// bools for queueing timed effects
+bool secondUpdate = false;
+bool timedKnockback = false;
+bool timedRandomWindActive = false;
+bool timedRandomWindDisable = false;
+bool timedRandomButtons = false;
+
+void RegisterChaosRaceStuff() {
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+
+        // Cycle effects every 2 hours
+        uint32_t currentTimer = GAMEPLAYSTAT_TOTAL_TIME % 72000;
+
+        // Effects on a timer
+        switch (currentTimer) {
+            // 1200 seconds (20 minutes) | Start Rotating Link
+            case 12000:
+                GameInteractor::State::RotatingLink = 1;
+                break;
+            // 1320 seconds (22 minutes) | Stop Rotating Link
+            case 13200:
+                GameInteractor::State::RotatingLink = 0;
+                break;
+            // 1740 seconds (29 minutes) | Knockback
+            case 17400:
+                timedKnockback = true;
+                secondUpdate = false;
+                break;
+            // 2640 seconds (44 minutes) | Start Super Random Wind
+            case 26400:
+                timedRandomWindActive = true;
+                secondUpdate = false;
+                break;
+            // 2670 seconds (44.5 minutes) | Stop Super Random Wind
+            case 26700:
+                timedRandomWindDisable = true;
+                secondUpdate = false;
+                break;
+            // 5520 seconds (92 minutes. 1 hour 32 minutes) | Start Spazzing Link
+            case 55200:
+                GameInteractor::State::SpazzingLink = 1;
+                break;
+            // 5580 seconds (93 minutes. 1 hour 33 minutes) | Stop Spazzing Link
+            case 55800:
+                GameInteractor::State::SpazzingLink = 0;
+                break;
+            // 6600 seconds (110 minutes. 1 hour 50 minutes) | Start Random Buttons
+            case 66000:
+                timedRandomButtons = true;
+                break;
+            // 6630 seconds (110.5 minutes. 1 hour 50.5 minutes) | Stop Random Buttons
+            case 66300:
+                timedRandomButtons = false;
+                break;
+            // Use secondUpdate bool to make sure an effect doesn't execute twice, as GAMEPLAYSTAT_TOTAL_TIME
+            // is being divided by 2 so is the same for 2 frames.
+            default:
+                secondUpdate = true;
+                break;
+        }
+
+        // Apply timed effects
+        if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused() && secondUpdate) {
+
+            if (timedKnockback) {
+                GameInteractor::RawAction::KnockbackPlayer(6.0f);
+                timedKnockback = false;
+            }
+
+            if (timedRandomWindActive) {
+                GameInteractor::RawAction::SetRandomWind(true);
+            }
+
+            if (timedRandomWindDisable) {
+                GameInteractor::RawAction::SetRandomWind(false);
+                timedRandomWindActive = false;
+                timedRandomWindDisable = false;
+            }
+        }
+
+        if (timedRandomButtons) {
+            GameInteractor::RawAction::EmulateRandomButtonPress(3);
+        }
+
+        if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
+
+            Player* player = GET_PLAYER(gPlayState);
+
+            // Effects on a random chance
+
+            // Random swap Mirror Mode, average once every 30 minutes.
+            uint32_t randomMirror = rand() % 36000;
+            if (randomMirror == 0) {
+                uint8_t currentMirror = CVarGetInteger("gMirroredWorldMode", 0);
+                if (currentMirror == 0) {
+                    CVarSetInteger("gMirroredWorldMode", 1);
+                } else {
+                    CVarSetInteger("gMirroredWorldMode", 0);
+                }
+                UpdateMirrorModeState(gPlayState->sceneNum);
+            }
+
+            // Random dpad hud location, average once every 10 minutes.
+            uint32_t randomDpadPos = rand() % 12000;
+            if (randomDpadPos == 0) {
+                CVarSetInteger("gDPadPosType", 2);
+                uint32_t randomXPos = rand() % 200;
+                uint32_t randomYPos = rand() % 200;
+                CVarSetInteger("gDPadPosX", 290 - randomXPos);
+                CVarSetInteger("gDPadPosY", 0 + randomYPos);
+            }
+
+            // Random Enemy spawn, average once every 60 seconds
+            uint32_t randomEnemy = rand() % 1200;
+            uint32_t seed = rand() % 20000;
+            EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
+            if (randomEnemy == 0) {
+                GameInteractor::RawAction::SpawnEnemyWithOffset(enemyToSpawn.id, enemyToSpawn.params);
+            }
+        }
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* refActor) {
+        // Random Enemy Sizes
+        Player* player = GET_PLAYER(gPlayState);
+        Actor* actor = static_cast<Actor*>(refActor);
+
+        float randomNumber;
+        float randomScale;
+
+        uint8_t bigOrSmallActor = rand() % 100;
+
+        // Big actor
+        if (bigOrSmallActor > 50 && actor->id != ACTOR_BOSS_DODONGO && actor->id != ACTOR_BOSS_FD &&
+            actor->id != ACTOR_BOSS_FD2) {
+            randomNumber = rand() % 200;
+            randomScale = 1.0f + (randomNumber / 100);
+        // Small actor
+        } else {
+            randomNumber = rand() % 90;
+            randomScale = 0.1f + (randomNumber / 100);
+        }
+
+        if ((actor->category == ACTORCAT_ENEMY || actor->category == ACTORCAT_BOSS) && actor->id != ACTOR_EN_BROB) {
+            Actor_SetScale(actor, actor->scale.z * randomScale);
+        }
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnTransitionEnd>([](int32_t sceneNum) { 
+        uint32_t randomNumber = rand() % 200;
+        if (randomNumber == 0) {
+            gPlayState->linkAgeOnLoad ^= 1;
+        }
+        GameInteractor::State::RandomBombFuseTimerActive = 1;
+    });
+}
+
 void InitMods() {
     RegisterTTS();
     RegisterInfiniteMoney();
@@ -977,4 +1137,5 @@ void InitMods() {
     RegisterEnemyDefeatCounts();
     RegisterAltTrapTypes();
     NameTag_RegisterHooks();
+    RegisterChaosRaceStuff();
 }

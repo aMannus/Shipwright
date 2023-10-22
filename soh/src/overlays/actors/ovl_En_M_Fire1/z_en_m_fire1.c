@@ -5,6 +5,7 @@
  */
 
 #include "z_en_m_fire1.h"
+#include "soh/Enhancements/game-interactor/GameInteractor.h"
 
 #define FLAGS 0
 
@@ -58,6 +59,7 @@ void EnMFire1_Init(Actor* thisx, PlayState* play) {
 }
 
 void EnMFire1_Destroy(Actor* thisx, PlayState* play) {
+    GameInteractor_SpawnCuccoStorm();
     EnMFire1* this = (EnMFire1*)thisx;
 
     Collider_DestroyCylinder(play, &this->collider);
