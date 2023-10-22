@@ -956,15 +956,9 @@ void RegisterAltTrapTypes() {
 
 // bools for queueing timed effects
 bool secondUpdate = false;
-bool timedCuccoStorm = false;
-bool timedRequiemTP = false;
 bool timedKnockback = false;
-bool timedLinksHouseTP = false;
-bool timedEmptyBombs = false;
 bool timedRandomWindActive = false;
 bool timedRandomWindDisable = false;
-bool timedSetRupeeCount = false;
-bool timedEmptyHealth = false;
 bool timedRandomButtons = false;
 
 void RegisterChaosRaceStuff() {
@@ -976,16 +970,6 @@ void RegisterChaosRaceStuff() {
 
         // Effects on a timer
         switch (currentTimer) {
-            // 120 seconds (2 minutes) | Requiem TP
-            case 1200:
-                timedRequiemTP = true;
-                secondUpdate = false;
-                break;
-            // 600 seconds (10 minutes) | Cucco Storm
-            case 6000:
-                timedCuccoStorm = true;
-                secondUpdate = false;
-                break;
             // 1200 seconds (20 minutes) | Start Rotating Link
             case 12000:
                 GameInteractor::State::RotatingLink = 1;
@@ -994,12 +978,8 @@ void RegisterChaosRaceStuff() {
             case 13200:
                 GameInteractor::State::RotatingLink = 0;
                 break;
-            // 1680 seconds (28 minutes) | Knockback
-            case 16800:
             // 1740 seconds (29 minutes) | Knockback
             case 17400:
-            // 1800 seconds (30 minutes) | Knockback
-            case 18000:
                 timedKnockback = true;
                 secondUpdate = false;
                 break;
@@ -1008,24 +988,9 @@ void RegisterChaosRaceStuff() {
                 timedRandomWindActive = true;
                 secondUpdate = false;
                 break;
-            // 2760 seconds (46 minutes) | Stop Super Random Wind
-            case 27600:
+            // 2670 seconds (44.5 minutes) | Stop Super Random Wind
+            case 26700:
                 timedRandomWindDisable = true;
-                secondUpdate = false;
-                break;
-            // 3540 seconds (59 minutes) | Teleport to Link's House
-            case 35400:
-                timedLinksHouseTP = true;
-                secondUpdate = false;
-                break;
-            // 4140 seconds (69 minutes. 1 hour 9 minutes) | Set rupees to 69
-            case 41400:
-                timedSetRupeeCount = true;
-                secondUpdate = false;
-                break;
-            // 4560 seconds (76 minutes. 1 hour 16 minutes) | Empty Bombs
-            case 45600:
-                timedEmptyBombs = true;
                 secondUpdate = false;
                 break;
             // 5520 seconds (92 minutes. 1 hour 32 minutes) | Start Spazzing Link
@@ -1036,17 +1001,12 @@ void RegisterChaosRaceStuff() {
             case 55800:
                 GameInteractor::State::SpazzingLink = 0;
                 break;
-            // 6300 seconds (105 minutes. 1 hour 45 minutes) | Set Health to 1/4 heart
-            case 63000:
-                timedEmptyHealth = true;
-                secondUpdate = false;
-                break;
             // 6600 seconds (110 minutes. 1 hour 50 minutes) | Start Random Buttons
             case 66000:
                 timedRandomButtons = true;
                 break;
-            // 6780 seconds (113 minutes. 1 hour 53 minutes) | Stop Random Buttons
-            case 67800:
+            // 6630 seconds (110.5 minutes. 1 hour 50.5 minutes) | Stop Random Buttons
+            case 66300:
                 timedRandomButtons = false;
                 break;
             // Use secondUpdate bool to make sure an effect doesn't execute twice, as GAMEPLAYSTAT_TOTAL_TIME
@@ -1058,28 +1018,6 @@ void RegisterChaosRaceStuff() {
 
         // Apply timed effects
         if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused() && secondUpdate) {
-            if (timedRequiemTP) {
-                GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_REQUIEM);
-                timedRequiemTP = false;
-            }
-
-            if (timedLinksHouseTP) {
-                GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_LINKSHOUSE);
-                timedLinksHouseTP = false;
-            }
-
-            if (timedCuccoStorm) {
-                for (uint8_t i = 0; i < 5; i++) {
-                    GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0);
-                }
-                timedCuccoStorm = false;
-            }
-
-            if (timedEmptyBombs) {
-                Inventory_ChangeAmmo(ITEM_BOMBCHU, -50);
-                Inventory_ChangeAmmo(ITEM_BOMB, -50);
-                timedEmptyBombs = false;
-            }
 
             if (timedKnockback) {
                 GameInteractor::RawAction::KnockbackPlayer(6.0f);
@@ -1095,16 +1033,6 @@ void RegisterChaosRaceStuff() {
                 timedRandomWindActive = false;
                 timedRandomWindDisable = false;
             }
-
-            if (timedSetRupeeCount) {
-                gSaveContext.rupees = 69;
-                timedSetRupeeCount = false;
-            }
-
-            if (timedEmptyHealth) {
-                gSaveContext.health = 4;
-                timedEmptyHealth = false;
-            }
         }
 
         if (timedRandomButtons) {
@@ -1115,27 +1043,10 @@ void RegisterChaosRaceStuff() {
 
             Player* player = GET_PLAYER(gPlayState);
 
-            // Unequip ocarina on dpad down
-            if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
-                gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
-                gSaveContext.equips.buttonItems[5] = ITEM_NONE;
-            }
-            // Unequip bunny hood on dpad up
-            if (gSaveContext.equips.buttonItems[4] == ITEM_MASK_BUNNY) {
-                gSaveContext.equips.buttonItems[4] = ITEM_NONE;
-            }
-
-            // Reverse controls with bunny hood
-            if (player->currentMask == PLAYER_MASK_BUNNY) {
-                GameInteractor::State::ReverseControlsActive = 1;
-            } else {
-                GameInteractor::State::ReverseControlsActive = 0;
-            }
-
             // Effects on a random chance
 
-            // Random swap Mirror Mode, average once every 10 minutes.
-            uint32_t randomMirror = rand() % 12000;
+            // Random swap Mirror Mode, average once every 30 minutes.
+            uint32_t randomMirror = rand() % 36000;
             if (randomMirror == 0) {
                 uint8_t currentMirror = CVarGetInteger("gMirroredWorldMode", 0);
                 if (currentMirror == 0) {
@@ -1156,30 +1067,12 @@ void RegisterChaosRaceStuff() {
                 CVarSetInteger("gDPadPosY", 0 + randomYPos);
             }
 
-            // Random Enemy spawn, average once every 30 seconds
-            uint32_t randomEnemy = rand() % 600;
+            // Random Enemy spawn, average once every 60 seconds
+            uint32_t randomEnemy = rand() % 1200;
             uint32_t seed = rand() % 20000;
             EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
             if (randomEnemy == 0) {
                 GameInteractor::RawAction::SpawnEnemyWithOffset(enemyToSpawn.id, enemyToSpawn.params);
-            }
-
-            // Random unequip shield, average once every 2 minutes
-            uint32_t randomShield = rand() % 2400;
-            if (randomShield == 0) {
-                player->currentShield = PLAYER_SHIELD_NONE;
-            }
-
-            // Random unequip c-buttons, average once every 10 minutes
-            uint32_t randomUnequipCButtons = rand() % 12000;
-            if (randomUnequipCButtons == 0) {
-                GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_CBUTTONS);
-            }
-
-            // Random unequip d-pad, average once every 10 minutes
-            uint32_t randomUnequipDPad = rand() % 12000;
-            if (randomUnequipDPad == 0) {
-                GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_DPAD);
             }
         }
     });
@@ -1211,17 +1104,11 @@ void RegisterChaosRaceStuff() {
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnTransitionEnd>([](int32_t sceneNum) { 
-        uint32_t randomNumber = rand() % 100;
+        uint32_t randomNumber = rand() % 200;
         if (randomNumber == 0) {
             gPlayState->linkAgeOnLoad ^= 1;
         }
         GameInteractor::State::RandomBombFuseTimerActive = 1;
-    });
-
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
-        Player* player = GET_PLAYER(gPlayState);
-        player->currentTunic = PLAYER_TUNIC_KOKIRI;
-        Inventory_ChangeEquipment(EQUIP_TUNIC, PLAYER_TUNIC_KOKIRI + 1);
     });
 }
 
