@@ -1292,7 +1292,7 @@ void RegisterChaosRaceStuff() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
         Player* player = GET_PLAYER(gPlayState);
         player->currentTunic = PLAYER_TUNIC_KOKIRI;
-        Inventory_ChangeEquipment(EQUIP_TUNIC, PLAYER_TUNIC_KOKIRI + 1);
+        Inventory_ChangeEquipment(EQUIP_TYPE_TUNIC, PLAYER_TUNIC_KOKIRI + 1);
     });
 }
 
@@ -1345,7 +1345,6 @@ void InitMods() {
     RegisterEnemyDefeatCounts();
     RegisterAltTrapTypes();
     RegisterRandomizerSheikSpawn();
-    RegisterRandomizedEnemySizes();
     NameTag_RegisterHooks();
     RegisterChaosRaceStuff();
 }
