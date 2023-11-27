@@ -1196,9 +1196,9 @@ f32 EnGo2_GetTargetXZSpeed(EnGo2* this) {
 
     if (index == GORON_CITY_LINK && (fabsf(this->actor.yDistToPlayer) < yDist) &&
         (this->actor.xzDistToPlayer < 400.0f)) {
-        return 9.0f;
+        return 12.0f;
     } else {
-        return index == GORON_CITY_ROLLING_BIG ? 3.6000001f : 6.0f;
+        return index == GORON_CITY_ROLLING_BIG ? 9.0f : 3.0f;
     }
 }
 
@@ -2134,13 +2134,13 @@ s32 EnGo2_OverrideLimbDraw(PlayState* play, s32 limb, Gfx** dList, Vec3f* pos, V
     f32 float1;
 
     if (limb == 17) {
-        Matrix_Translate(2800.0f + CVarGetFloat("gCosmetics.Goron_NeckLength", 0.0f), 0.0f, 0.0f, MTXMODE_APPLY);
+        Matrix_Translate(2800.0f + 3000.0f, 0.0f, 0.0f, MTXMODE_APPLY);
         vec1 = this->interactInfo.headRot;
         float1 = (vec1.y / (f32)0x8000) * M_PI;
         Matrix_RotateX(float1, MTXMODE_APPLY);
         float1 = (vec1.x / (f32)0x8000) * M_PI;
         Matrix_RotateZ(float1, MTXMODE_APPLY);
-        Matrix_Translate(-2800.0f, 0.0f, 0.0f, MTXMODE_APPLY);
+        Matrix_Translate(-2800.0f + 3000.0f, 0.0f, 0.0f, MTXMODE_APPLY);
     }
     if (limb == 10) {
         vec1 = this->interactInfo.torsoRot;

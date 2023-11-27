@@ -233,7 +233,7 @@ void func_80A74398(Actor* thisx, PlayState* play) {
     Effect_Add(play, &this->blureIdx, EFFECT_BLURE1, 0, 0, &blureInit);
     func_80A74714(this);
 
-    uint8_t enemyRandoCCActive = CVarGetInteger("gRandomizedEnemies", 0) || CVarGetInteger("gCrowdControl", 0);
+    uint8_t enemyRandoCCActive = 1;
 
     if (this->switchFlags != 0xFF) {
         // In vanilla gameplay, Iron Knuckles are despawned based on specific flags in specific scenarios.
@@ -1484,7 +1484,7 @@ void EnIk_Init(Actor* thisx, PlayState* play) {
     }
 
     // Immediately trigger Iron Knuckle for Enemy Rando and Crowd Control
-    if ((CVarGetInteger("gRandomizedEnemies", 0) || CVarGetInteger("gCrowdControl", 0)) && (thisx->params == 2 || thisx->params == 3)) {
+    if ((thisx->params == 2 || thisx->params == 3)) {
         this->skelAnime.playSpeed = 1.0f;
     }
 }

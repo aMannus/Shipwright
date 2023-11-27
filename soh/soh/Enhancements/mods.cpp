@@ -9,6 +9,7 @@
 #include "soh/Enhancements/cosmetics/authenticGfxPatches.h"
 #include <soh/Enhancements/item-tables/ItemTableManager.h>
 #include "soh/Enhancements/nametag.h"
+#include "soh/Enhancements/enemyrandomizer.h"
 
 #include "src/overlays/actors/ovl_En_Bb/z_en_bb.h"
 #include "src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.h"
@@ -477,7 +478,8 @@ void RegisterHyperBosses() {
              gSaveContext.bossRushOptions[BR_OPTIONS_HYPERBOSSES] == BR_CHOICE_HYPERBOSSES_YES);
 
         // Don't apply during cutscenes because it causes weird behaviour and/or crashes on some bosses.
-        if (hyperBossesActive && isBossActor && !Player_InBlockingCsMode(gPlayState, player)) {
+        if (gPlayState->sceneNum == SCENE_SPIRIT_TEMPLE_BOSS && isBossActor &&
+            !Player_InBlockingCsMode(gPlayState, player)) {
             // Barinade needs to be updated in sequence to avoid unintended behaviour.
             if (actor->id == ACTOR_BOSS_VA) {
                 // params -1 is BOSSVA_BODY
@@ -997,29 +999,236 @@ void RegisterAltTrapTypes() {
     });
 }
 
-void RegisterRandomizerSheikSpawn() {
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
-        if (!gPlayState) return;
-        bool canSheik = (OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_TRIAL_COUNT) != RO_GANONS_TRIALS_SKIP && 
-          OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_LIGHT_ARROWS_HINT));
-        if (!IS_RANDO || !LINK_IS_ADULT || !canSheik) return;
-        switch (gPlayState->sceneNum) {
-            case SCENE_TEMPLE_OF_TIME:
-                if (gPlayState->roomCtx.curRoom.num == 1) {
-                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_XC, -104, -40, 2382, 0, 0x8000, 0, SHEIK_TYPE_RANDO, false);
+// bools for queueing timed effects
+bool secondUpdate = false;
+bool timedCuccoStorm = false;
+bool timedRequiemTP = false;
+bool timedKnockback = false;
+bool timedLinksHouseTP = false;
+bool timedEmptyBombs = false;
+bool timedRandomWindActive = false;
+bool timedRandomWindDisable = false;
+bool timedSetRupeeCount = false;
+bool timedEmptyHealth = false;
+bool timedRandomButtons = false;
+
+void RegisterChaosRaceStuff() {
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+
+        // Cycle effects every 2 hours
+        uint32_t currentTimer = GAMEPLAYSTAT_TOTAL_TIME % 72000;
+
+        // Effects on a timer
+        switch (currentTimer) {
+            // 120 seconds (2 minutes) | Requiem TP
+            case 1200:
+                timedRequiemTP = true;
+                secondUpdate = false;
+                break;
+            // 600 seconds (10 minutes) | Cucco Storm
+            case 6000:
+                timedCuccoStorm = true;
+                secondUpdate = false;
+                break;
+            // 1200 seconds (20 minutes) | Start Rotating Link
+            case 12000:
+                GameInteractor::State::RotatingLink = 1;
+                break;
+            // 1320 seconds (22 minutes) | Stop Rotating Link
+            case 13200:
+                GameInteractor::State::RotatingLink = 0;
+                break;
+            // 1680 seconds (28 minutes) | Knockback
+            case 16800:
+            // 1740 seconds (29 minutes) | Knockback
+            case 17400:
+            // 1800 seconds (30 minutes) | Knockback
+            case 18000:
+                timedKnockback = true;
+                secondUpdate = false;
+                break;
+            // 2640 seconds (44 minutes) | Start Super Random Wind
+            case 26400:
+                timedRandomWindActive = true;
+                secondUpdate = false;
+                break;
+            // 2760 seconds (46 minutes) | Stop Super Random Wind
+            case 27600:
+                timedRandomWindDisable = true;
+                secondUpdate = false;
+                break;
+            // 3540 seconds (59 minutes) | Teleport to Link's House
+            case 35400:
+                timedLinksHouseTP = true;
+                secondUpdate = false;
+                break;
+            // 4140 seconds (69 minutes. 1 hour 9 minutes) | Set rupees to 69
+            case 41400:
+                timedSetRupeeCount = true;
+                secondUpdate = false;
+                break;
+            // 4560 seconds (76 minutes. 1 hour 16 minutes) | Empty Bombs
+            case 45600:
+                timedEmptyBombs = true;
+                secondUpdate = false;
+                break;
+            // 5520 seconds (92 minutes. 1 hour 32 minutes) | Start Spazzing Link
+            case 55200:
+                GameInteractor::State::SpazzingLink = 1;
+                break;
+            // 5580 seconds (93 minutes. 1 hour 33 minutes) | Stop Spazzing Link
+            case 55800:
+                GameInteractor::State::SpazzingLink = 0;
+                break;
+            // 6300 seconds (105 minutes. 1 hour 45 minutes) | Set Health to 1/4 heart
+            case 63000:
+                timedEmptyHealth = true;
+                secondUpdate = false;
+                break;
+            // 6600 seconds (110 minutes. 1 hour 50 minutes) | Start Random Buttons
+            case 66000:
+                timedRandomButtons = true;
+                break;
+            // 6780 seconds (113 minutes. 1 hour 53 minutes) | Stop Random Buttons
+            case 67800:
+                timedRandomButtons = false;
+                break;
+            // Use secondUpdate bool to make sure an effect doesn't execute twice, as GAMEPLAYSTAT_TOTAL_TIME
+            // is being divided by 2 so is the same for 2 frames.
+            default:
+                secondUpdate = true;
+                break;
+        }
+
+        // Apply timed effects
+        if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused() && secondUpdate) {
+            if (timedRequiemTP) {
+                GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_REQUIEM);
+                timedRequiemTP = false;
+            }
+
+            if (timedLinksHouseTP) {
+                GameInteractor::RawAction::TeleportPlayer(GI_TP_DEST_LINKSHOUSE);
+                timedLinksHouseTP = false;
+            }
+
+            if (timedCuccoStorm) {
+                for (uint8_t i = 0; i < 5; i++) {
+                    GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0);
                 }
-                break;
-            case SCENE_INSIDE_GANONS_CASTLE:
-                if (gPlayState->roomCtx.curRoom.num == 1){
-                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_XC, 101, 150, 137, 0, 0, 0, SHEIK_TYPE_RANDO, false);
-                    }
-                break;
-            default: break;
+                timedCuccoStorm = false;
+            }
+
+            if (timedEmptyBombs) {
+                Inventory_ChangeAmmo(ITEM_BOMBCHU, -50);
+                Inventory_ChangeAmmo(ITEM_BOMB, -50);
+                timedEmptyBombs = false;
+            }
+
+            if (timedKnockback) {
+                GameInteractor::RawAction::KnockbackPlayer(6.0f);
+                timedKnockback = false;
+            }
+
+            if (timedRandomWindActive) {
+                GameInteractor::RawAction::SetRandomWind(true);
+            }
+
+            if (timedRandomWindDisable) {
+                GameInteractor::RawAction::SetRandomWind(false);
+                timedRandomWindActive = false;
+                timedRandomWindDisable = false;
+            }
+
+            if (timedSetRupeeCount) {
+                gSaveContext.rupees = 69;
+                timedSetRupeeCount = false;
+            }
+
+            if (timedEmptyHealth) {
+                gSaveContext.health = 4;
+                timedEmptyHealth = false;
+            }
+        }
+
+        if (timedRandomButtons) {
+            GameInteractor::RawAction::EmulateRandomButtonPress(3);
+        }
+
+        if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
+
+            Player* player = GET_PLAYER(gPlayState);
+
+            // Unequip ocarina on dpad down
+            if (gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_FAIRY ||
+                gSaveContext.equips.buttonItems[5] == ITEM_OCARINA_TIME) {
+                gSaveContext.equips.buttonItems[5] = ITEM_NONE;
+            }
+            // Unequip bunny hood on dpad up
+            if (gSaveContext.equips.buttonItems[4] == ITEM_MASK_BUNNY) {
+                gSaveContext.equips.buttonItems[4] = ITEM_NONE;
+            }
+
+            // Reverse controls with bunny hood
+            if (player->currentMask == PLAYER_MASK_BUNNY) {
+                GameInteractor::State::ReverseControlsActive = 1;
+            } else {
+                GameInteractor::State::ReverseControlsActive = 0;
+            }
+
+            // Effects on a random chance
+
+            // Random swap Mirror Mode, average once every 10 minutes.
+            uint32_t randomMirror = rand() % 12000;
+            if (randomMirror == 0) {
+                uint8_t currentMirror = CVarGetInteger("gMirroredWorldMode", 0);
+                if (currentMirror == 0) {
+                    CVarSetInteger("gMirroredWorldMode", 1);
+                } else {
+                    CVarSetInteger("gMirroredWorldMode", 0);
+                }
+                UpdateMirrorModeState(gPlayState->sceneNum);
+            }
+
+            // Random dpad hud location, average once every 10 minutes.
+            uint32_t randomDpadPos = rand() % 12000;
+            if (randomDpadPos == 0) {
+                CVarSetInteger("gDPadPosType", 2);
+                uint32_t randomXPos = rand() % 200;
+                uint32_t randomYPos = rand() % 200;
+                CVarSetInteger("gDPadPosX", 290 - randomXPos);
+                CVarSetInteger("gDPadPosY", 0 + randomYPos);
+            }
+
+            // Random Enemy spawn, average once every 30 seconds
+            uint32_t randomEnemy = rand() % 600;
+            uint32_t seed = rand() % 20000;
+            EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
+            if (randomEnemy == 0) {
+                GameInteractor::RawAction::SpawnEnemyWithOffset(enemyToSpawn.id, enemyToSpawn.params);
+            }
+
+            // Random unequip shield, average once every 2 minutes
+            uint32_t randomShield = rand() % 2400;
+            if (randomShield == 0) {
+                player->currentShield = PLAYER_SHIELD_NONE;
+            }
+
+            // Random unequip c-buttons, average once every 10 minutes
+            uint32_t randomUnequipCButtons = rand() % 12000;
+            if (randomUnequipCButtons == 0) {
+                GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_CBUTTONS);
+            }
+
+            // Random unequip d-pad, average once every 10 minutes
+            uint32_t randomUnequipDPad = rand() % 12000;
+            if (randomUnequipDPad == 0) {
+                GameInteractor::RawAction::ClearAssignedButtons(GI_BUTTONS_DPAD);
+            }
         }
     });
-}
 
-void RegisterRandomizedEnemySizes() {
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* refActor) {
         // Randomized Enemy Sizes
         Player* player = GET_PLAYER(gPlayState);
@@ -1044,11 +1253,48 @@ void RegisterRandomizedEnemySizes() {
         // Small actor
         } else {
             randomNumber = rand() % 90;
-            // Between 10% and 100% size.
             randomScale = 0.1f + (randomNumber / 100);
         }
 
-        Actor_SetScale(actor, actor->scale.z * randomScale);
+        if ((actor->category == ACTORCAT_ENEMY || actor->category == ACTORCAT_BOSS) && actor->id != ACTOR_EN_BROB) {
+            Actor_SetScale(actor, actor->scale.z * randomScale);
+        }
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnTransitionEnd>([](int32_t sceneNum) { 
+        uint32_t randomNumber = rand() % 100;
+        if (randomNumber == 0) {
+            gPlayState->linkAgeOnLoad ^= 1;
+        }
+        GameInteractor::State::RandomBombFuseTimerActive = 1;
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
+        Player* player = GET_PLAYER(gPlayState);
+        player->currentTunic = PLAYER_TUNIC_KOKIRI;
+        Inventory_ChangeEquipment(EQUIP_TYPE_TUNIC, PLAYER_TUNIC_KOKIRI + 1);
+    });
+}
+
+void RegisterRandomizerSheikSpawn() {
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() {
+        if (!gPlayState) return;
+        bool canSheik = (OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_TRIAL_COUNT) != RO_GANONS_TRIALS_SKIP && 
+          OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_LIGHT_ARROWS_HINT));
+        if (!IS_RANDO || !LINK_IS_ADULT || !canSheik) return;
+        switch (gPlayState->sceneNum) {
+            case SCENE_TEMPLE_OF_TIME:
+                if (gPlayState->roomCtx.curRoom.num == 1) {
+                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_XC, -104, -40, 2382, 0, 0x8000, 0, SHEIK_TYPE_RANDO, false);
+                }
+                break;
+            case SCENE_INSIDE_GANONS_CASTLE:
+                if (gPlayState->roomCtx.curRoom.num == 1){
+                    Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_XC, 101, 150, 137, 0, 0, 0, SHEIK_TYPE_RANDO, false);
+                    }
+                break;
+            default: break;
+        }
     });
 }
 
@@ -1079,6 +1325,6 @@ void InitMods() {
     RegisterEnemyDefeatCounts();
     RegisterAltTrapTypes();
     RegisterRandomizerSheikSpawn();
-    RegisterRandomizedEnemySizes();
     NameTag_RegisterHooks();
+    RegisterChaosRaceStuff();
 }

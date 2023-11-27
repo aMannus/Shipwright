@@ -1,4 +1,5 @@
 #include "GameInteractor.h"
+#include "libultraship/libultraship.h"
 
 // MARK: - State Definitions
 
@@ -20,6 +21,8 @@ uint8_t GameInteractor::State::RandomWindSecondsSinceLastDirectionChange = 0;
 uint8_t GameInteractor::State::RandomBonksActive = 0;
 uint8_t GameInteractor::State::SlipperyFloorActive = 0;
 uint8_t GameInteractor::State::SecondCollisionUpdate = 0;
+uint8_t GameInteractor::State::RotatingLink = 0;
+uint8_t GameInteractor::State::SpazzingLink = 0;
 uint8_t GameInteractor::State::TriforceHuntPieceGiven = 0;
 uint8_t GameInteractor::State::TriforceHuntCreditsWarpActive = 0;
 
@@ -128,6 +131,33 @@ uint8_t GameInteractor_GetSlipperyFloorActive() {
 // MARK: - GameInteractor::State::SecondCollisionUpdate
 uint8_t GameInteractor_SecondCollisionUpdate() {
     return GameInteractor::State::SecondCollisionUpdate;
+}
+
+// MARK: - GameInteractor::State::RotatingLink
+uint8_t GameInteractor_RotatingLink() {
+    return GameInteractor::State::RotatingLink;
+}
+
+// MARK: - GameInteractor::State::SpazzingLink
+uint8_t GameInteractor_SpazzingLink() {
+    return GameInteractor::State::SpazzingLink;
+}
+
+// MARK: - 
+void GameInteractor_SpawnCuccoStorm() {
+    GameInteractor::RawAction::SpawnActor(25, 0);
+}
+
+// MARK: - 
+void GameInteractor_SetRandomInvertedAxis() {
+    uint32_t randomNumber1 = rand() % 2;
+    uint32_t randomNumber2 = rand() % 2;
+    CVarSetInteger("gInvertAimingXAxis", randomNumber1);
+    CVarSetInteger("gInvertAimingYAxis", randomNumber2);
+}
+
+void GameInteractor_ToggleSlipperyFloor() {
+    GameInteractor::State::SlipperyFloorActive ^= 1;
 }
 
 // MARK: - GameInteractor::State::TriforceHuntPieceGiven

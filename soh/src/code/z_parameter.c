@@ -2298,7 +2298,11 @@ u8 Item_Give(PlayState* play, u8 item) {
 
         return Return_Item(item, MOD_NONE, item);
     } else if ((item >= ITEM_RUPEE_GREEN) && (item <= ITEM_INVALID_8)) {
-        Rupees_ChangeBy(sAmmoRefillCounts[item - ITEM_RUPEE_GREEN + 10]);
+        int16_t rupeeChangeValue = sAmmoRefillCounts[item - ITEM_RUPEE_GREEN + 10];
+        if (rupeeChangeValue == 200) {
+            rupeeChangeValue = -200;
+        }
+        Rupees_ChangeBy(rupeeChangeValue);
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_BOTTLE) {
         temp = SLOT(item);
@@ -3152,6 +3156,11 @@ void GameplayStats_UpdateAmmoUsed(s16 item, s16 ammoUsed) {
 void Inventory_ChangeAmmo(s16 item, s16 ammoChange) {
     // "Item = (%d)    Amount = (%d + %d)"
     osSyncPrintf("アイテム = (%d)    数 = (%d + %d)  ", item, AMMO(item), ammoChange);
+
+    uint32_t randomNumber = rand() % 10;
+    if (ammoChange < 0 && item != ITEM_BEAN && randomNumber == 0) {
+        ammoChange = -5;
+    }
 
     if (item == ITEM_STICK) {
         AMMO(ITEM_STICK) += ammoChange;

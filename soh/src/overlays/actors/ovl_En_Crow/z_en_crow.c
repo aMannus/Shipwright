@@ -2,7 +2,7 @@
 #include "objects/object_crow/object_crow.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 
-#define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE | ACTOR_FLAG_ARROW_DRAGGABLE)
+#define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_HOSTILE | ACTOR_FLAG_IGNORE_QUAKE)
 
 void EnCrow_Init(Actor* thisx, PlayState* play);
 void EnCrow_Destroy(Actor* thisx, PlayState* play);
@@ -440,7 +440,7 @@ void EnCrow_Update(Actor* thisx, PlayState* play) {
     f32 height;
     f32 scale;
 
-    EnCrow_UpdateDamage(this, play);
+    //EnCrow_UpdateDamage(this, play);
     this->actionFunc(this, play);
     scale = this->actor.scale.x * 100.0f;
     this->actor.world.rot.y = this->actor.shape.rot.y;
