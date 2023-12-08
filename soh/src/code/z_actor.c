@@ -1255,8 +1255,15 @@ void func_8002D7EC(Actor* actor) {
 }
 
 void func_8002D868(Actor* actor) {
-    actor->velocity.x = Math_SinS(actor->world.rot.y) * actor->speedXZ;
-    actor->velocity.z = Math_CosS(actor->world.rot.y) * actor->speedXZ;
+    if (actor->id == ACTOR_PLAYER && CVarGetInteger("gFasterOnButtonPresses", 0)) {
+        f32 speedModifier = (f32)CVarGetInteger("gFasterOnButtonPressesSpeed", 0) / 100;
+        actor->velocity.x = Math_SinS(actor->world.rot.y) * actor->speedXZ * speedModifier;
+        actor->velocity.z = Math_CosS(actor->world.rot.y) * actor->speedXZ * speedModifier;
+    } else {
+        actor->velocity.x = Math_SinS(actor->world.rot.y) * actor->speedXZ;
+        actor->velocity.z = Math_CosS(actor->world.rot.y) * actor->speedXZ;
+    }
+    
 
     actor->velocity.y += actor->gravity;
     if (actor->velocity.y < actor->minVelocityY) {

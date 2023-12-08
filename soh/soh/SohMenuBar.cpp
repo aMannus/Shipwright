@@ -1116,8 +1116,17 @@ void DrawEnhancementsMenu() {
         UIWidgets::Spacer(0);
 
         if (ImGui::BeginMenu("Extra Modes")) {
+            if (ImGui::BeginMenu("FASTER-FASTER-FASTER")) {
+                UIWidgets::PaddedEnhancementCheckbox("FASTER-FASTER-FASTER", "gFasterOnButtonPresses", false, false);
+                UIWidgets::PaddedEnhancementSliderInt("FASTER Scaling: %d %%", "##FasterOnButtonPressesScaling",
+                                                      "gFasterOnButtonPressesScaling", 0, 100, "", 0, true, true, false);
+                UIWidgets::PaddedEnhancementSliderInt("FASTER Current Speed: %d %%", "##FasterOnButtonPressesSpeed",
+                                                      "gFasterOnButtonPressesSpeed", 0, 3000, "", 5, true, true,
+                                                      false);
+                ImGui::EndMenu();
+            }
         #ifdef ENABLE_CROWD_CONTROL
-            if (UIWidgets::PaddedEnhancementCheckbox("Crowd Control", "gCrowdControl", false, false)) {
+            if (UIWidgets::PaddedEnhancementCheckbox("Crowd Control", "gCrowdControl", true, false)) {
                 if (CVarGetInteger("gCrowdControl", 0)) {
                     CrowdControl::Instance->Enable();
                 } else {

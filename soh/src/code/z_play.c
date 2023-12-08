@@ -830,6 +830,13 @@ void Play_Update(PlayState* play) {
             if (CHECK_BTN_ALL(input[0].press.button, BTN_Z))      {gSaveContext.sohStats.count[COUNT_BUTTON_PRESSES_Z]++;}
             if (CHECK_BTN_ALL(input[0].press.button, BTN_START))  {gSaveContext.sohStats.count[COUNT_BUTTON_PRESSES_START]++;}
 
+            if (CHECK_BTN_ALL(input[0].press.button, BTN_A) && CVarGetInteger("gFasterOnButtonPresses", 0)) {
+                int32_t movingSpeed = CVarGetInteger("gFasterOnButtonPressesSpeed", 0);
+                int32_t scaling = CVarGetInteger("gFasterOnButtonPressesScaling", 5);
+                int32_t newSpeed = movingSpeed + scaling;
+                CVarSetInteger("gFasterOnButtonPressesSpeed", newSpeed);
+            }
+
             // Start RTA timing on first non-c-up input after intro cutscene
             if (
                 !gSaveContext.sohStats.fileCreatedAt && !Player_InCsMode(play) && 
