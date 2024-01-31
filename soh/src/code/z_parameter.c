@@ -1521,6 +1521,13 @@ void Inventory_SwapAgeEquipment(void) {
                 }
             }
 
+            // In Rando, when switching to adult for the second+ time, if a sword was not previously
+            // equiped in MS shuffle, then we need to set the swordless flag again
+            if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) &&
+                gSaveContext.equips.buttonItems[0] == ITEM_NONE) {
+                Flags_SetInfTable(INFTABLE_SWORDLESS);
+            }
+
             gSaveContext.equips.equipment = gSaveContext.adultEquips.equipment;
         }
     } else {
@@ -1587,6 +1594,13 @@ void Inventory_SwapAgeEquipment(void) {
                     gSaveContext.equips.buttonItems[i] =
                         gSaveContext.inventory.items[gSaveContext.equips.cButtonSlots[i - 1]];
                 }
+            }
+
+            // In Rando, when switching to child from a swordless adult, and child Link previously had a
+            // sword equiped, then we need to unset the swordless flag to match
+            if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) &&
+                gSaveContext.equips.buttonItems[0] != ITEM_NONE) {
+                Flags_UnsetInfTable(INFTABLE_SWORDLESS);
             }
 
             gSaveContext.equips.equipment = gSaveContext.childEquips.equipment;
@@ -3569,7 +3583,7 @@ void Interface_DrawLineupTick(PlayState* play) {
     s16 width = 32;
     s16 height = 32;
     s16 x = -8 + (SCREEN_WIDTH / 2);
-    s16 y = CVarGetInteger("gOpenMenuBar", 0) ? -4 : -6;
+    s16 y = -6;
 
     OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gEmptyCDownArrowTex, width, height, x, y, width, height, 2 << 10, 2 << 10);
 
