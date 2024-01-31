@@ -265,6 +265,11 @@ typedef enum {
     SECTION_DISPLAY_EXTENDED_SEPARATE
 } ItemTrackerExtendedDisplayType;
 
+typedef enum {
+    SECTION_DISPLAY_MINIMAL_HIDDEN,
+    SECTION_DISPLAY_MINIMAL_SEPARATE
+} ItemTrackerMinimalDisplayType;
+
 struct ItemTrackerNumbers {
   int currentCapacity;
   int maxCapacity;
@@ -739,6 +744,14 @@ void DrawNotes(bool resizeable = false) {
     ImGui::EndGroup();
 }
 
+void DrawPlayerSpeed() {
+    ImGui::BeginGroup();
+    uint32_t playerSpeed = CVarGetInteger("gFasterOnButtonPressesSpeed", 0);
+    ImGui::SetWindowFontScale(4.0);
+    ImGui::Text("CURRENT SPEED: %d%%", playerSpeed);
+    ImGui::EndGroup();
+}
+
 // Windowing stuff
 ImVec4 ChromaKeyBackground = { 0, 0, 0, 0 }; // Float value, 1 = 255 in rgb value.
 void BeginFloatingWindows(std::string UniqueName, ImGuiWindowFlags flags = 0) {
@@ -1062,6 +1075,13 @@ void ItemTrackerWindow::DrawElement() {
             DrawNotes(true);
             EndFloatingWindows();
         }
+
+        if (CVarGetInteger("gItemTrackerPlayerSpeedDisplayType", SECTION_DISPLAY_MINIMAL_HIDDEN) == SECTION_DISPLAY_MINIMAL_SEPARATE) {
+            ImGui::SetNextWindowSize(ImVec2(400,300), ImGuiCond_FirstUseEver);
+            BeginFloatingWindows("Player Speed");
+            DrawPlayerSpeed();
+            EndFloatingWindows();
+        }
     }
 }
 
@@ -1073,6 +1093,7 @@ static const char* displayModes[2] = { "Always", "Combo Button Hold" };
 static const char* buttons[14] = { "A", "B", "C-Up", "C-Down", "C-Left", "C-Right", "L", "Z", "R", "Start", "D-Up", "D-Down", "D-Left", "D-Right" };
 static const char* displayTypes[3] = { "Hidden", "Main Window", "Separate" };
 static const char* extendedDisplayTypes[4] = { "Hidden", "Main Window", "Misc Window", "Separate" };
+static const char* minimalDisplayTypes[2] = { "Hidden", "Separate" };
 
 void ItemTrackerSettingsWindow::DrawElement() {
     ImGui::SetNextWindowSize(ImVec2(733, 472), ImGuiCond_FirstUseEver);
@@ -1199,6 +1220,10 @@ void ItemTrackerSettingsWindow::DrawElement() {
         if (UIWidgets::LabeledRightAlignedEnhancementCombobox("Personal notes", "gItemTrackerNotesDisplayType", displayTypes, SECTION_DISPLAY_HIDDEN)) {
             shouldUpdateVectors = true;
         }
+    }
+
+    if (UIWidgets::LabeledRightAlignedEnhancementCombobox("Player Speed", "gItemTrackerPlayerSpeedDisplayType", minimalDisplayTypes, SECTION_DISPLAY_MINIMAL_HIDDEN)) {
+        shouldUpdateVectors = true;
     }
 
     ImGui::PopStyleVar(1);
