@@ -1223,6 +1223,19 @@ void RegisterToTMedallions() {
     });
 }
 
+void RegisterFasterFasterFaster() {
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnItemReceive>([](GetItemEntry _unused) {
+        if (CVarGetInteger("gFasterFasterFaster", 0) != FASTER_FASTER_FASTER_RECEIVE_ITEM || !gPlayState) {
+            return;
+        }
+
+        int32_t movingSpeed = CVarGetInteger("gFasterFasterFasterSpeed", 0);
+        int32_t scaling = CVarGetInteger("gFasterFasterFasterScaling", 5);
+        int32_t newSpeed = movingSpeed + scaling;
+        CVarSetInteger("gFasterFasterFasterSpeed", newSpeed);
+    });
+}
+
 void InitMods() {
     RegisterTTS();
     RegisterInfiniteMoney();
@@ -1255,5 +1268,6 @@ void InitMods() {
     RegisterRandomizerSheikSpawn();
     RegisterRandomizedEnemySizes();
     RegisterToTMedallions();
+    RegisterFasterFasterFaster();
     NameTag_RegisterHooks();
 }

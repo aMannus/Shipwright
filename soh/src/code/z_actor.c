@@ -1279,8 +1279,8 @@ void func_8002D868(Actor* actor) {
     uint8_t inCutscene = player->stateFlags1 & PLAYER_STATE1_CLIMBING_LADDER ||
                          player->stateFlags1 & PLAYER_STATE1_IN_CUTSCENE ||
                          player->stateFlags2 & PLAYER_STATE2_CRAWLING;
-    if (actor->id == ACTOR_PLAYER && CVarGetInteger("gFasterOnButtonPresses", 0) && !inCutscene) {
-        f32 speedModifier = (f32)CVarGetInteger("gFasterOnButtonPressesSpeed", 0) / 100;
+    if (actor->id == ACTOR_PLAYER && CVarGetInteger("gFasterFasterFaster", 0) && !inCutscene) {
+        f32 speedModifier = (f32)CVarGetInteger("gFasterFasterFasterSpeed", 0) / 100;
         actor->velocity.x = Math_SinS(actor->world.rot.y) * actor->speedXZ * speedModifier;
         actor->velocity.z = Math_CosS(actor->world.rot.y) * actor->speedXZ * speedModifier;
     } else {

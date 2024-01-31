@@ -75,6 +75,7 @@ static const char* imguiScaleOptions[4] = { "Small", "Normal", "Large", "X-Large
         "Disabled",           "Always",        "Random",          "Random (Seeded)",          "Dungeons",
         "Dungeons (Vanilla)", "Dungeons (MQ)", "Dungeons Random", "Dungeons Random (Seeded)",
     };
+    static const char* fasterFasterFasterModes[3] = { "Disabled", "On A Press", "On Receiving Items" };
     static const char* enemyRandomizerModes[3] = { "Disabled", "Random", "Random (Seeded)" };
     static const char* allPowers[9] = {
                         "Vanilla (1x)",
@@ -1176,11 +1177,12 @@ void DrawEnhancementsMenu() {
 
         if (ImGui::BeginMenu("Extra Modes")) {
             if (ImGui::BeginMenu("FASTER-FASTER-FASTER")) {
-                UIWidgets::PaddedEnhancementCheckbox("FASTER-FASTER-FASTER", "gFasterOnButtonPresses", false, false);
-                UIWidgets::PaddedEnhancementSliderInt("FASTER Scaling: %d %%", "##FasterOnButtonPressesScaling",
-                                                      "gFasterOnButtonPressesScaling", 0, 100, "", 0, true, true, false);
-                UIWidgets::PaddedEnhancementSliderInt("FASTER Current Speed: %d %%", "##FasterOnButtonPressesSpeed",
-                                                      "gFasterOnButtonPressesSpeed", 0, 3000, "", 5, true, true,
+                UIWidgets::PaddedText("FASTER-FASTER-FASTER", false, true);
+                UIWidgets::EnhancementCombobox("gFasterFasterFaster", fasterFasterFasterModes, FASTER_FASTER_FASTER_OFF);
+                UIWidgets::PaddedEnhancementSliderInt("FASTER Scaling: %d %%", "##FasterFasterFasterScaling",
+                                                      "gFasterFasterFasterScaling", 0, 100, "", 0, true, true, false);
+                UIWidgets::PaddedEnhancementSliderInt("FASTER Current Speed: %d %%", "##FasterFasterFasterSpeed",
+                                                      "gFasterFasterFasterSpeed", 0, 3000, "", 5, true, true,
                                                       false);
                 ImGui::EndMenu();
             }

@@ -746,7 +746,7 @@ void DrawNotes(bool resizeable = false) {
 
 void DrawPlayerSpeed() {
     ImGui::BeginGroup();
-    uint32_t playerSpeed = CVarGetInteger("gFasterOnButtonPressesSpeed", 0);
+    uint32_t playerSpeed = CVarGetInteger("gFasterFasterFasterSpeed", 0);
     ImGui::SetWindowFontScale(4.0);
     ImGui::Text("CURRENT SPEED: %d%%", playerSpeed);
     ImGui::EndGroup();
