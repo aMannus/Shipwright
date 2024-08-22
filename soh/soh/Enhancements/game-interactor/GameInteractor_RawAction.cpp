@@ -625,6 +625,7 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset
                 return GameInteractionEffectQueryResult::TemporarilyNotPossible;
             }
             NameTag_RegisterForActorWithOptions(actor, viewerName.c_str(), { .tag = "CrowdControl" });
+            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
         }
         return GameInteractionEffectQueryResult::Possible;
     } else {
@@ -632,6 +633,7 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset
             Actor_Spawn(&gPlayState->actorCtx, gPlayState, enemyId, pos.x, pos.y, pos.z, 0, 0, 0, enemyParams, 0);
         if (actor != NULL) {
             NameTag_RegisterForActorWithOptions(actor, viewerName.c_str(), { .tag = "CrowdControl" });
+            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
             return GameInteractionEffectQueryResult::Possible;
         }
     }
