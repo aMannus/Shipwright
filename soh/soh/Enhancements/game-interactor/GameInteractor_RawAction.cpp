@@ -4,6 +4,7 @@
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
 #include <math.h>
 #include "soh/Enhancements/debugger/colViewer.h"
+#include "soh/Enhancements/nametag.h"
 
 extern "C" {
 #include "variables.h"
@@ -549,7 +550,7 @@ void GameInteractor::RawAction::ClearCutscenePointer() {
     gPlayState->csCtx.segment = &null_cs;
 }
 
-GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset(uint32_t enemyId, int32_t enemyParams) {
+GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset(uint32_t enemyId, int32_t enemyParams, std::string viewerName) {
 
     if (!GameInteractor::CanSpawnActor()) {
         return GameInteractionEffectQueryResult::TemporarilyNotPossible;
@@ -618,13 +619,19 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset
             pos.x += 10;
             pos.y += 10;
             pos.z += 10;
-            if (Actor_Spawn(&gPlayState->actorCtx, gPlayState, enemyId, pos.x, pos.y, pos.z, 0, 0, 0, enemyParams, 0) == NULL) {
+            Actor* actor =
+                Actor_Spawn(&gPlayState->actorCtx, gPlayState, enemyId, pos.x, pos.y, pos.z, 0, 0, 0, enemyParams, 0);
+            if (actor == NULL) {
                 return GameInteractionEffectQueryResult::TemporarilyNotPossible;
             }
+            NameTag_RegisterForActorWithOptions(actor, viewerName.c_str(), { .tag = "CrowdControl" });
         }
         return GameInteractionEffectQueryResult::Possible;
     } else {
-        if (Actor_Spawn(&gPlayState->actorCtx, gPlayState, enemyId, pos.x, pos.y, pos.z, 0, 0, 0, enemyParams, 0) != NULL) {
+        Actor* actor =
+            Actor_Spawn(&gPlayState->actorCtx, gPlayState, enemyId, pos.x, pos.y, pos.z, 0, 0, 0, enemyParams, 0);
+        if (actor != NULL) {
+            NameTag_RegisterForActorWithOptions(actor, viewerName.c_str(), { .tag = "CrowdControl" });
             return GameInteractionEffectQueryResult::Possible;
         }
     }
@@ -666,8 +673,11 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnActor(uint32_t 
         return GameInteractionEffectQueryResult::Possible;
     } else {
         // Generic spawn an actor at Link's position
-        if (Actor_Spawn(&gPlayState->actorCtx, gPlayState, actorId, player->actor.world.pos.x,
-                        player->actor.world.pos.y, player->actor.world.pos.z, 0, 0, 0, actorParams, 0) != NULL) {
+        Actor* actor = Actor_Spawn(&gPlayState->actorCtx, gPlayState, actorId, player->actor.world.pos.x,
+                                   player->actor.world.pos.y, player->actor.world.pos.z, 0, 0, 0, actorParams, 0);
+        if (actor != NULL) {
+            std::string tag = "Testing Tags";
+            NameTag_RegisterForActorWithOptions(actor, tag.c_str(), { .tag = "CrowdControl" });
             return GameInteractionEffectQueryResult::Possible;
         }
     }

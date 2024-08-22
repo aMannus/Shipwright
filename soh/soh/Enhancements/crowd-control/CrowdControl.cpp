@@ -197,7 +197,7 @@ void CrowdControl::EmitMessage(TCPsocket socket, uint32_t eventId, long timeRema
 CrowdControl::EffectResult CrowdControl::ExecuteEffect(Effect* effect) {
     GameInteractionEffectQueryResult giResult;
     if (effect->category == kEffectCatSpawnEnemy) {
-        giResult = GameInteractor::RawAction::SpawnEnemyWithOffset(effect->spawnParams[0], effect->spawnParams[1]);
+        giResult = GameInteractor::RawAction::SpawnEnemyWithOffset(effect->spawnParams[0], effect->spawnParams[1], effect->viewerName);
     } else if (effect->category == kEffectCatSpawnActor) {
         giResult = GameInteractor::RawAction::SpawnActor(effect->spawnParams[0], effect->spawnParams[1]);
     } else {
@@ -239,6 +239,7 @@ CrowdControl::Effect* CrowdControl::ParseMessage(char payload[512]) {
     Effect* effect = new Effect();
     effect->lastExecutionResult = EffectResult::Initiate;
     effect->id = dataReceived["id"];
+    effect->viewerName = dataReceived["viewer"];
     auto parameters = dataReceived["parameters"];
     uint32_t receivedParameter = 0;
     auto effectName = dataReceived["code"].get<std::string>();

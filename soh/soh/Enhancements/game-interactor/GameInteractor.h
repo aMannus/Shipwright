@@ -236,7 +236,7 @@ public:
         static void SetPlayerInvincibility(bool active);
         static void ClearCutscenePointer();
 
-        static GameInteractionEffectQueryResult SpawnEnemyWithOffset(uint32_t enemyId, int32_t enemyParams);
+        static GameInteractionEffectQueryResult SpawnEnemyWithOffset(uint32_t enemyId, int32_t enemyParams, std::string viewerName);
         static GameInteractionEffectQueryResult SpawnActor(uint32_t actorId, int32_t actorParams);
     };
 };
