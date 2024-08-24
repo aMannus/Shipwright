@@ -550,7 +550,7 @@ void GameInteractor::RawAction::ClearCutscenePointer() {
     gPlayState->csCtx.segment = &null_cs;
 }
 
-GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset(uint32_t enemyId, int32_t enemyParams, std::string viewerName) {
+GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset(uint32_t enemyId, int32_t enemyParams, std::string nameTag) {
 
     if (!GameInteractor::CanSpawnActor()) {
         return GameInteractionEffectQueryResult::TemporarilyNotPossible;
@@ -624,7 +624,9 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset
             if (actor == NULL) {
                 return GameInteractionEffectQueryResult::TemporarilyNotPossible;
             }
-            NameTag_RegisterForActorWithOptions(actor, viewerName.c_str(), { .tag = "CrowdControl" });
+            if (nameTag != "") {
+                NameTag_RegisterForActor(actor, nameTag.c_str());
+            }
             Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
         }
         return GameInteractionEffectQueryResult::Possible;
@@ -632,7 +634,9 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset
         Actor* actor =
             Actor_Spawn(&gPlayState->actorCtx, gPlayState, enemyId, pos.x, pos.y, pos.z, 0, 0, 0, enemyParams, 0);
         if (actor != NULL) {
-            NameTag_RegisterForActorWithOptions(actor, viewerName.c_str(), { .tag = "CrowdControl" });
+            if (nameTag != "") {
+                NameTag_RegisterForActor(actor, nameTag.c_str());
+            }
             Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
             return GameInteractionEffectQueryResult::Possible;
         }
@@ -641,7 +645,7 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnEnemyWithOffset
     return GameInteractionEffectQueryResult::TemporarilyNotPossible;
 }
 
-GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnActor(uint32_t actorId, int32_t actorParams) {
+GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnActor(uint32_t actorId, int32_t actorParams, std::string nameTag) {
 
     if (!GameInteractor::CanSpawnActor()) {
         return GameInteractionEffectQueryResult::TemporarilyNotPossible;
@@ -657,6 +661,9 @@ GameInteractionEffectQueryResult GameInteractor::RawAction::SpawnActor(uint32_t 
             return GameInteractionEffectQueryResult::TemporarilyNotPossible;
         }
 
+        if (nameTag != "") {
+            NameTag_RegisterForActor((Actor*)cucco, nameTag.c_str());
+        }
         cucco->actionFunc = func_80AB70A0_nocutscene;
         return GameInteractionEffectQueryResult::Possible;
     } else if (actorId == ACTOR_EN_BOM) {

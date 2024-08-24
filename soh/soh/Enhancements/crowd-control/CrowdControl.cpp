@@ -199,7 +199,7 @@ CrowdControl::EffectResult CrowdControl::ExecuteEffect(Effect* effect) {
     if (effect->category == kEffectCatSpawnEnemy) {
         giResult = GameInteractor::RawAction::SpawnEnemyWithOffset(effect->spawnParams[0], effect->spawnParams[1], effect->viewerName);
     } else if (effect->category == kEffectCatSpawnActor) {
-        giResult = GameInteractor::RawAction::SpawnActor(effect->spawnParams[0], effect->spawnParams[1]);
+        giResult = GameInteractor::RawAction::SpawnActor(effect->spawnParams[0], effect->spawnParams[1], effect->viewerName);
     } else {
         giResult = GameInteractor::ApplyEffect(effect->giEffect);
     }

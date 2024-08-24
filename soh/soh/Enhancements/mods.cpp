@@ -959,7 +959,7 @@ void RegisterAltTrapTypes() {
                     GameInteractor::RawAction::KnockbackPlayer(1);
                     break;
                 case ADD_BOMB_TRAP:
-                    GameInteractor::RawAction::SpawnActor(ACTOR_EN_BOM, 1);
+                    GameInteractor::RawAction::SpawnActor(ACTOR_EN_BOM, 1, "");
                     break;
                 case ADD_VOID_TRAP:
                     Play_TriggerRespawn(gPlayState);

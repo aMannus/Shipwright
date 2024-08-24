@@ -1246,7 +1246,7 @@ static bool BurnHandler(std::shared_ptr<LUS::Console> Console, const std::vector
 }
 
 static bool CuccoStormHandler(std::shared_ptr<LUS::Console> Console, const std::vector<std::string>& args, std::string* output) {
-    GameInteractionEffectQueryResult result = GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0);
+    GameInteractionEffectQueryResult result = GameInteractor::RawAction::SpawnActor(ACTOR_EN_NIW, 0, "");
 
     if (result == GameInteractionEffectQueryResult::Possible) {
         INFO_MESSAGE("[SOH] Spawned cucco storm");
