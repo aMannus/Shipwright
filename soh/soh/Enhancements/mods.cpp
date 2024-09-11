@@ -9,6 +9,7 @@
 #include "soh/Enhancements/cosmetics/authenticGfxPatches.h"
 #include <soh/Enhancements/item-tables/ItemTableManager.h>
 #include "soh/Enhancements/nametag.h"
+#include "soh/Enhancements/ChaosRace.h"
 
 #include "src/overlays/actors/ovl_En_Bb/z_en_bb.h"
 #include "src/overlays/actors/ovl_En_Dekubaba/z_en_dekubaba.h"
@@ -1099,4 +1100,5 @@ void InitMods() {
     RegisterRandomizerSheikSpawn();
     RegisterRandomizedEnemySizes();
     NameTag_RegisterHooks();
+    RegisterChaosRace();
 }

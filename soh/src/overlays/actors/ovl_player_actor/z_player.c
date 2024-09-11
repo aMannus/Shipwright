@@ -11246,7 +11246,7 @@ void Player_DrawGameplay(PlayState* play, Player* this, s32 lod, Gfx* cullDList,
         }
 
        
-        if (this->currentMask != PLAYER_MASK_BUNNY || !CVarGetInteger("gHideBunnyHood", 0)) {
+        if (this->currentMask != PLAYER_MASK_BUNNY || (!CVarGetInteger("gHideBunnyHood", 0) && !GameInteractor_InvisibleLinkActive())) {
             gSPDisplayList(POLY_OPA_DISP++, sMaskDlists[this->currentMask - 1]);
         }
 
@@ -11413,6 +11413,8 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
             Player_DrawGetItem(play, this);
         }
     }
+
+    GameInteractor_ExecuteOnPlayerDraw();
 
     CLOSE_DISPS(play->state.gfxCtx);
 }
