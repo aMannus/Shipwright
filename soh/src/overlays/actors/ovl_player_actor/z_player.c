@@ -2110,6 +2110,31 @@ void func_80833DF8(Player* this, PlayState* play) {
         }
 
         item = func_80833CDC(play, i);
+
+        // Chaos Race swap around item usages
+        switch (item) {
+            case ITEM_STICK:
+                item = ITEM_NUT;
+                break;
+            case ITEM_NUT:
+                item = ITEM_STICK;
+                break;
+            case ITEM_FARORES_WIND:
+                item = ITEM_NAYRUS_LOVE;
+                break;
+            case ITEM_NAYRUS_LOVE:
+                item = ITEM_FARORES_WIND;
+                break;
+            case ITEM_BUG:
+                item = ITEM_FISH;
+                break;
+            case ITEM_FISH:
+                item = ITEM_BUG;
+                break;
+            default:
+                break;
+        }
+
         if (item >= ITEM_NONE_FE) {
             for (i = 0; i < ARRAY_COUNT(D_80854388); i++) {
                 if (CHECK_BTN_ALL(sControlInput->cur.button, D_80854388[i])) {
