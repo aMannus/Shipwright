@@ -1,6 +1,8 @@
 #include "ChaosRace.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Enhancements/nametag.h"
+#include "soh/Enhancements/randomizer/3drando/random.hpp"
 
 #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
 #include "objects/gameplay_field_keep/gameplay_field_keep.h"
@@ -11,6 +13,7 @@
 extern "C" {
 #include <z64.h>
 #include "functions.h"
+#include "macros.h"
 PlayState* gPlayState;
 }
 
@@ -24,6 +27,44 @@ typedef enum {
 } GILinkProp;
 
 uint8_t PlayerProp = LINK_PROP_DEFAULT;
+uint32_t randomCuccoStormTimer = 0;
+
+static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
+    "Cluckey_9",
+    "AGreenCock",
+    "alwayzcluckingirl",
+    "Cockadius",
+    "dblcock",
+    "Obsydycluck",
+    "cluckigun94",
+    "CaptainCockles",
+    "CardinalCluck",
+    "cardinalcluck",
+    "Frankie The Cock",
+    "ItsCluckinPat",
+    "CockingJxL",
+    "Cockomato",
+    "Melcuck",
+    "ITS GOOSIN TIME",
+    "PapaCock",
+    "CluckySaw",
+    "CluckCloud",
+    "ChickenTMH",
+    "CuckiCrash",
+    "SaltyCock",
+    "StampedingCuckster",
+    "CockySnub",
+};
+
+void ChaosRace_HandleTriggers() {
+    uint32_t randomNumber;
+
+    // Enable harmless cucco storm (average every 5 minutes)
+    randomNumber = rand();
+    if (randomNumber % 6000 == 0) {
+        randomCuccoStormTimer = 200;
+    }
+}
 
 void ChaosRace_DrawLinkProp() {
     if (PlayerProp) {
@@ -90,9 +131,37 @@ void ChaosRace_ChangePlayerIntoProp() {
     }
 }
 
+void ChaosRace_HarmlessCuccoStorm() {
+    if (!GameInteractor::IsSaveLoaded() || GameInteractor::IsGameplayPaused())
+        return;
+
+    if (randomCuccoStormTimer) {
+        randomCuccoStormTimer--;
+
+        uint32_t randomNumber = rand();
+        if (randomNumber % 10 == 0) {
+            Player* player = GET_PLAYER(gPlayState);
+            std::string nameTag = "The Cock";
+            Vec3f pos;
+            pos.x = player->actor.world.pos.x;
+            pos.y = player->actor.world.pos.y;
+            pos.z = player->actor.world.pos.z;
+
+            randomNumber = Random(0, CUCCO_NAME_TABLE_SIZE);
+            nameTag = cuccoNames[randomNumber];
+
+            Actor* actor =
+                Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_ATTACK_NIW, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0);
+            NameTag_RegisterForActor(actor, nameTag.c_str());
+            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
+        }
+    }
+}
+
 void RegisterChaosRace() {
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() { 
-        
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+        ChaosRace_HandleTriggers();
+        ChaosRace_HarmlessCuccoStorm();
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() { 

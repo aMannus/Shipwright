@@ -358,10 +358,12 @@ void EnAttackNiw_Update(Actor* thisx, PlayState* play) {
     tmpf1 = 20.0f;
     if (this->actor.xyzDistToPlayerSq < SQ(tmpf1)) {
         cucco = (EnNiw*)this->actor.parent;
-        if ((this->actor.parent->update != NULL) && (this->actor.parent != NULL) && (cucco != NULL) &&
-            (cucco->timer9 == 0) && (player->invincibilityTimer == 0)) {
-            func_8002F6D4(play, &this->actor, 2.0f, this->actor.world.rot.y, 0.0f, 0x10);
-            cucco->timer9 = 0x46;
+        if (cucco != NULL) {
+            if ((this->actor.parent->update != NULL) && (this->actor.parent != NULL) && (cucco != NULL) &&
+                (cucco->timer9 == 0) && (player->invincibilityTimer == 0)) {
+                func_8002F6D4(play, &this->actor, 2.0f, this->actor.world.rot.y, 0.0f, 0x10);
+                cucco->timer9 = 0x46;
+            }
         }
     }
     if (this->unk_25E == 0) {
