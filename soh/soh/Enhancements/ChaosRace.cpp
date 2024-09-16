@@ -9,9 +9,11 @@
 #include "objects/object_gi_stick/object_gi_stick.h"
 #include "objects/object_gi_map/object_gi_map.h"
 #include "objects/object_bombiwa/object_bombiwa.h"
+#include "overlays/actors/ovl_En_Ik/z_en_ik.h"
 
 extern "C" {
 #include <z64.h>
+#include "variables.h"
 #include "functions.h"
 #include "macros.h"
 PlayState* gPlayState;
@@ -54,6 +56,10 @@ static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "StampedingCuckster",
     "CockySnub",
 };
+
+uint32_t ChaosRace_MinutesToTicks(uint32_t minutes) {
+    return minutes * 20 * 60;
+}
 
 Vec3f ChaosRace_GetCircleAroundPlayerOffset(uint16_t index) {
     Vec3f posOffset;
@@ -120,6 +126,29 @@ void ChaosRace_SpawnCuccoInvasion() {
                                    pos.y + posOffset.y,
                                    pos.z + posOffset.z, 0, 0, 0, 0, 0);
         NameTag_RegisterForActor(actor, nameTag.c_str());
+    }
+}
+
+void ChaosRace_SpawnIronKnuckleInvasion() {
+    if (!GameInteractor::IsSaveLoaded() || GameInteractor::IsGameplayPaused())
+        return;
+
+    Player* player = GET_PLAYER(gPlayState);
+    std::string nameTag = "FRIEND";
+    Vec3f pos;
+    pos.x = player->actor.world.pos.x;
+    pos.y = player->actor.world.pos.y;
+    pos.z = player->actor.world.pos.z;
+
+    for (uint8_t i = 0; i < 8; i++) {
+        Vec3f posOffset = ChaosRace_GetCircleAroundPlayerOffset(i);
+
+        Actor* actor = Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_IK, pos.x + posOffset.x,
+                                   pos.y + posOffset.y, pos.z + posOffset.z, 0, 0, 0, 2, 0);
+        Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
+        NameTag_RegisterForActor(actor, nameTag.c_str());
+        EnIk* knuckleActor = (EnIk*)actor;
+        knuckleActor->skelAnime.playSpeed = 1.0f;
     }
 }
 
@@ -193,8 +222,13 @@ void ChaosRace_HandleTriggers() {
 
     // Enable harmless cucco storm (average every 10 minutes)
     randomNumber = rand();
-    if (randomNumber % 12000 == 1) {
+    if (randomNumber % ChaosRace_MinutesToTicks(10) == 1) {
         ChaosRace_SpawnCuccoInvasion();
+    }
+
+    randomNumber = rand();
+    if (randomNumber % ChaosRace_MinutesToTicks(30) == 1) {
+        ChaosRace_SpawnIronKnuckleInvasion();
     }
 }
 

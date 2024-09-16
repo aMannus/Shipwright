@@ -57,6 +57,9 @@ void EnAttackNiw_Init(Actor* thisx, PlayState* play) {
     this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
     this->actor.shape.rot.y = this->actor.world.rot.y = (Rand_ZeroOne() - 0.5f) * 60000.0f;
     this->actionFunc = func_809B5670;
+
+    // Attack cuccos not considered for clear enemy rooms
+    Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, this, ACTORCAT_NPC);
 }
 
 void EnAttackNiw_Destroy(Actor* thisx, PlayState* play) {
