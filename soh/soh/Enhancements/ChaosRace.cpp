@@ -27,7 +27,6 @@ typedef enum {
 } GILinkProp;
 
 uint8_t PlayerProp = LINK_PROP_DEFAULT;
-uint32_t randomCuccoStormTimer = 0;
 
 static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "Cluckey_9",
@@ -56,13 +55,71 @@ static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "CockySnub",
 };
 
-void ChaosRace_HandleTriggers() {
-    uint32_t randomNumber;
+Vec3f ChaosRace_GetCircleAroundPlayerOffset(uint16_t index) {
+    Vec3f posOffset;
+    posOffset.x = 0;
+    posOffset.y = 50;
+    posOffset.z = 0;
 
-    // Enable harmless cucco storm (average every 5 minutes)
-    randomNumber = rand();
-    if (randomNumber % 6000 == 0) {
-        randomCuccoStormTimer = 200;
+    // offset in a circle around player
+    switch (index) {
+        case 0:
+            posOffset.x = -100;
+            break;
+        case 1:
+            posOffset.x = -75;
+            posOffset.z = 75;
+            break;
+        case 2:
+            posOffset.z = 100;
+            break;
+        case 3:
+            posOffset.x = 75;
+            posOffset.z = 75;
+            break;
+        case 4:
+            posOffset.x = 100;
+            break;
+        case 5:
+            posOffset.x = 75;
+            posOffset.z = -75;
+            break;
+        case 6:
+            posOffset.x = 0;
+            posOffset.z = -100;
+            break;
+        case 7:
+            posOffset.x = -75;
+            posOffset.z = -75;
+            break;
+        default:
+            break;
+    }
+
+    return posOffset;
+}
+
+void ChaosRace_SpawnCuccoInvasion() {
+    if (!GameInteractor::IsSaveLoaded() || GameInteractor::IsGameplayPaused())
+        return;
+
+    uint32_t randomNumber;
+    Player* player = GET_PLAYER(gPlayState);
+    std::string nameTag = "The Cock";
+    Vec3f pos;
+    pos.x = player->actor.world.pos.x;
+    pos.y = player->actor.world.pos.y;
+    pos.z = player->actor.world.pos.z;
+
+    for (uint8_t i = 0; i < 8; i++) {
+        Vec3f posOffset = ChaosRace_GetCircleAroundPlayerOffset(i);
+        randomNumber = Random(0, CUCCO_NAME_TABLE_SIZE);
+        nameTag = cuccoNames[randomNumber];
+
+        Actor* actor = Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_NIW, pos.x + posOffset.x,
+                                   pos.y + posOffset.y,
+                                   pos.z + posOffset.z, 0, 0, 0, 0, 0);
+        NameTag_RegisterForActor(actor, nameTag.c_str());
     }
 }
 
@@ -131,37 +188,19 @@ void ChaosRace_ChangePlayerIntoProp() {
     }
 }
 
-void ChaosRace_HarmlessCuccoStorm() {
-    if (!GameInteractor::IsSaveLoaded() || GameInteractor::IsGameplayPaused())
-        return;
+void ChaosRace_HandleTriggers() {
+    uint32_t randomNumber;
 
-    if (randomCuccoStormTimer) {
-        randomCuccoStormTimer--;
-
-        uint32_t randomNumber = rand();
-        if (randomNumber % 10 == 0) {
-            Player* player = GET_PLAYER(gPlayState);
-            std::string nameTag = "The Cock";
-            Vec3f pos;
-            pos.x = player->actor.world.pos.x;
-            pos.y = player->actor.world.pos.y;
-            pos.z = player->actor.world.pos.z;
-
-            randomNumber = Random(0, CUCCO_NAME_TABLE_SIZE);
-            nameTag = cuccoNames[randomNumber];
-
-            Actor* actor =
-                Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_ATTACK_NIW, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0);
-            NameTag_RegisterForActor(actor, nameTag.c_str());
-            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
-        }
+    // Enable harmless cucco storm (average every 10 minutes)
+    randomNumber = rand();
+    if (randomNumber % 12000 == 1) {
+        ChaosRace_SpawnCuccoInvasion();
     }
 }
 
 void RegisterChaosRace() {
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayerUpdate>([]() {
         ChaosRace_HandleTriggers();
-        ChaosRace_HarmlessCuccoStorm();
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneSpawnActors>([]() { 
