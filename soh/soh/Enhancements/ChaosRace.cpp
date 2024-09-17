@@ -220,15 +220,26 @@ void ChaosRace_ChangePlayerIntoProp() {
 void ChaosRace_HandleTriggers() {
     uint32_t randomNumber;
 
-    // Enable harmless cucco storm (average every 10 minutes)
+    // Spawn Cucco Invasion (average once every 10 minutes)
     randomNumber = rand();
     if (randomNumber % ChaosRace_MinutesToTicks(10) == 1) {
         ChaosRace_SpawnCuccoInvasion();
     }
 
+    // Spawn Iron Knuckle Invasion (average once every 30 minutes)
     randomNumber = rand();
     if (randomNumber % ChaosRace_MinutesToTicks(30) == 1) {
         ChaosRace_SpawnIronKnuckleInvasion();
+    }
+
+    // Process queued effects
+    if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
+
+        // Knockback after reading a gossip stone
+        if (GameInteractor::State::LinkKnockbackQueued) {
+            GameInteractor::State::LinkKnockbackQueued = 0;
+            GameInteractor::RawAction::KnockbackPlayer(5.0f);
+        }
     }
 }
 

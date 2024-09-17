@@ -8,6 +8,7 @@
 #include "objects/object_gs/object_gs.h"
 #include "overlays/actors/ovl_En_Elf/z_en_elf.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
+#include "soh/Enhancements/game-interactor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_TARGETABLE | ACTOR_FLAG_FRIENDLY | ACTOR_FLAG_NO_FREEZE_OCARINA)
 
@@ -185,6 +186,7 @@ void func_80A4E648(EnGs* this, PlayState* play) {
         this->unk_19C = func_80A4E3EC(this, play);
     } else if (Actor_ProcessTalkRequest(&this->actor, play)) {
         this->unk_19C = 2;
+        GameInteractor_SetLinkKnockbackQueued(true);
     } else {
         Actor_GetScreenPos(play, &this->actor, &sp26, &sp24);
         if ((sp26 >= 0) && (sp26 <= SCREEN_WIDTH) && (sp24 >= 0) && (sp24 <= SCREEN_HEIGHT) && (this->unk_19C != 3)) {
