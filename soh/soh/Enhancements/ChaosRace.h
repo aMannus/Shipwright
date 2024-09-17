@@ -4,4 +4,4 @@
 
 void RegisterChaosRace();
 
-#define CUCCO_NAME_TABLE_SIZE 24
+#define CUCCO_NAME_TABLE_SIZE 27

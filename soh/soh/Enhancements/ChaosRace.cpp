@@ -47,7 +47,7 @@ static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "ItsCluckinPat",
     "CockingJxL",
     "Cockomato",
-    "Melcuck",
+    "Cocklar21",
     "ITS GOOSIN TIME",
     "PapaCock",
     "CluckySaw",
@@ -57,6 +57,9 @@ static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "SaltyCock",
     "StampedingCuckster",
     "CockySnub",
+    "CocktunTTV",
+    "ClucklitxShadows",
+    "GriddyCock",
 };
 
 uint32_t ChaosRace_MinutesToTicks(uint32_t minutes) {
@@ -72,32 +75,32 @@ Vec3f ChaosRace_GetCircleAroundPlayerOffset(uint16_t index) {
     // offset in a circle around player
     switch (index) {
         case 0:
-            posOffset.x = -150;
+            posOffset.x = -100;
             break;
         case 1:
-            posOffset.x = -120;
-            posOffset.z = 120;
+            posOffset.x = -75;
+            posOffset.z = 75;
             break;
         case 2:
-            posOffset.z = 150;
+            posOffset.z = 100;
             break;
         case 3:
-            posOffset.x = 120;
-            posOffset.z = 120;
+            posOffset.x = 75;
+            posOffset.z = 75;
             break;
         case 4:
-            posOffset.x = 150;
+            posOffset.x = 100;
             break;
         case 5:
-            posOffset.x = 120;
-            posOffset.z = -120;
+            posOffset.x = 75;
+            posOffset.z = -75;
             break;
         case 6:
-            posOffset.z = -150;
+            posOffset.z = -100;
             break;
         case 7:
-            posOffset.x = -120;
-            posOffset.z = -120;
+            posOffset.x = -75;
+            posOffset.z = -75;
             break;
         default:
             break;
@@ -260,21 +263,21 @@ void ChaosRace_HandleTriggers() {
     Player* player = GET_PLAYER(gPlayState);
     uint32_t randomNumber;
 
-    // Spawn Cucco Invasion (average once every 10 minutes)
+    // Spawn Cucco Invasion (average once every 5 minutes)
     randomNumber = rand();
-    if (randomNumber % ChaosRace_MinutesToTicks(10) == 1) {
+    if (randomNumber % ChaosRace_MinutesToTicks(5) == 1) {
         ChaosRace_SpawnCuccoInvasion();
     }
 
-    // Spawn Iron Knuckle Invasion (average once every 30 minutes)
+    // Spawn Iron Knuckle Invasion (average once every 15 minutes)
     randomNumber = rand();
-    if (randomNumber % ChaosRace_MinutesToTicks(30) == 1) {
+    if (randomNumber % ChaosRace_MinutesToTicks(15) == 1) {
         ChaosRace_SpawnIronKnuckleInvasion();
     }
 
-    // Spawn Random Enemy Invasion (average once every 5 minutes)
+    // Spawn Random Enemy Invasion (average once every 2 minutes)
     randomNumber = rand();
-    if (randomNumber % ChaosRace_MinutesToTicks(5) == 1) {
+    if (randomNumber % ChaosRace_MinutesToTicks(2) == 1) {
         ChaosRace_SpawnRandomEnemyInvasion();
     }
 
