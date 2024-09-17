@@ -3,6 +3,7 @@
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 #include "soh/Enhancements/nametag.h"
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
+#include "soh/Enhancements/enemyrandomizer.h"
 
 #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
 #include "objects/gameplay_field_keep/gameplay_field_keep.h"
@@ -70,39 +71,56 @@ Vec3f ChaosRace_GetCircleAroundPlayerOffset(uint16_t index) {
     // offset in a circle around player
     switch (index) {
         case 0:
-            posOffset.x = -100;
+            posOffset.x = -150;
             break;
         case 1:
-            posOffset.x = -75;
-            posOffset.z = 75;
+            posOffset.x = -120;
+            posOffset.z = 120;
             break;
         case 2:
-            posOffset.z = 100;
+            posOffset.z = 150;
             break;
         case 3:
-            posOffset.x = 75;
-            posOffset.z = 75;
+            posOffset.x = 120;
+            posOffset.z = 120;
             break;
         case 4:
-            posOffset.x = 100;
+            posOffset.x = 150;
             break;
         case 5:
-            posOffset.x = 75;
-            posOffset.z = -75;
+            posOffset.x = 120;
+            posOffset.z = -120;
             break;
         case 6:
-            posOffset.x = 0;
-            posOffset.z = -100;
+            posOffset.z = -150;
             break;
         case 7:
-            posOffset.x = -75;
-            posOffset.z = -75;
+            posOffset.x = -120;
+            posOffset.z = -120;
             break;
         default:
             break;
     }
 
     return posOffset;
+}
+
+Actor* ChaosRace_SpawnEnemy(int16_t actorId, int16_t params, uint8_t enemyIndex, f32 posX, f32 posY, f32 posZ) {
+    Vec3f posOffset = ChaosRace_GetCircleAroundPlayerOffset(enemyIndex);
+
+    // Raycast to place enemy on the ground
+    CollisionPoly poly;
+    Vec3f finalPos;
+    finalPos.x = posX + posOffset.x;
+    finalPos.y = posY + posOffset.y;
+    finalPos.z = posZ + posOffset.z;
+    f32 raycastResult = BgCheck_AnyRaycastFloor1(&gPlayState->colCtx, &poly, &finalPos);
+    if (raycastResult > BGCHECK_Y_MIN) {
+        finalPos.y = raycastResult;
+    }
+
+    return Actor_Spawn(&gPlayState->actorCtx, gPlayState, actorId, finalPos.x, finalPos.y, finalPos.z, 0, 0, 0, params,
+                       0);
 }
 
 void ChaosRace_SpawnCuccoInvasion() {
@@ -112,19 +130,14 @@ void ChaosRace_SpawnCuccoInvasion() {
     uint32_t randomNumber;
     Player* player = GET_PLAYER(gPlayState);
     std::string nameTag = "The Cock";
-    Vec3f pos;
-    pos.x = player->actor.world.pos.x;
-    pos.y = player->actor.world.pos.y;
-    pos.z = player->actor.world.pos.z;
 
     for (uint8_t i = 0; i < 8; i++) {
-        Vec3f posOffset = ChaosRace_GetCircleAroundPlayerOffset(i);
         randomNumber = Random(0, CUCCO_NAME_TABLE_SIZE);
         nameTag = cuccoNames[randomNumber];
 
-        Actor* actor = Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_NIW, pos.x + posOffset.x,
-                                   pos.y + posOffset.y,
-                                   pos.z + posOffset.z, 0, 0, 0, 0, 0);
+        Actor* actor = ChaosRace_SpawnEnemy(ACTOR_EN_NIW, 0, i, player->actor.world.pos.x, player->actor.world.pos.y,
+                                            player->actor.world.pos.z);
+
         NameTag_RegisterForActor(actor, nameTag.c_str());
     }
 }
@@ -135,20 +148,33 @@ void ChaosRace_SpawnIronKnuckleInvasion() {
 
     Player* player = GET_PLAYER(gPlayState);
     std::string nameTag = "FRIEND";
-    Vec3f pos;
-    pos.x = player->actor.world.pos.x;
-    pos.y = player->actor.world.pos.y;
-    pos.z = player->actor.world.pos.z;
 
     for (uint8_t i = 0; i < 8; i++) {
-        Vec3f posOffset = ChaosRace_GetCircleAroundPlayerOffset(i);
+        Actor* actor = ChaosRace_SpawnEnemy(ACTOR_EN_IK, 2, i, player->actor.world.pos.x, player->actor.world.pos.y,
+                                            player->actor.world.pos.z);
 
-        Actor* actor = Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_IK, pos.x + posOffset.x,
-                                   pos.y + posOffset.y, pos.z + posOffset.z, 0, 0, 0, 2, 0);
         Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
         NameTag_RegisterForActor(actor, nameTag.c_str());
         EnIk* knuckleActor = (EnIk*)actor;
         knuckleActor->skelAnime.playSpeed = 1.0f;
+    }
+}
+
+void ChaosRace_SpawnRandomEnemyInvasion() {
+    if (!GameInteractor::IsSaveLoaded() || GameInteractor::IsGameplayPaused())
+        return;
+
+    Player* player = GET_PLAYER(gPlayState);
+
+    for (uint8_t i = 0; i < 8; i++) {
+        uint32_t seed = rand() % 20000;
+        EnemyEntry enemyToSpawn = GetRandomizedEnemyEntry(seed);
+
+        Actor* actor = ChaosRace_SpawnEnemy(enemyToSpawn.id, enemyToSpawn.params, i, player->actor.world.pos.x,
+                                            player->actor.world.pos.y,
+                                            player->actor.world.pos.z);
+
+        Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
     }
 }
 
@@ -243,6 +269,12 @@ void ChaosRace_HandleTriggers() {
     randomNumber = rand();
     if (randomNumber % ChaosRace_MinutesToTicks(30) == 1) {
         ChaosRace_SpawnIronKnuckleInvasion();
+    }
+
+    // Spawn Random Enemy Invasion (average once every 5 minutes)
+    randomNumber = rand();
+    if (randomNumber % ChaosRace_MinutesToTicks(5) == 1) {
+        ChaosRace_SpawnRandomEnemyInvasion();
     }
 
     // Process queued effects
