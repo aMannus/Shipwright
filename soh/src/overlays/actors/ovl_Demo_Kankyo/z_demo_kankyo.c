@@ -811,7 +811,7 @@ void DemoKankyo_DrawWarpSparkles(Actor* thisx, PlayState* play) {
                 // Skip the first part of warp song cutscenes in rando
                 if (IS_RANDO && this->actor.params == DEMOKANKYO_WARP_OUT) {
                     this->unk_150[i].unk_22 = 2;
-                    uint8_t index = rand() % 7;
+                    uint8_t index = rand() % 9;
                     uint32_t entrance = 0;
                     switch (index) {
                         case 1:
@@ -832,9 +832,17 @@ void DemoKankyo_DrawWarpSparkles(Actor* thisx, PlayState* play) {
                         case 6:
                             entrance = GI_TP_DEST_PRELUDE;
                             break;
+                        case 7:
+                            // Ice cavern
+                            entrance = 136;
+                            break;
+                        case 8:
+                            // Barinade
+                            entrance = 769;
+                            break;
                         default:
-                            // Ganons castle
-                            entrance = 0x0467;
+                            // Ganons castle (from ganons lair)
+                            entrance = 1063;
                             break;
                     }
                     play->nextEntranceIndex = entrance;
