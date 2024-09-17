@@ -277,6 +277,12 @@ void ChaosRace_HandleTriggers() {
         ChaosRace_SpawnRandomEnemyInvasion();
     }
 
+    // Random age change (average once every 60 minutes)
+    randomNumber = rand();
+    if (randomNumber % ChaosRace_MinutesToTicks(60) == 1) {
+        CVarSetInteger("gSwitchAge", 1);
+    }
+
     // Process queued effects
     if (GameInteractor::IsSaveLoaded() && !GameInteractor::IsGameplayPaused()) {
 
