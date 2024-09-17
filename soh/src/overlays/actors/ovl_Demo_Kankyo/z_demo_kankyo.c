@@ -5,6 +5,7 @@
 #include "objects/object_toki_objects/object_toki_objects.h"
 #include "soh/frame_interpolation.h"
 #include <assert.h>
+#include "soh/Enhancements/game-interactor/GameInteractor.h"
 
 #define FLAGS (ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_DRAW_WHILE_CULLED)
 
@@ -810,6 +811,33 @@ void DemoKankyo_DrawWarpSparkles(Actor* thisx, PlayState* play) {
                 // Skip the first part of warp song cutscenes in rando
                 if (IS_RANDO && this->actor.params == DEMOKANKYO_WARP_OUT) {
                     this->unk_150[i].unk_22 = 2;
+                    uint8_t index = rand() % 7;
+                    uint32_t entrance = 0;
+                    switch (index) {
+                        case 1:
+                            entrance = GI_TP_DEST_SERENADE;
+                            break;
+                        case 2:
+                            entrance = GI_TP_DEST_REQUIEM;
+                            break;
+                        case 3:
+                            entrance = GI_TP_DEST_BOLERO;
+                            break;
+                        case 4:
+                            entrance = GI_TP_DEST_MINUET;
+                            break;
+                        case 5:
+                            entrance = GI_TP_DEST_NOCTURNE;
+                            break;
+                        case 6:
+                            entrance = GI_TP_DEST_PRELUDE;
+                            break;
+                        default:
+                            // Ganons castle
+                            entrance = 0x0467;
+                            break;
+                    }
+                    play->nextEntranceIndex = entrance;
                 } else {
                     this->unk_150[i].unk_22++;
                 }
