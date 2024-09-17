@@ -792,6 +792,8 @@ s32 EnGirlA_CanBuy_Randomizer(PlayState* play, EnGirlA* this) {
         return CANBUY_RESULT_NEED_RUPEES;
     }
 
+    // Drain rupees after every purchase
+    gSaveContext.rupees = 0;
     return CANBUY_RESULT_SUCCESS_FANFARE;
 }
 
