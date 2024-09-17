@@ -106,6 +106,9 @@ void SetStartingItems() {
     if (Randomizer_GetSettingValue(RSK_STARTING_DEKU_SHIELD))
         Item_Give(NULL, ITEM_SHIELD_DEKU);
 
+    // Give lens to allow easier acecss to super speed
+    Item_Give(NULL, ITEM_LENS);
+
     // Songs
     if (Randomizer_GetSettingValue(RSK_STARTING_ZELDAS_LULLABY))
         Item_Give(NULL, ITEM_SONG_LULLABY);

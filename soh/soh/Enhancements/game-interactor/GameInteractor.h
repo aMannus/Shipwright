@@ -74,6 +74,7 @@ uint8_t GameInteractor_DisableZTargetingActive();
 uint8_t GameInteractor_ReverseControlsActive();
 int32_t GameInteractor_DefenseModifier();
 int32_t GameInteractor_RunSpeedModifier();
+void GameInteractor_SetRunSpeedModifier(uint8_t speed);
 GIGravityLevel GameInteractor_GravityLevel();
 uint32_t GameInteractor_GetEmulatedButtons();
 void GameInteractor_SetEmulatedButtons(uint32_t buttons);

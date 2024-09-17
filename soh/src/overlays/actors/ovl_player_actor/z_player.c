@@ -3008,8 +3008,10 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
                 if (Magic_RequestChange(play, 0, MAGIC_CONSUME_LENS)) {
                     if (play->actorCtx.lensActive) {
                         Actor_DisableLens(play);
+                        GameInteractor_SetRunSpeedModifier(0);
                     } else {
                         play->actorCtx.lensActive = true;
+                        GameInteractor_SetRunSpeedModifier(2);
                     }
                     func_80078884((play->actorCtx.lensActive) ? NA_SE_SY_GLASSMODE_ON : NA_SE_SY_GLASSMODE_OFF);
                 } else {

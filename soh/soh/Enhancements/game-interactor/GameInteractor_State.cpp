@@ -86,6 +86,10 @@ int32_t GameInteractor_RunSpeedModifier() {
     return GameInteractor::State::RunSpeedModifier;
 }
 
+void GameInteractor_SetRunSpeedModifier(uint8_t speed) {
+    GameInteractor::State::RunSpeedModifier = speed;
+}
+
 // MARK: - GameInteractor::State::DisableCameraRotationActive
 GIGravityLevel GameInteractor_GravityLevel() {
     return GameInteractor::State::GravityLevel;
