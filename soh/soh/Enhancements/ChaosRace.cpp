@@ -218,6 +218,7 @@ void ChaosRace_ChangePlayerIntoProp() {
 }
 
 void ChaosRace_HandleTriggers() {
+    Player* player = GET_PLAYER(gPlayState);
     uint32_t randomNumber;
 
     // Spawn Cucco Invasion (average once every 10 minutes)
@@ -241,6 +242,12 @@ void ChaosRace_HandleTriggers() {
             GameInteractor::RawAction::KnockbackPlayer(5.0f);
         }
     }
+
+    // Rotate link on wearing bunny hood
+    if (player->currentMask == PLAYER_MASK_BUNNY) {
+        player->actor.shape.rot.x += 500;
+        player->actor.shape.rot.y += 500;
+    }
 }
 
 void RegisterChaosRace() {
@@ -253,10 +260,6 @@ void RegisterChaosRace() {
     });
     
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* refActor) {
-        
-    });
-
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorUpdate>([](void* refActor) {
         
     });
 
