@@ -30,6 +30,7 @@ typedef enum {
 } GILinkProp;
 
 uint8_t PlayerProp = LINK_PROP_DEFAULT;
+uint32_t flippedWorldTimer = 0;
 
 static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "Cluckey_9",
@@ -297,6 +298,22 @@ void ChaosRace_HandleTriggers() {
     if (player->currentMask == PLAYER_MASK_BUNNY) {
         player->actor.shape.rot.x += 500;
         player->actor.shape.rot.y += 500;
+    }
+
+    // Enable vertically switched world randomly (average once every 30 minutes)
+    randomNumber = rand();
+    if (randomNumber % ChaosRace_MinutesToTicks(30) == 1) {
+        flippedWorldTimer = ChaosRace_MinutesToTicks(1);
+    }
+    if (flippedWorldTimer) {
+        flippedWorldTimer--;
+        if (!CVarGetInteger("gMirroredWorld", 0)) {
+            CVarSetInteger("gMirroredWorld", 1);
+        }
+    } else {
+        if (CVarGetInteger("gMirroredWorld", 0)) {
+            CVarSetInteger("gMirroredWorld", 0);
+        }
     }
 }
 

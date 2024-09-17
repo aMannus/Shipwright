@@ -435,7 +435,7 @@ s32 func_800AAA9C(View* view) {
     if (CVarGetInteger("gMirroredWorld", 0)) {
         MtxF flipF;
         SkinMatrix_Clear(&flipF);
-        flipF.xx = -1.0;
+        flipF.yy = -1.0;
         MtxF projectionF;
         Matrix_MtxToMtxF(projection, &projectionF);
         SkinMatrix_MtxFMtxFMult(&projectionF, &flipF, &projectionF);
@@ -556,7 +556,7 @@ s32 func_800AB2C4(View* view) {
     if (CVarGetInteger("gMirroredWorld", 0)) {
         MtxF flipF;
         SkinMatrix_Clear(&flipF);
-        flipF.xx = -1.0;
+        flipF.yy = -1.0;
         MtxF projectionF;
         Matrix_MtxToMtxF(projection, &projectionF);
         SkinMatrix_MtxFMtxFMult(&projectionF, &flipF, &projectionF);
