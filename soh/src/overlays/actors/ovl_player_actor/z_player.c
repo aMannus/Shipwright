@@ -11471,6 +11471,11 @@ s16 func_8084ABD8(PlayState* play, Player* this, s32 arg2, s16 arg3) {
     s16 temp3;
     bool gInvertAimingXAxis = (CVarGetInteger("gInvertAimingXAxis", 0) && !CVarGetInteger("gMirroredWorld", 0)) || (!CVarGetInteger("gInvertAimingXAxis", 0) && CVarGetInteger("gMirroredWorld", 0));
 
+    // If stick isn't touched, make it go right a little
+    if (sControlInput->rel.stick_x < 10 && sControlInput->rel.stick_x > -10) {
+        sControlInput->rel.stick_x += 30;
+    }
+
     if (!func_8002DD78(this) && !func_808334B4(this) && (arg2 == 0) && !CVarGetInteger("gDisableAutoCenterViewFirstPerson", 0)) {
         temp2 = sControlInput->rel.stick_y * 240.0f * (CVarGetInteger("gInvertAimingYAxis", 1) ? 1 : -1); // Sensitivity not applied here because higher than default sensitivies will allow the camera to escape the autocentering, and glitch out massively
         Math_SmoothStepToS(&this->actor.focus.rot.x, temp2, 14, 4000, 30);
