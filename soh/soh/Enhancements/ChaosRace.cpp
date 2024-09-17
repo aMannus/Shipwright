@@ -217,6 +217,18 @@ void ChaosRace_ChangePlayerIntoProp() {
     }
 }
 
+void ChaosRace_DrawNothing() {
+    return;
+}
+
+void ChaosRace_ChangeConsumableDraw(void* actorRef) {
+    Actor* actor = static_cast<Actor*>(actorRef);
+
+    if (actor->id == ACTOR_EN_ITEM00) {
+        actor->draw = (ActorFunc)ChaosRace_DrawNothing;
+    }
+}
+
 void ChaosRace_HandleTriggers() {
     Player* player = GET_PLAYER(gPlayState);
     uint32_t randomNumber;
@@ -259,8 +271,8 @@ void RegisterChaosRace() {
         ChaosRace_ChangePlayerIntoProp();
     });
     
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* refActor) {
-        
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* actorRef) { 
+        ChaosRace_ChangeConsumableDraw(actorRef);
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayerDraw>([]() {
