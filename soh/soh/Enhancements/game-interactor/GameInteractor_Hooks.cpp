@@ -58,6 +58,10 @@ void GameInteractor_ExecuteOnPlayerDraw() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnPlayerDraw>();
 }
 
+void GameInteractor_ExecuteOnPlayerItemUse(int32_t item) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnPlayerItemUse>(item);
+}
+
 void GameInteractor_ExecuteOnOcarinaSongAction() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnOcarinaSongAction>();
 }

@@ -138,11 +138,12 @@ void ChaosRace_SpawnCuccoInvasion() {
     for (uint8_t i = 0; i < 8; i++) {
         randomNumber = Random(0, CUCCO_NAME_TABLE_SIZE);
         nameTag = cuccoNames[randomNumber];
-
         Actor* actor = ChaosRace_SpawnEnemy(ACTOR_EN_NIW, 0, i, player->actor.world.pos.x, player->actor.world.pos.y,
                                             player->actor.world.pos.z);
 
-        NameTag_RegisterForActor(actor, nameTag.c_str());
+        if (actor != NULL) {
+            NameTag_RegisterForActor(actor, nameTag.c_str());
+        }
     }
 }
 
@@ -156,11 +157,12 @@ void ChaosRace_SpawnIronKnuckleInvasion() {
     for (uint8_t i = 0; i < 8; i++) {
         Actor* actor = ChaosRace_SpawnEnemy(ACTOR_EN_IK, 2, i, player->actor.world.pos.x, player->actor.world.pos.y,
                                             player->actor.world.pos.z);
-
-        Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
-        NameTag_RegisterForActor(actor, nameTag.c_str());
-        EnIk* knuckleActor = (EnIk*)actor;
-        knuckleActor->skelAnime.playSpeed = 1.0f;
+        if (actor != NULL) {
+            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
+            NameTag_RegisterForActor(actor, nameTag.c_str());
+            EnIk* knuckleActor = (EnIk*)actor;
+            knuckleActor->skelAnime.playSpeed = 1.0f;
+        }
     }
 }
 
@@ -177,8 +179,9 @@ void ChaosRace_SpawnRandomEnemyInvasion() {
         Actor* actor = ChaosRace_SpawnEnemy(enemyToSpawn.id, enemyToSpawn.params, i, player->actor.world.pos.x,
                                             player->actor.world.pos.y,
                                             player->actor.world.pos.z);
-
-        Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
+        if (actor != NULL) {
+            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
+        }
     }
 }
 
@@ -259,6 +262,21 @@ void ChaosRace_ChangeConsumableDraw(void* actorRef) {
     }
 }
 
+void ChaosRace_OnItemUse(int32_t item) {
+    if (item == ITEM_BOMB || item == ITEM_BOMBCHU) {
+        GameInteractor::RawAction::SpawnActor(ACTOR_EN_BOM, 0);
+    }
+
+    if (item == ITEM_HOOKSHOT || item == ITEM_LONGSHOT) {
+        Player* player = GET_PLAYER(gPlayState);
+        Actor* actor = Actor_Spawn(&gPlayState->actorCtx, gPlayState, ACTOR_EN_FIREFLY, player->actor.world.pos.x,
+                    player->actor.world.pos.y + 100, player->actor.world.pos.z + 120, 0, 0, 0, 2, 0);
+        if (actor != NULL) {
+            Actor_ChangeCategory(gPlayState, &gPlayState->actorCtx, actor, ACTORCAT_NPC);
+        }
+    }
+}
+
 void ChaosRace_HandleTriggers() {
     Player* player = GET_PLAYER(gPlayState);
     uint32_t randomNumber;
@@ -331,6 +349,10 @@ void RegisterChaosRace() {
     
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>([](void* actorRef) { 
         ChaosRace_ChangeConsumableDraw(actorRef);
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayerItemUse>([](int32_t item) { 
+        ChaosRace_OnItemUse(item);
     });
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayerDraw>([]() {

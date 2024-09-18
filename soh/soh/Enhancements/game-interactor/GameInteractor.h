@@ -163,6 +163,7 @@ public:
     DEFINE_HOOK(OnSceneSpawnActors, void());
     DEFINE_HOOK(OnPlayerUpdate, void());
     DEFINE_HOOK(OnPlayerDraw, void());
+    DEFINE_HOOK(OnPlayerItemUse, void(int32_t item));
     DEFINE_HOOK(OnOcarinaSongAction, void());
     DEFINE_HOOK(OnShopSlotChange, void(uint8_t cursorIndex, int16_t price));
     DEFINE_HOOK(OnActorInit, void(void* actor));

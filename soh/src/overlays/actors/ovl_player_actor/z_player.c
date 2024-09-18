@@ -2135,6 +2135,8 @@ void func_80833DF8(Player* this, PlayState* play) {
                 break;
         }
 
+        GameInteractor_ExecuteOnPlayerItemUse(item);
+
         if (item >= ITEM_NONE_FE) {
             for (i = 0; i < ARRAY_COUNT(D_80854388); i++) {
                 if (CHECK_BTN_ALL(sControlInput->cur.button, D_80854388[i])) {
