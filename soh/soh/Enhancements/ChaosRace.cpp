@@ -372,8 +372,8 @@ void ChaosRace_HandleTriggers() {
 
         // Knockback after reading a gossip stone
         if (GameInteractor::State::LinkKnockbackQueued) {
+            GameInteractor::RawAction::KnockbackPlayer((float)GameInteractor::State::LinkKnockbackQueued);
             GameInteractor::State::LinkKnockbackQueued = 0;
-            GameInteractor::RawAction::KnockbackPlayer(5.0f);
         }
     }
 

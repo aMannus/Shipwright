@@ -8001,6 +8001,7 @@ void func_80842A28(PlayState* play, Player* this) {
     play->actorCtx.unk_02 = 4;
     Player_RequestRumble(this, 255, 20, 150, 0);
     Player_PlaySfx(&this->actor, NA_SE_IT_HAMMER_HIT);
+    GameInteractor_SetLinkKnockbackQueued(1);
 }
 
 void func_80842A88(PlayState* play, Player* this) {
