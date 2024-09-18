@@ -279,6 +279,10 @@ void ChaosRace_OnItemUse(int32_t item) {
 }
 
 void ChaosRace_HandleTriggers() {
+    if (!GameInteractor::IsSaveLoaded()) {
+        return;
+    }
+
     Player* player = GET_PLAYER(gPlayState);
     uint32_t randomNumber;
 
@@ -294,9 +298,9 @@ void ChaosRace_HandleTriggers() {
         ChaosRace_SpawnIronKnuckleInvasion();
     }
 
-    // Spawn Random Enemy Invasion (average once every 2 minutes)
+    // Spawn Random Enemy Invasion (average once every 3 minutes)
     randomNumber = rand();
-    if (randomNumber % ChaosRace_MinutesToTicks(2) == 1) {
+    if (randomNumber % ChaosRace_MinutesToTicks(3) == 1) {
         ChaosRace_SpawnRandomEnemyInvasion();
     }
 
@@ -350,10 +354,18 @@ void ChaosRace_HandleTriggers() {
     } else {
         GameInteractor::State::DisableLedgeGrabsActive = 0;
     }
+
+    // If paused, chance to automatically unpause
+    if (gPlayState->pauseCtx.state != 0) {
+        randomNumber = rand();
+        if (randomNumber % 20) {
+            GameInteractor::State::EmulatedButtons |= BTN_START;
+        }
+    }
 }
 
 void RegisterChaosRace() {
-    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayerUpdate>([]() {
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnGameFrameUpdate>([]() {
         ChaosRace_HandleTriggers();
     });
 
