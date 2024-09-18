@@ -4,6 +4,7 @@
 #include "soh/Enhancements/nametag.h"
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
 #include "soh/Enhancements/enemyrandomizer.h"
+#include "soh/OTRGlobals.h"
 
 #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
 #include "objects/gameplay_field_keep/gameplay_field_keep.h"
@@ -29,9 +30,17 @@ typedef enum {
     LINK_PROP_BOULDER,
 } GILinkProp;
 
+typedef enum {
+    DVD_UP,
+    DVD_DOWN,
+    DVD_LEFT,
+    DVD_RIGHT,
+} DVDDirection;
+
 uint8_t PlayerProp = LINK_PROP_DEFAULT;
 uint32_t flippedWorldTimer = 0;
 uint32_t ledgeGrabTimer = 0;
+uint32_t DVDTimer = 0;
 
 static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "Cluckey_9",
@@ -286,6 +295,46 @@ void ChaosRace_ToggleIcePhysics(int16_t scene) {
     }
 }
 
+// Move DPAD up/down right/left like the old DVD logo screensaver.
+// Probably a more sane way to do it out there but whatever.
+uint8_t directionX = DVD_RIGHT;
+uint8_t directionY = DVD_DOWN;
+
+void ChaosRace_DpadDVDLogo() {
+    int32_t dpadType = CVarGetInteger("gDPadPosType", 0);
+    int32_t dpadX = CVarGetInteger("gDPadPosX", 0);
+    int32_t dpadY = CVarGetInteger("gDPadPosY", 0);
+    int32_t distanceToEdge = 0;
+
+    if (directionX == DVD_RIGHT) {
+        CVarSetInteger("gDPadPosX", dpadX + 1);
+        distanceToEdge = SCREEN_WIDTH - dpadX;
+        if (distanceToEdge <= -82) {
+            directionX = DVD_LEFT;
+        }
+    } else {
+        CVarSetInteger("gDPadPosX", dpadX - 1);
+        distanceToEdge = dpadX;
+        if (distanceToEdge <= 0) {
+            directionX = DVD_RIGHT;
+        }
+    }
+
+    if (directionY == DVD_DOWN) {
+        CVarSetInteger("gDPadPosY", dpadY + 1);
+        distanceToEdge = SCREEN_HEIGHT - dpadY;
+        if (distanceToEdge <= 30) {
+            directionY = DVD_UP;
+        }
+    } else {
+        CVarSetInteger("gDPadPosY", dpadY - 1);
+        distanceToEdge = dpadY;
+        if (distanceToEdge <= -2) {
+            directionY = DVD_DOWN;
+        }
+    }
+}
+
 void ChaosRace_HandleTriggers() {
     if (!GameInteractor::IsSaveLoaded()) {
         return;
@@ -370,6 +419,21 @@ void ChaosRace_HandleTriggers() {
             GameInteractor::State::EmulatedButtons |= BTN_START;
         }
     }
+
+    // Random chance to activate dpad DVD logo mode (average every 5 minutes, lasts 1 minute)
+    randomNumber = rand();
+    if (randomNumber % ChaosRace_MinutesToTicks(5) == 1) {
+        DVDTimer = ChaosRace_MinutesToTicks(1);
+        int32_t randomX = Random(0, SCREEN_WIDTH);
+        int32_t randomY = Random(0, SCREEN_HEIGHT);
+        CVarSetInteger("gDPadPosType", 1);
+        CVarSetInteger("gDPadPosX", randomX);
+        CVarSetInteger("gDPadPosY", randomY);
+    }
+    if (DVDTimer) {
+        DVDTimer--;
+        ChaosRace_DpadDVDLogo();
+    }
 }
 
 void RegisterChaosRace() {
@@ -395,5 +459,6 @@ void RegisterChaosRace() {
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneInit>([](int16_t sceneNum) {
         ChaosRace_ToggleIcePhysics(sceneNum);
+        CVarSetInteger("gMinimapPosType", 0);
     });
 }
