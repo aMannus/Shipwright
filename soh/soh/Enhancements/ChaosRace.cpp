@@ -31,6 +31,7 @@ typedef enum {
 
 uint8_t PlayerProp = LINK_PROP_DEFAULT;
 uint32_t flippedWorldTimer = 0;
+uint32_t ledgeGrabTimer = 0;
 
 static std::string cuccoNames[CUCCO_NAME_TABLE_SIZE] = {
     "Cluckey_9",
@@ -335,6 +336,19 @@ void ChaosRace_HandleTriggers() {
         if (CVarGetInteger("gMirroredWorld", 0)) {
             CVarSetInteger("gMirroredWorld", 0);
         }
+    }
+
+    // Randomly enable Disable Ledge Grabs for 10 seconds (average once every minute)
+    randomNumber = rand();
+    if (randomNumber % ChaosRace_MinutesToTicks(1) == 1) {
+        // 20 ticks * 10 seconds
+        ledgeGrabTimer = 200;
+    }
+    if (ledgeGrabTimer) {
+        ledgeGrabTimer--;
+        GameInteractor::State::DisableLedgeGrabsActive = 1;
+    } else {
+        GameInteractor::State::DisableLedgeGrabsActive = 0;
     }
 }
 
