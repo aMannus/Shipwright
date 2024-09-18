@@ -278,6 +278,14 @@ void ChaosRace_OnItemUse(int32_t item) {
     }
 }
 
+void ChaosRace_ToggleIcePhysics(int16_t scene) {
+    if (scene == SCENE_FIRE_TEMPLE || scene == SCENE_FIRE_TEMPLE_BOSS || scene == SCENE_WATER_TEMPLE_BOSS) {
+        GameInteractor::State::SlipperyFloorActive = 1;
+    } else {
+        GameInteractor::State::SlipperyFloorActive = 0;
+    }
+}
+
 void ChaosRace_HandleTriggers() {
     if (!GameInteractor::IsSaveLoaded()) {
         return;
@@ -355,7 +363,7 @@ void ChaosRace_HandleTriggers() {
         GameInteractor::State::DisableLedgeGrabsActive = 0;
     }
 
-    // If paused, chance to automatically unpause
+    // If paused, chance to automatically unpause (average after a second)
     if (gPlayState->pauseCtx.state != 0) {
         randomNumber = rand();
         if (randomNumber % 20) {
@@ -383,5 +391,9 @@ void RegisterChaosRace() {
 
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnPlayerDraw>([]() {
         ChaosRace_DrawLinkProp();
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneInit>([](int16_t sceneNum) {
+        ChaosRace_ToggleIcePhysics(sceneNum);
     });
 }
