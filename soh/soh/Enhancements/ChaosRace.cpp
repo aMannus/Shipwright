@@ -412,10 +412,10 @@ void ChaosRace_HandleTriggers() {
         GameInteractor::State::DisableLedgeGrabsActive = 0;
     }
 
-    // If paused, chance to automatically unpause (average after a second)
+    // If paused, chance to automatically unpause (average after 3 seconds)
     if (gPlayState->pauseCtx.state != 0) {
         randomNumber = rand();
-        if (randomNumber % 20) {
+        if (randomNumber % 60 == 1) {
             GameInteractor::State::EmulatedButtons |= BTN_START;
         }
     }
