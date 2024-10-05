@@ -6,6 +6,7 @@
 #include "soh/frame_interpolation.h"
 #include <assert.h>
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
+#include <stdlib.h>
 
 #define FLAGS (ACTOR_FLAG_UPDATE_WHILE_CULLED | ACTOR_FLAG_DRAW_WHILE_CULLED)
 
