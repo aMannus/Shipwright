@@ -19,7 +19,7 @@ extern "C" {
 #include "variables.h"
 #include "functions.h"
 #include "macros.h"
-PlayState* gPlayState;
+extern PlayState* gPlayState;
 }
 
 typedef enum {
