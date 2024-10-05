@@ -97,7 +97,7 @@ void GiveLinksPocketItem() {
     if (Randomizer_GetSettingValue(RSK_LINKS_POCKET) != RO_LINKS_POCKET_NOTHING) {
         GetItemEntry getItemEntry = Randomizer_GetItemFromKnownCheck(RC_LINKS_POCKET, (GetItemID)RG_NONE);
         StartingItemGive(getItemEntry);
-        Rando::Context::GetInstance()->GetItemLocation(RC_LINKS_POCKET)->MarkAsObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_LINKS_POCKET)->SetCheckStatus(RCSHOW_SAVED);
         // If we re-add the above, we'll get the item on save creation, now it's given on first load
         Flags_SetRandomizerInf(RAND_INF_LINKS_POCKET);
     }
@@ -325,6 +325,10 @@ extern "C" void Randomizer_InitSaveFile() {
 
     if (Randomizer_GetSettingValue(RSK_SHUFFLE_CHILD_WALLET) == RO_GENERIC_OFF) {
         Flags_SetRandomizerInf(RAND_INF_HAS_WALLET);
+    }
+
+    if (Randomizer_GetSettingValue(RSK_SHUFFLE_FISHING_POLE) == RO_GENERIC_OFF) {
+        Flags_SetRandomizerInf(RAND_INF_FISHING_POLE_FOUND);
     }
 
     // Give Link's pocket item

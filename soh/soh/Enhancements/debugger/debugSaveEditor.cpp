@@ -1320,7 +1320,16 @@ void DrawEquipmentTab() {
         "Giant (500)",
     };
     // only display Tycoon wallet if you're in a save file that would allow it.
-    if (IS_RANDO && OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) > RO_SHOPSANITY_ZERO_ITEMS) {
+    if (
+        IS_RANDO &&
+        !(
+            OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) == RO_SHOPSANITY_OFF ||
+            (
+                OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) == RO_SHOPSANITY_SPECIFIC_COUNT &&
+                OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY_COUNT) == RO_SHOPSANITY_COUNT_ZERO_ITEMS
+            )
+        )
+    ) {
         const std::string walletName = "Tycoon (999)";
         walletNamesImpl.push_back(walletName);
     }
@@ -1777,12 +1786,6 @@ void DrawPlayerTab() {
 }
 
 void SaveEditorWindow::DrawElement() {
-    ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Save Editor", &mIsVisible, ImGuiWindowFlags_NoFocusOnAppearing)) {
-        ImGui::End();
-        return;
-    }
-
     if (ImGui::BeginTabBar("SaveContextTabBar", ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) {
         if (ImGui::BeginTabItem("Info")) {
             DrawInfoTab();
@@ -1816,8 +1819,6 @@ void SaveEditorWindow::DrawElement() {
 
         ImGui::EndTabBar();
     }
-
-    ImGui::End();
 }
 
 void SaveEditorWindow::InitElement() {

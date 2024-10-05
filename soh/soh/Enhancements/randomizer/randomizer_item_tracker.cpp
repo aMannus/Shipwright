@@ -390,7 +390,13 @@ ItemTrackerNumbers GetItemCurrentAndMax(ItemTrackerItem item) {
         case ITEM_WALLET_ADULT:
         case ITEM_WALLET_GIANT:
             result.currentCapacity = IS_RANDO && !Flags_GetRandomizerInf(RAND_INF_HAS_WALLET) ? 0 : CUR_CAPACITY(UPG_WALLET);
-            result.maxCapacity = OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) > RO_SHOPSANITY_ZERO_ITEMS ? 999 : 500;
+            result.maxCapacity = !IS_RANDO || (
+                OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) == RO_SHOPSANITY_OFF ||
+                (
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY) == RO_SHOPSANITY_SPECIFIC_COUNT &&
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SHOPSANITY_COUNT) == RO_SHOPSANITY_COUNT_ZERO_ITEMS
+                )
+            ) ? 500 : 999;
             result.currentAmmo = gSaveContext.rupees;
             break;
         case ITEM_BOMBCHU:
@@ -1206,6 +1212,15 @@ void ItemTrackerLoadFile() {
     }
 }
 
+void ItemTrackerWindow::Draw() {
+    if (!IsVisible()) {
+        return;
+    }
+    DrawElement();
+    // Sync up the IsVisible flag if it was changed by ImGui
+    SyncVisibilityConsoleVariable();
+}
+
 void ItemTrackerWindow::DrawElement() {
     UpdateVectors();
 
@@ -1350,13 +1365,6 @@ static const char* extendedDisplayTypes[4] = { "Hidden", "Main Window", "Misc Wi
 static const char* minimalDisplayTypes[2] = { "Hidden", "Separate" };
 
 void ItemTrackerSettingsWindow::DrawElement() {
-    ImGui::SetNextWindowSize(ImVec2(733, 472), ImGuiCond_FirstUseEver);
-
-    if (!ImGui::Begin("Item Tracker Settings", &mIsVisible, ImGuiWindowFlags_NoFocusOnAppearing)) {
-        ImGui::End();
-        return;
-    }
-
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 8.0f, 8.0f });
     ImGui::BeginTable("itemTrackerSettingsTable", 2, ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersV);
     ImGui::TableSetupColumn("General settings", ImGuiTableColumnFlags_WidthStretch, 200.0f);
@@ -1499,8 +1507,6 @@ void ItemTrackerSettingsWindow::DrawElement() {
 
     ImGui::PopStyleVar(1);
     ImGui::EndTable();
-
-    ImGui::End();
 }
 
 void ItemTrackerWindow::InitElement() {

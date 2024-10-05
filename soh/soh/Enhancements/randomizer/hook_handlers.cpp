@@ -4,6 +4,7 @@
 #include "soh/Enhancements/custom-message/CustomMessageTypes.h"
 #include "soh/Enhancements/randomizer/randomizerTypes.h"
 #include "soh/Enhancements/randomizer/dungeon.h"
+#include "soh/Enhancements/randomizer/fishsanity.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 
@@ -12,6 +13,7 @@ extern "C" {
 #include "functions.h"
 #include "variables.h"
 #include "soh/Enhancements/randomizer/adult_trade_shuffle.h"
+#include "src/overlays/actors/ovl_Bg_Treemouth/z_bg_treemouth.h"
 #include "src/overlays/actors/ovl_En_Si/z_en_si.h"
 #include "src/overlays/actors/ovl_En_Cow/z_en_cow.h"
 #include "src/overlays/actors/ovl_En_Shopnuts/z_en_shopnuts.h"
@@ -305,7 +307,9 @@ void RandomizerOnItemReceiveHandler(GetItemEntry receivedItemEntry) {
     auto loc = Rando::Context::GetInstance()->GetItemLocation(randomizerQueuedCheck);
     if (randomizerQueuedItemEntry.modIndex == receivedItemEntry.modIndex && randomizerQueuedItemEntry.itemId == receivedItemEntry.itemId) {
         SPDLOG_INFO("Item received mod {} item {} from RC {}", receivedItemEntry.modIndex, receivedItemEntry.itemId, static_cast<uint32_t>(randomizerQueuedCheck));
-        loc->MarkAsObtained();
+        loc->SetCheckStatus(RCSHOW_COLLECTED);
+        CheckTracker::RecalculateAllAreaTotals();
+        SaveManager::Instance->SaveSection(gSaveContext.fileNum, SECTION_ID_TRACKER_DATA, true);
         randomizerQueuedCheck = RC_UNKNOWN_CHECK;
         randomizerQueuedItemEntry = GET_ITEM_NONE;
     }
@@ -614,6 +618,11 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, void
         case VB_BE_ELIGIBLE_FOR_PRELUDE_OF_LIGHT:
             *should = !Flags_GetEventChkInf(EVENTCHKINF_LEARNED_PRELUDE_OF_LIGHT) && CHECK_QUEST_ITEM(QUEST_MEDALLION_FOREST);
             break;
+        case VB_MIDO_SPAWN:
+            if (RAND_GET_OPTION(RSK_FOREST) != RO_FOREST_OPEN && !Flags_GetEventChkInf(EVENTCHKINF_SHOWED_MIDO_SWORD_SHIELD)) {
+                *should = true;
+            }
+            break;
         case VB_MOVE_MIDO_IN_KOKIRI_FOREST:
             if (RAND_GET_OPTION(RSK_FOREST) == RO_FOREST_OPEN) {
                 *should = true;
@@ -629,7 +638,11 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, void
             *should = !Flags_GetRandomizerInf(RAND_INF_DARUNIAS_JOY);
             break;
         case VB_BE_ELIGIBLE_FOR_LIGHT_ARROWS:
-            *should = !Flags_GetEventChkInf(EVENTCHKINF_RETURNED_TO_TEMPLE_OF_TIME_WITH_ALL_MEDALLIONS) && MeetsLACSRequirements();
+            *should =
+                LINK_IS_ADULT &&
+                (gEntranceTable[gSaveContext.entranceIndex].scene == SCENE_TEMPLE_OF_TIME) &&
+                !Flags_GetEventChkInf(EVENTCHKINF_RETURNED_TO_TEMPLE_OF_TIME_WITH_ALL_MEDALLIONS) &&
+                MeetsLACSRequirements();
             break;
         case VB_BE_ELIGIBLE_FOR_NOCTURNE_OF_SHADOW:
             *should =
@@ -656,7 +669,8 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, void
                 *should = false;
             } else {
                 *should = true;
-                Rando::Context::GetInstance()->GetItemLocation(RC_TOT_MASTER_SWORD)->MarkAsObtained();
+                Rando::Context::GetInstance()->GetItemLocation(RC_TOT_MASTER_SWORD)->SetCheckStatus(RCSHOW_COLLECTED);
+                CheckTracker::RecalculateAllAreaTotals();
             }
             break;
         case VB_ITEM00_DESPAWN: {
@@ -673,6 +687,17 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, void
                 GetItemEntry itemEntry = randomizerQueuedItemEntry;
                 item00->itemEntry = itemEntry;
                 item00->actor.draw = (ActorFunc)EnItem00_DrawRandomizedItem;
+            }
+            break;
+        }
+        case VB_ITEM_B_HEART_DESPAWN: {
+            ItemBHeart* itemBHeart = static_cast<ItemBHeart*>(optionalArg);
+            RandomizerCheck rc = OTRGlobals::Instance->gRandomizer->GetCheckFromActor(itemBHeart->actor.id, gPlayState->sceneNum, itemBHeart->actor.params);
+            if (rc != RC_UNKNOWN_CHECK) {
+                itemBHeart->sohItemEntry = Rando::Context::GetInstance()->GetFinalGIEntry(rc, true, (GetItemID)Rando::StaticData::GetLocation(rc)->GetVanillaItem());
+                itemBHeart->actor.draw = (ActorFunc)ItemBHeart_DrawRandomizedItem;
+                itemBHeart->actor.update = (ActorFunc)ItemBHeart_UpdateRandomizedItem;
+                *should = Rando::Context::GetInstance()->GetItemLocation(rc)->HasObtained();
             }
             break;
         }
@@ -766,6 +791,9 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, void
                         Randomizer_Item_Give(gPlayState, item00->itemEntry);
                     }
                 }
+                // This is typically called when you close the text box after getting an item, in case a previous
+                // function hid the interface.
+                Interface_ChangeAlpha(gSaveContext.unk_13EE);
                 // EnItem00_SetupAction(item00, func_8001E5C8);
                 // *should = false;
             } else if (item00->actor.params == ITEM00_SOH_GIVE_ITEM_ENTRY_GI) {
@@ -1173,25 +1201,26 @@ void RandomizerOnSceneInitHandler(int16_t sceneNum) {
     //       probably need to do something different when we implement shuffle
     if (sceneNum == SCENE_TREASURE_BOX_SHOP) {
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_ITEM_1);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_1)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_1)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_ITEM_2);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_2)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_2)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_ITEM_3);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_3)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_3)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_ITEM_4);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_4)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_4)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_ITEM_5);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_5)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_ITEM_5)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_KEY_1);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_1)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_1)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_KEY_2);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_2)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_2)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_KEY_3);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_3)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_3)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_KEY_4);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_4)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_4)->SetCheckStatus(RCSHOW_UNCHECKED);
         Flags_UnsetRandomizerInf(RAND_INF_MARKET_TREASURE_CHEST_GAME_KEY_5);
-        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_5)->MarkAsNotObtained();
+        Rando::Context::GetInstance()->GetItemLocation(RC_MARKET_TREASURE_CHEST_GAME_KEY_5)->SetCheckStatus(RCSHOW_UNCHECKED);
+        CheckTracker::RecalculateAllAreaTotals();
     }
 
     // LACs & Prelude checks
@@ -1202,6 +1231,7 @@ void RandomizerOnSceneInitHandler(int16_t sceneNum) {
         updateHook = 0;
     }
 
+    // If we're not in the Temple of Time or we've already learned the Prelude of Light and received LACs, we don't need to do anything
     if (
         sceneNum != SCENE_TEMPLE_OF_TIME || 
         (
@@ -1215,15 +1245,18 @@ void RandomizerOnSceneInitHandler(int16_t sceneNum) {
             Flags_SetEventChkInf(EVENTCHKINF_LEARNED_PRELUDE_OF_LIGHT);
         }
 
-        if (!Flags_GetEventChkInf(EVENTCHKINF_RETURNED_TO_TEMPLE_OF_TIME_WITH_ALL_MEDALLIONS) && MeetsLACSRequirements()) {
+        // We're always in rando here, and rando always overrides this should so we can just pass false
+        if (GameInteractor_Should(VB_BE_ELIGIBLE_FOR_LIGHT_ARROWS, false, NULL)) {
             Flags_SetEventChkInf(EVENTCHKINF_RETURNED_TO_TEMPLE_OF_TIME_WITH_ALL_MEDALLIONS);
         }
 
+        // If both awards have been given, we can unregister the hook, otherwise it will get unregistered when the player leaves the area
         if (
             Flags_GetEventChkInf(EVENTCHKINF_LEARNED_PRELUDE_OF_LIGHT) &&
             Flags_GetEventChkInf(EVENTCHKINF_RETURNED_TO_TEMPLE_OF_TIME_WITH_ALL_MEDALLIONS)
         ) {
             GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnPlayerUpdate>(updateHook);
+            updateHook = 0;
         }
     });
 }
@@ -1327,16 +1360,6 @@ void RandomizerOnActorInitHandler(void* actorRef) {
             EnSi* enSi = static_cast<EnSi*>(actorRef);
             enSi->sohGetItemEntry = Rando::Context::GetInstance()->GetFinalGIEntry(rc, true, (GetItemID)Rando::StaticData::GetLocation(rc)->GetVanillaItem());
             actor->draw = (ActorFunc)EnSi_DrawRandomizedItem;
-        }
-    }
-
-    if (actor->id == ACTOR_ITEM_B_HEART) {
-        ItemBHeart* itemBHeart = static_cast<ItemBHeart*>(actorRef);
-        RandomizerCheck rc = OTRGlobals::Instance->gRandomizer->GetCheckFromActor(itemBHeart->actor.id, gPlayState->sceneNum, itemBHeart->actor.params);
-        if (rc != RC_UNKNOWN_CHECK) {
-            itemBHeart->sohItemEntry = Rando::Context::GetInstance()->GetFinalGIEntry(rc, true, (GetItemID)Rando::StaticData::GetLocation(rc)->GetVanillaItem());
-            itemBHeart->actor.draw = (ActorFunc)ItemBHeart_DrawRandomizedItem;
-            itemBHeart->actor.update = (ActorFunc)ItemBHeart_UpdateRandomizedItem;
         }
     }
 
@@ -1465,6 +1488,14 @@ void RandomizerOnActorInitHandler(void* actorRef) {
         }
     }
 
+    if (actor->id == ACTOR_BG_TREEMOUTH && LINK_IS_ADULT &&
+        RAND_GET_OPTION(RSK_SHUFFLE_DUNGEON_ENTRANCES) != RO_DUNGEON_ENTRANCE_SHUFFLE_OFF &&
+        (RAND_GET_OPTION(RSK_FOREST) == RO_FOREST_OPEN ||
+            Flags_GetEventChkInf(EVENTCHKINF_SHOWED_MIDO_SWORD_SHIELD))) {
+        BgTreemouth* bgTreemouth = static_cast<BgTreemouth*>(actorRef);
+        bgTreemouth->unk_168 = 1.0f;
+    }
+
     //consumable bags
     if (
         actor->id == ACTOR_EN_ITEM00 &&
@@ -1495,6 +1526,12 @@ void RandomizerRegisterHooks() {
     static uint32_t onSceneInitHook = 0;
     static uint32_t onActorInitHook = 0;
 
+    static uint32_t fishsanityOnActorInitHook = 0;
+    static uint32_t fishsanityOnFlagSetHook = 0;
+    static uint32_t fishsanityOnActorUpdateHook = 0;
+    static uint32_t fishsanityOnSceneInitHook = 0;
+    static uint32_t fishsanityOnVanillaBehaviorHook = 0;
+
     GameInteractor::Instance->RegisterGameHook<GameInteractor::OnLoadGame>([](int32_t fileNum) {
         randomizerQueuedChecks = std::queue<RandomizerCheck>();
         randomizerQueuedCheck = RC_UNKNOWN_CHECK;
@@ -1509,6 +1546,12 @@ void RandomizerRegisterHooks() {
         GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnSceneInit>(onSceneInitHook);
         GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnActorInit>(onActorInitHook);
 
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnActorInit>(fishsanityOnActorInitHook);
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnFlagSet>(fishsanityOnFlagSetHook);
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnActorUpdate>(fishsanityOnActorUpdateHook);
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnSceneInit>(fishsanityOnSceneInitHook);
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::OnVanillaBehavior>(fishsanityOnVanillaBehaviorHook);
+
         onFlagSetHook = 0;
         onSceneFlagSetHook = 0;
         onPlayerUpdateForRCQueueHook = 0;
@@ -1517,6 +1560,12 @@ void RandomizerRegisterHooks() {
         onVanillaBehaviorHook = 0;
         onSceneInitHook = 0;
         onActorInitHook = 0;
+
+        fishsanityOnActorInitHook = 0;
+        fishsanityOnFlagSetHook = 0;
+        fishsanityOnActorUpdateHook = 0;
+        fishsanityOnSceneInitHook = 0;
+        fishsanityOnVanillaBehaviorHook = 0;
 
         if (!IS_RANDO) return;
 
@@ -1528,5 +1577,15 @@ void RandomizerRegisterHooks() {
         onVanillaBehaviorHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnVanillaBehavior>(RandomizerOnVanillaBehaviorHandler);
         onSceneInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneInit>(RandomizerOnSceneInitHandler);
         onActorInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>(RandomizerOnActorInitHandler);
+
+        if (RAND_GET_OPTION(RSK_FISHSANITY) != RO_FISHSANITY_OFF) {
+            OTRGlobals::Instance->gRandoContext->GetFishsanity()->InitializeFromSave();
+
+            fishsanityOnActorInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorInit>(Rando::Fishsanity::OnActorInitHandler);
+            fishsanityOnActorInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnFlagSet>(Rando::Fishsanity::OnFlagSetHandler);
+            fishsanityOnActorInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnActorUpdate>(Rando::Fishsanity::OnActorUpdateHandler);
+            fishsanityOnActorInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneInit>(Rando::Fishsanity::OnSceneInitHandler);
+            fishsanityOnActorInitHook = GameInteractor::Instance->RegisterGameHook<GameInteractor::OnVanillaBehavior>(Rando::Fishsanity::OnVanillaBehaviorHandler);
+        }
     });
 }
