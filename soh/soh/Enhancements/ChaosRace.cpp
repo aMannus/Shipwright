@@ -5,6 +5,7 @@
 #include "soh/Enhancements/randomizer/3drando/random.hpp"
 #include "soh/Enhancements/enemyrandomizer.h"
 #include "soh/OTRGlobals.h"
+#include <stdlib.h>
 
 #include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
 #include "objects/gameplay_field_keep/gameplay_field_keep.h"
