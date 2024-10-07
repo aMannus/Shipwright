@@ -11588,6 +11588,11 @@ static Gfx* sMaskDlists[PLAYER_MASK_MAX - 1] = {
 static Vec3s D_80854864 = { 0, 0, 0 };
 
 void Player_DrawGameplay(PlayState* play, Player* this, s32 lod, Gfx* cullDList, OverrideLimbDrawOpa overrideLimbDraw) {
+
+    if (GameInteractor_InvisibleLinkActive()) {
+        return;
+    }
+
     static s32 D_8085486C = 255;
 
     OPEN_DISPS(play->state.gfxCtx);
@@ -11799,6 +11804,8 @@ void Player_Draw(Actor* thisx, PlayState* play2) {
     }
 
     CLOSE_DISPS(play->state.gfxCtx);
+
+    GameInteractor_ExecuteOnPlayerDraw();
 }
 
 void Player_Destroy(Actor* thisx, PlayState* play) {

@@ -11,6 +11,7 @@
 #include "soh/Enhancements/nametag.h"
 #ifdef ENABLE_REMOTE_CONTROL
 #include "soh/Enhancements/game-interactor/GameInteractor_Anchor.h"
+#include "soh/Enhancements/PropHunt.h"
 #endif
 
 #include "src/overlays/actors/ovl_En_Bb/z_en_bb.h"
@@ -1105,5 +1106,6 @@ void InitMods() {
     NameTag_RegisterHooks();
     #ifdef ENABLE_REMOTE_CONTROL
     Anchor_RegisterHooks();
+    RegisterPropHunt();
     #endif
 }

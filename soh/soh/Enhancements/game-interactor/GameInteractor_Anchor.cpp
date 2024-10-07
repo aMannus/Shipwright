@@ -12,6 +12,7 @@
 #include <soh/Enhancements/randomizer/randomizer_check_tracker.h>
 #include <soh/util.h>
 #include <nlohmann/json.hpp>
+#include "soh/UIWidgets.hpp"
 
 extern "C" {
 #include <variables.h>
@@ -23,6 +24,12 @@ extern "C" s16 gEnLinkPuppetId;
 extern PlayState* gPlayState;
 extern SaveContext gSaveContext;
 }
+
+static PropButtons propButtonTable[PROP_BUTTON_COUNT] = {
+    { "Link",   LINK_PROP_DEFAULT },
+    { "Pot",    LINK_PROP_POT },
+    { "Grass",  LINK_PROP_GRASS },
+};
 
 using json = nlohmann::json;
 
@@ -77,6 +84,7 @@ void from_json(const json& j, PlayerData& playerData) {
     j.at("stickWeaponTipZ").get_to(playerData.stickWeaponTip.z);
     j.at("unk_860").get_to(playerData.unk_860);
     j.at("unk_862").get_to(playerData.unk_862);
+    j.at("currentProp").get_to(playerData.currentProp);
 }
 
 void to_json(json& j, const PlayerData& playerData) {
@@ -117,6 +125,7 @@ void to_json(json& j, const PlayerData& playerData) {
         { "stickWeaponTipZ", playerData.stickWeaponTip.z },
         { "unk_860", playerData.unk_860 },
         { "unk_862", playerData.unk_862 },
+        { "currentProp", playerData.currentProp },
     };
 }
 
@@ -485,6 +494,8 @@ void GameInteractorAnchor::HandleRemoteJson(nlohmann::json payload) {
                 GET_PLAYER(gPlayState)->actor.freezeTimer = 20;
                 Actor_SetColorFilter(&GET_PLAYER(gPlayState)->actor, 0, 0xFF, 0, 10);
             }
+
+            gSaveContext.playerData.currentProp = LINK_PROP_DEFAULT;
         }
     }
     if (payload["type"] == "CLIENT_UPDATE") {
@@ -1326,7 +1337,7 @@ void AnchorPlayerLocationWindow::DrawElement() {
         if (client.sceneNum < SCENE_ID_MAX && client.fileNum != 0xFF) {
             ImGui::SameLine();
             ImGui::TextColored(ImVec4(0.5, 0.5, 0.5, 1), "%s", SohUtils::GetSceneName(client.sceneNum).c_str());
-            if (GameInteractor::Instance->IsSaveLoaded() && client.sceneNum != SCENE_GROTTOS && client.sceneNum != SCENE_ID_MAX) {
+            if (GameInteractor::Instance->IsSaveLoaded() && client.sceneNum != SCENE_GROTTOS && client.sceneNum != SCENE_ID_MAX && !client.playerData.currentProp) {
                 ImGui::SameLine();
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
                 if (ImGui::Button(ICON_FA_CHEVRON_RIGHT, ImVec2(ImGui::GetFontSize() * 1.0f, ImGui::GetFontSize() * 1.0f))) {
@@ -1440,6 +1451,44 @@ void AnchorLogWindow::UpdateElement() {
             --index;
         }
     }
+}
+
+void AnchorPropHuntWindow::DrawElement() {
+    ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 4.0f);
+    ImGui::Begin("Prop Hunt Selection", &mIsVisible,
+                 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize |
+                     ImGuiWindowFlags_NoResize);
+
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12.0f, 6.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.22f, 0.38f, 0.56f, 1.0f));
+
+    if (ImGui::Button("Reset to Link", ImVec2(150.0f, 0.0f))) {
+        gSaveContext.playerData.currentProp = LINK_PROP_DEFAULT;
+    }
+
+    UIWidgets::Spacer(1.0f);
+
+    for (uint16_t i = 1; i < PROP_BUTTON_COUNT; i++) {
+        if (i % 3 != 1) {
+            ImGui::SameLine();
+        }
+        if (ImGui::Button(propButtonTable[i].name, ImVec2(80.0f, 0.0f))) {
+            gSaveContext.playerData.currentProp = propButtonTable[i].id;
+        }
+    }
+
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor(1);
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+    ImGui::PopStyleColor(2);
 }
 
 #endif

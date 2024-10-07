@@ -4,6 +4,7 @@
 #include "z_link_puppet.h"
 #include <objects/gameplay_keep/gameplay_keep.h>
 #include "soh/Enhancements/game-interactor/GameInteractor_Anchor.h"
+#include "soh/Enhancements/PropHunt.h"
 #include <string.h>
 #include <objects/object_link_child/object_link_child.h>
 
@@ -95,9 +96,14 @@ void LinkPuppet_Init(Actor* thisx, PlayState* play) {
     NameTag_RemoveAllForActor(thisx);
 
     Color_RGB8 clientColor = Anchor_GetClientColor(this->actor.params - 3);
-    const char* playerName = Anchor_GetClientName(this->actor.params - 3);
-    this->nameTagOptions.yOffset = 0;
-    NameTag_RegisterForActorWithOptions(&this->actor, playerName, this->nameTagOptions);
+
+    this->currentProp = playerData.currentProp;
+
+    if (this->currentProp == LINK_PROP_DEFAULT) {
+        const char* playerName = Anchor_GetClientName(this->actor.params - 3);
+        this->nameTagOptions.yOffset = 0;
+        NameTag_RegisterForActorWithOptions(&this->actor, playerName, this->nameTagOptions);
+    }
 }
 
 void LinkPuppet_Destroy(Actor* thisx, PlayState* play) {
@@ -162,6 +168,23 @@ void LinkPuppet_Update(Actor* thisx, PlayState* play) {
         Audio_PlaySoundGeneral(playerData.playerSound, &this->actor.projectedPos, 4, &D_801333E0, &D_801333E0,
                                &D_801333E8);
     }
+
+    if (playerData.currentProp != this->currentProp) {
+        this->currentProp = playerData.currentProp;
+
+        if (this->currentProp == LINK_PROP_DEFAULT) {
+            this->actor.shape.shadowDraw = ActorShadow_DrawFeet;
+            const char* playerName = Anchor_GetClientName(this->actor.params - 3);
+            NameTag_RegisterForActorWithOptions(&this->actor, playerName, this->nameTagOptions);
+            this->actor.flags |= ACTOR_FLAG_TARGETABLE;
+        } else {
+            this->actor.shape.shadowDraw = NULL;
+            NameTag_RemoveAllForActor(thisx);
+            this->actor.flags &= ~ACTOR_FLAG_TARGETABLE;
+        }
+    }
+
+    
 }
 
 Vec3f FEET_POS[] = {
@@ -215,24 +238,30 @@ void LinkPuppet_Draw(Actor* thisx, PlayState* play) {
 
     PlayerData playerData = Anchor_GetClientPlayerData(this->actor.params - 3);
 
-    if (this->puppetAge == playerData.playerAge) {
-        DrawAnchorPuppet(play, this->linkSkeleton.skeleton, this->linkSkeleton.jointTable,
-                         this->linkSkeleton.dListCount, 0, playerData.tunicType, playerData.bootsType,
-                         playerData.faceType, PuppetOverrideDraw, Puppet_PostLimbDraw, this, playerData, this->actor.params - 3);
+    if (playerData.currentProp == LINK_PROP_DEFAULT) {
+        if (this->puppetAge == playerData.playerAge) {
+            DrawAnchorPuppet(play, this->linkSkeleton.skeleton, this->linkSkeleton.jointTable,
+                             this->linkSkeleton.dListCount, 0, playerData.tunicType, playerData.bootsType,
+                             playerData.faceType, PuppetOverrideDraw, Puppet_PostLimbDraw, this, playerData,
+                             this->actor.params - 3);
 
-        if ((playerData.unk_862 - 1) > -1) {
-            OPEN_DISPS(play->state.gfxCtx);
+            if ((playerData.unk_862 - 1) > -1) {
+                OPEN_DISPS(play->state.gfxCtx);
 
-            Matrix_Translate(this->leftHandPos.x + (3.3f * Math_SinS(this->actor.shape.rot.y)), this->leftHandPos.y,
-                             this->leftHandPos.z + ((3.3f + (IREG(90) / 10.0f)) * Math_CosS(this->actor.shape.rot.y)),
-                             MTXMODE_NEW);
-            Matrix_RotateZYX(0, play->gameplayFrames * 1000, 0, MTXMODE_APPLY);
-            Matrix_Scale(0.2f, 0.2f, 0.2f, MTXMODE_APPLY);
+                Matrix_Translate(this->leftHandPos.x + (3.3f * Math_SinS(this->actor.shape.rot.y)), this->leftHandPos.y,
+                                 this->leftHandPos.z +
+                                     ((3.3f + (IREG(90) / 10.0f)) * Math_CosS(this->actor.shape.rot.y)),
+                                 MTXMODE_NEW);
+                Matrix_RotateZYX(0, play->gameplayFrames * 1000, 0, MTXMODE_APPLY);
+                Matrix_Scale(0.2f, 0.2f, 0.2f, MTXMODE_APPLY);
 
-            GetItem_Draw(play, ABS(playerData.unk_862 - 1));
+                GetItem_Draw(play, ABS(playerData.unk_862 - 1));
 
-            CLOSE_DISPS(play->state.gfxCtx);
+                CLOSE_DISPS(play->state.gfxCtx);
+            }
         }
+    } else {
+        PropHunt_DrawProp(playerData.currentProp);
     }
 }
 #endif

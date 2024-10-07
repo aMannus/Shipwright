@@ -201,6 +201,7 @@ typedef struct {
     Vec3f stickWeaponTip;
     s16 unk_860;
     s8 unk_862;
+    u16 currentProp;
 } PlayerData;
 
 typedef struct {

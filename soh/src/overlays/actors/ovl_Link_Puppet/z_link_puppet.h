@@ -18,6 +18,7 @@ typedef struct LinkPuppet {
     uint8_t puppetAge;
     NameTagOptions nameTagOptions;
     Vec3f leftHandPos;
+    uint16_t currentProp;
 } LinkPuppet;
 
 typedef enum {

@@ -1426,6 +1426,7 @@ extern std::shared_ptr<ValueViewerWindow> mValueViewerWindow;
 #ifdef ENABLE_REMOTE_CONTROL
 extern std::shared_ptr<AnchorPlayerLocationWindow> mAnchorPlayerLocationWindow;
 extern std::shared_ptr<AnchorLogWindow> mAnchorLogWindow;
+extern std::shared_ptr<AnchorPropHuntWindow> mAnchorPropHuntWindow;
 #endif
 
 void DrawDeveloperToolsMenu() {
@@ -1693,6 +1694,14 @@ void DrawRemoteControlMenu() {
                     "buttons to change the direction the messages stack towards."
                 );
             }
+            if (mAnchorPropHuntWindow) {
+                if (ImGui::Button(GetWindowButtonText("Prop Hunt Window", CVarGetInteger("gRemote.AnchorPropHuntWindow", 0)).c_str(), ImVec2(ImGui::GetContentRegionAvail().x - 20.0f, 0.0f))) {
+                    mAnchorPropHuntWindow->ToggleVisibility();
+                }
+                UIWidgets::InsertHelpHoverText(
+                    "Change into various props. Visible to other players too."
+                );
+            }
             ImGui::PopStyleVar(3);
         }
 
@@ -1720,6 +1729,9 @@ void DrawRemoteControlMenu() {
                         if (CVarGetInteger("gRemote.AnchorPlayerLocationWindow", 0) && mAnchorPlayerLocationWindow) {
                             mAnchorPlayerLocationWindow->ToggleVisibility();
                         }
+                        if (CVarGetInteger("gRemote.AnchorPropHuntWindow", 0) && mAnchorPropHuntWindow) {
+                            mAnchorPropHuntWindow->ToggleVisibility();
+                        }
                         GameInteractorAnchor::Instance->Disable();
                         break;
                 }
@@ -1739,6 +1751,9 @@ void DrawRemoteControlMenu() {
                         }
                         if (!CVarGetInteger("gRemote.AnchorPlayerLocationWindow", 0) && mAnchorPlayerLocationWindow) {
                             mAnchorPlayerLocationWindow->ToggleVisibility();
+                        }
+                        if (!CVarGetInteger("gRemote.AnchorPropHuntWindow", 0) && mAnchorPropHuntWindow) {
+                            mAnchorPropHuntWindow->ToggleVisibility();
                         }
                         GameInteractorAnchor::Instance->Enable();
                         break;
