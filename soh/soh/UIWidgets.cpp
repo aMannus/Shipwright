@@ -314,7 +314,7 @@ namespace UIWidgets {
         }
 
         ImGui::PushItemWidth(std::min((ImGui::GetContentRegionAvail().x - (PlusMinusButton ? sliderButtonWidth : 0.0f)), maxSliderWidth));
-        if (ImGui::SliderInt(id, &val, min, max, format, ImGuiSliderFlags_AlwaysClamp))
+        if (ImGui::SliderInt(id, &val, min, max, format, 0))
         {
             changed = true;
         }

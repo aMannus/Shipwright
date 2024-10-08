@@ -38,6 +38,10 @@ std::map<int, std::string> cmdMap = {
     { G_ENDDL, "gsSPEndDisplayList" },
 };
 
+char* GetActiveDisplayList() {
+    return activeDisplayList;
+}
+
 void DLViewerWindow::DrawElement() {
     ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Display List Viewer", &mIsVisible, ImGuiWindowFlags_NoFocusOnAppearing)) {

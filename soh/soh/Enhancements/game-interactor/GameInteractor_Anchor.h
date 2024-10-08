@@ -114,16 +114,3 @@ void Anchor_TeleportToPlayer(uint32_t clientId);
 #ifdef __cplusplus
 }
 #endif
-
-typedef enum {
-    LINK_PROP_DEFAULT,
-    LINK_PROP_POT,
-    LINK_PROP_GRASS,
-} AnchorLinkProp;
-
-typedef struct PropButtons {
-    const char* name;
-    uint16_t id;
-} PropButtons;
-
-#define PROP_BUTTON_COUNT 3

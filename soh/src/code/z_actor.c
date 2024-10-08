@@ -179,10 +179,6 @@ void ActorShadow_DrawFoot(PlayState* play, Light* light, MtxF* arg2, s32 arg3, f
 
 void ActorShadow_DrawFeet(Actor* actor, Lights* lights, PlayState* play) {
 
-    if (actor->id == 0 && GameInteractor_InvisibleLinkActive()) {
-        return;
-    }
-
     f32 distToFloor = actor->world.pos.y - actor->floorHeight;
 
     if (distToFloor > 20.0f) {

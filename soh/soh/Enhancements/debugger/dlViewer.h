@@ -10,3 +10,5 @@ class DLViewerWindow : public LUS::GuiWindow {
     void DrawElement() override;
     void UpdateElement() override {};
 };
+
+char* GetActiveDisplayList();

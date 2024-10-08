@@ -13,6 +13,7 @@
 #include <soh/util.h>
 #include <nlohmann/json.hpp>
 #include "soh/UIWidgets.hpp"
+#include "soh/Enhancements/PropHunt.h"
 
 extern "C" {
 #include <variables.h>
@@ -24,12 +25,6 @@ extern "C" s16 gEnLinkPuppetId;
 extern PlayState* gPlayState;
 extern SaveContext gSaveContext;
 }
-
-static PropButtons propButtonTable[PROP_BUTTON_COUNT] = {
-    { "Link",   LINK_PROP_DEFAULT },
-    { "Pot",    LINK_PROP_POT },
-    { "Grass",  LINK_PROP_GRASS },
-};
 
 using json = nlohmann::json;
 
@@ -1462,26 +1457,47 @@ void AnchorPropHuntWindow::DrawElement() {
                  ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize |
                      ImGuiWindowFlags_NoResize);
 
-
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12.0f, 6.0f));
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.22f, 0.38f, 0.56f, 1.0f));
 
+    UIWidgets::PaddedSeparator();
+
+    UIWidgets::EnhancementCheckbox("Render selected DL in DLViewer", "gPropUseDLViewer");
+    UIWidgets::EnhancementCheckbox("Use custom sizes and offsets", "gPropCustomSizeOffsetEnabled");
+
+    if (CVarGetInteger("gPropCustomSizeOffsetEnabled", 0)) {
+        UIWidgets::PaddedEnhancementSliderInt("Size X: %d.0f", "##propsizex", "gPropSizeX", 1, 100, "", 1, true, true, false);
+        UIWidgets::PaddedEnhancementSliderInt("Size Y: %d.0f", "##propsizey", "gPropSizeY", 1, 100, "", 1, true, true, false);
+        UIWidgets::PaddedEnhancementSliderInt("Size Z: %d.0f", "##propsizez", "gPropSizeZ", 1, 100, "", 1, true, true, false);
+
+        UIWidgets::PaddedEnhancementSliderInt("Offset X: %d.0f", "##propoffsetx", "gPropOffsetX", 0, 100, "", 0, true, true, false);
+        UIWidgets::PaddedEnhancementSliderInt("Offset Y: %d.0f", "##propoffsety", "gPropOffsetY", 0, 100, "", 0, true, true, false);
+        UIWidgets::PaddedEnhancementSliderInt("Offset Z: %d.0f", "##propoffsetz", "gPropOffsetZ", 0, 100, "", 0, true, true, false);
+    }
+
+    UIWidgets::PaddedSeparator();
+
     if (ImGui::Button("Reset to Link", ImVec2(150.0f, 0.0f))) {
         gSaveContext.playerData.currentProp = LINK_PROP_DEFAULT;
     }
 
-    UIWidgets::Spacer(1.0f);
+    UIWidgets::PaddedSeparator();
 
-    for (uint16_t i = 1; i < PROP_BUTTON_COUNT; i++) {
+    for (uint16_t i = 1; i < PROP_COUNT; i++) {
         if (i % 3 != 1) {
             ImGui::SameLine();
         }
-        if (ImGui::Button(propButtonTable[i].name, ImVec2(80.0f, 0.0f))) {
-            gSaveContext.playerData.currentProp = propButtonTable[i].id;
+
+        if (propHuntTable[i].name != NULL) {
+            if (ImGui::Button(propHuntTable[i].name, ImVec2(120.0f, 0.0f))) {
+                gSaveContext.playerData.currentProp = i;
+            }
         }
     }
+
+    UIWidgets::PaddedSeparator();
 
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(1);

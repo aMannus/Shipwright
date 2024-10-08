@@ -2,6 +2,7 @@
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Anchor.h"
+#include "soh/Enhancements/debugger/dlViewer.h"
 
 extern "C" {
 #include <z64.h>
@@ -11,9 +12,6 @@ extern "C" {
 extern PlayState* gPlayState;
 }
 
-#include "objects/gameplay_dangeon_keep/gameplay_dangeon_keep.h"
-#include "objects/gameplay_field_keep/gameplay_field_keep.h"
-
 void PropHunt_UpdatePropState() {
     if (gSaveContext.playerData.currentProp) {
         GameInteractor::State::InvisibleLinkActive = true;
@@ -22,26 +20,41 @@ void PropHunt_UpdatePropState() {
     }
 }
 
-void PropHunt_DrawProp(uint16_t currentProp) {
-    const char* PropDL = gPotDL;
-    float scale = 1.0f;
-    float translateY = 0.0f;
+std::string activeDL;
+char* dlistPath;
 
-    switch (currentProp) {
-        case LINK_PROP_POT:
-            PropDL = gPotDL;
-            scale = 15.0f;
-            break;
-        case LINK_PROP_GRASS:
-            PropDL = gFieldBushDL;
-            scale = 45.0f;
-            break;
-        default:
-            break;
+void PropHunt_DrawProp(uint16_t currentProp) {
+    Gfx* PropDL = (Gfx*)"";
+    Vec3f size = { 1.0f, 1.0f, 1.0f };
+    Vec3f offset = { 0.0f, 0.0f, 0.0f };
+
+    PropDL = (Gfx*)propHuntTable[currentProp].dList;
+    size = propHuntTable[currentProp].propPos;
+    offset = propHuntTable[currentProp].propOffset;
+
+    if (CVarGetInteger("gPropUseDLViewer", 0)) {
+        char* dlViewerSelection = GetActiveDisplayList();
+
+        if (dlViewerSelection != nullptr) {
+            activeDL = dlViewerSelection;
+            activeDL = "__OTR__" + activeDL;
+            dlistPath = activeDL.data();
+            PropDL = (Gfx*)dlistPath;
+        }
     }
 
-    Matrix_Scale(scale, scale, scale, MTXMODE_APPLY);
-    Matrix_Translate(0, translateY, 0, MTXMODE_APPLY);
+    if (CVarGetInteger("gPropCustomSizeOffsetEnabled", 0)) {
+        size.x = (float)CVarGetInteger("gPropSizeX", 1);
+        size.y = (float)CVarGetInteger("gPropSizeY", 1);
+        size.z = (float)CVarGetInteger("gPropSizeZ", 1);
+        
+        offset.x = (float)CVarGetInteger("gPropOffsetX", 1);
+        offset.y = (float)CVarGetInteger("gPropOffsetY", 1);
+        offset.z = (float)CVarGetInteger("gPropOffsetZ", 1);
+    }
+
+    Matrix_Scale(size.x, size.y, size.z, MTXMODE_APPLY);
+    Matrix_Translate(offset.x, offset.y, offset.z, MTXMODE_APPLY);
     Gfx_DrawDListOpa(gPlayState, (Gfx*)PropDL);
 }
 
