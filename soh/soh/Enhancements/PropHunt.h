@@ -22,7 +22,7 @@ typedef struct PropHuntProps {
     Vec3f propOffset;
 } PropHuntProps;
 
-#define PROP_COUNT 42
+#define PROP_COUNT 48
 #define LINK_PROP_DEFAULT 0
 
 static PropHuntProps propHuntTable[] = {
@@ -34,11 +34,11 @@ static PropHuntProps propHuntTable[] = {
     { "Royal Tomb", "__OTR__objects/object_spot02_objects/object_spot02_objects_DL_0130B0", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Crate", "__OTR__objects/object_kibako2/gLargeCrateDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Bean Seedling", "__OTR__objects/object_mamenoki/gMagicBeanSeedlingDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
-    { "Graveyard Kid Left Foot", "__OTR__objects/object_cs/gGraveyardKidLeftFootDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
+    { "Graveyard Kid Foot", "__OTR__objects/object_cs/gGraveyardKidLeftFootDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Child Link Bottle", "__OTR__objects/object_link_child/gLinkChildBottle2DL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Hookshot Post", "__OTR__objects/object_d_hsblock/gHookshotPostDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Bombwall Broken", "__OTR__objects/gameplay_field_keep/gBgBombwallBrokenDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
-    { "Ganondorf Open Left Hand", "__OTR__objects/object_gndd/gYoungGanondorfOpenLeftHandDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
+    { "Ganondorf Open Hand", "__OTR__objects/object_gndd/gYoungGanondorfOpenLeftHandDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Deku Stick", "__OTR__objects/object_link_child/gLinkChildLinkDekuStickDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Kak Well Arch", "__OTR__objects/object_spot01_objects/gKakarikoWellArchDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Lake Flower Patch", "__OTR__objects/gameplay_field_keep/gHanaDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
@@ -49,7 +49,8 @@ static PropHuntProps propHuntTable[] = {
     { "Volvagia Platform", "__OTR__objects/object_fd/gVolvagiaPlatformDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Fishing Post", "__OTR__objects/object_fish/gFishingWoodPostModelDL", { 8.0f, 8.0f, 8.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Dampe Lantern", "__OTR__objects/object_tk/gDampeLanternDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
-    { "Gate - Other", "__OTR__objects/object_mori_objects/gMoriHashiraGateDL", { 100.0f, 100.0f, 100.0f }, { 0.0f, 0.0f, 100.0f } },
+    { "Dampe's Hut", "__OTR__scenes/shared/spot02_scene/spot02_room_1DL_003068", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
+    { "Gate - Other", "__OTR__objects/object_mori_objects/gMoriHashiraGateDL", { 100.0f, 100.0f, 100.0f }, { 0.0f, 0.0f, 30.0f } },
     { "Door - Dungeon", "__OTR__objects/gameplay_keep/gDungeonDoorDL", { 100.0f, 100.0f, 100.0f }, { 0.0f, 0.0f, 30.0f } },
     { "Grotto", "__OTR__objects/gameplay_field_keep/gGrottoDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } },
     { "Great Fairy - Beta", "__OTR__objects/object_dy_obj/gGreatFairyBetaDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
@@ -68,6 +69,11 @@ static PropHuntProps propHuntTable[] = {
     { "Hookshot Target", "__OTR__objects/object_d_hsblock/gHookshotTargetDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 1390.0f, -200.0f } },
     { "Ladder One Story", "__OTR__objects/object_mori_objects/gMoriHashigoLadderDL", { 100.0f, 100.0f, 100.0f }, { 0.0f, 0.0f, -25.0f } },
     { "Kotake Head", "__OTR__objects/object_tr/gKotakeHeadDL", { 1.0f, 1.0f, 1.0f }, { 0.0f, 1000.0f, 0.0f } },
+    { "Dodongo Falling Stairs", "__OTR__objects/object_ddan_objects/gDodongoFallingStairsDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 4800.0f, 0.0f } },
+    { "Spirit Temple Climbing Wall", "__OTR__objects/object_jya_obj/gZurerukabeDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, -180.0f } },
+    { "Tower Collapse Bars", "__OTR__objects/object_zg/gTowerCollapseBarsDL", { 100.0f, 100.0f, 100.0f }, { 0.0f, 0.0f, -30.0f } },
+    { "Phantom Ganon Bars", "__OTR__objects/object_gnd/gPhantomGanonBarsDL", { 100.0f, 100.0f, 100.0f }, { 0.0f, 0.0f, 25.0f } },
+    { "Jabu Blue Switch", "__OTR__objects/object_bdan_objects/gJabuBlueFloorSwitchDL", { 10.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f } },
 };
 
 #endif
