@@ -1449,6 +1449,8 @@ void AnchorLogWindow::UpdateElement() {
     }
 }
 
+char propSearchChar[64] = "";
+
 void AnchorPropHuntWindow::DrawElement() {
     ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0.7f));
@@ -1465,23 +1467,44 @@ void AnchorPropHuntWindow::DrawElement() {
 
     UIWidgets::Spacer(5.0f);
 
-    if (ImGui::Button("Reset to Link", ImVec2(150.0f, 0.0f))) {
+    if (ImGui::Button("Reset to Link", ImVec2(120.0f, 0.0f))) {
         gSaveContext.playerData.currentProp = LINK_PROP_DEFAULT;
     }
 
     UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
 
-    for (uint16_t i = 1; i < PROP_COUNT; i++) {
-        if (i % 3 != 1) {
-            ImGui::SameLine();
-        }
+    ImGui::Text("Search Props");
+    UIWidgets::Spacer(1.0f);
+    if (ImGui::InputText("##searchprops", propSearchChar, ARRAY_COUNT(propSearchChar))) {
+        
+    }
 
-        if (propHuntTable[i].name != NULL) {
-            if (ImGui::Button(propHuntTable[i].name, ImVec2(120.0f, 0.0f))) {
-                gSaveContext.playerData.currentProp = i;
+    UIWidgets::Spacer(5.0f);
+
+    ImGui::BeginChild("ChildPropHuntButtons", ImVec2(400.0f, 300.0f));
+
+    uint16_t visibleButtons = 0;
+    std::string propSearchString = propSearchChar;
+
+    for (uint16_t i = 1; i < PROP_COUNT; i++) {
+        std::string currentButtonName = propHuntTable[i].name;
+        std::transform(currentButtonName.begin(), currentButtonName.end(), currentButtonName.begin(), ::toupper);
+        std::transform(propSearchString.begin(), propSearchString.end(), propSearchString.begin(), ::toupper);
+        if (propSearchString.empty() || currentButtonName.find(propSearchString) != std::string::npos) {
+            visibleButtons++;
+            if (visibleButtons % 3 != 1) {
+                ImGui::SameLine();
+            }
+
+            if (propHuntTable[i].name != NULL) {
+                if (ImGui::Button(propHuntTable[i].name, ImVec2(120.0f, 0.0f))) {
+                    gSaveContext.playerData.currentProp = i;
+                }
             }
         }
     }
+
+    ImGui::EndChild();
 
     UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
 
@@ -1495,12 +1518,13 @@ void AnchorPropHuntWindow::DrawElement() {
         ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
         ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.22f, 0.38f, 0.56f, 1.0f));
 
-        UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
+        UIWidgets::Spacer(5.0f);
 
         UIWidgets::EnhancementCheckbox("Render selected DL in DLViewer", "gPropUseDLViewer");
         if (CVarGetInteger("gPropUseDLViewer", 0)) {
             char* currentDL = GetActiveDisplayList();
             if (currentDL != nullptr) {
+                UIWidgets::Spacer(5.0f);
                 ImGui::PushItemWidth(ImGui::GetWindowSize().x - 100.0f);
                 ImGui::InputText("##", currentDL, 256, ImGuiInputTextFlags_ReadOnly);
                 ImGui::PopItemWidth();
@@ -1515,13 +1539,17 @@ void AnchorPropHuntWindow::DrawElement() {
             UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
 
             UIWidgets::EnhancementInputInt("Size X: ", "gPropSizeX", 10, 100);
+            UIWidgets::Spacer(3.0f);
             UIWidgets::EnhancementInputInt("Size Y: ", "gPropSizeY", 10, 100);
+            UIWidgets::Spacer(3.0f);
             UIWidgets::EnhancementInputInt("Size Z: ", "gPropSizeZ", 10, 100);
 
             UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
 
             UIWidgets::EnhancementInputInt("Offset X: ", "gPropOffsetX", 10, 100);
+            UIWidgets::Spacer(3.0f);
             UIWidgets::EnhancementInputInt("Offset Y: ", "gPropOffsetY", 10, 100);
+            UIWidgets::Spacer(3.0f);
             UIWidgets::EnhancementInputInt("Offset Z: ", "gPropOffsetZ", 10, 100);
 
             UIWidgets::Spacer(5.0f);
