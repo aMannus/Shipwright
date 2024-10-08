@@ -44,13 +44,13 @@ void PropHunt_DrawProp(uint16_t currentProp) {
     }
 
     if (CVarGetInteger("gPropCustomSizeOffsetEnabled", 0)) {
-        size.x = (float)CVarGetInteger("gPropSizeX", 1);
-        size.y = (float)CVarGetInteger("gPropSizeY", 1);
-        size.z = (float)CVarGetInteger("gPropSizeZ", 1);
+        size.x = (float)CVarGetInteger("gPropSizeX", 10) / 10.0f;
+        size.y = (float)CVarGetInteger("gPropSizeY", 10) / 10.0f;
+        size.z = (float)CVarGetInteger("gPropSizeZ", 10) / 10.0f;
         
-        offset.x = (float)CVarGetInteger("gPropOffsetX", 1);
-        offset.y = (float)CVarGetInteger("gPropOffsetY", 1);
-        offset.z = (float)CVarGetInteger("gPropOffsetZ", 1);
+        offset.x = (float)CVarGetInteger("gPropOffsetX", 10) / 10.0f;
+        offset.y = (float)CVarGetInteger("gPropOffsetY", 10) / 10.0f;
+        offset.z = (float)CVarGetInteger("gPropOffsetZ", 10) / 10.0f;
     }
 
     Matrix_Scale(size.x, size.y, size.z, MTXMODE_APPLY);

@@ -479,6 +479,18 @@ namespace UIWidgets {
         return ret;
     }
 
+    bool EnhancementInputInt(const char* text, const char* cvarName, int step, int stepFast) {
+        int val = CVarGetInteger(cvarName, 10);
+        ImGui::Text(text);
+        std::string inputLabel = "##" + std::string(cvarName);
+        bool valueChanged = ImGui::InputInt(inputLabel.c_str(), &val, 10, 100, 0);
+        if (valueChanged) {
+            CVarSetInteger(cvarName, val);
+        }
+        
+        return valueChanged;
+    }
+
     bool DrawResetColorButton(const char* cvarName, ImVec4* colors, ImVec4 defaultcolors, bool has_alpha) {
         bool changed = false;
         std::string Cvar_RBM = std::string(cvarName) + "RBM";

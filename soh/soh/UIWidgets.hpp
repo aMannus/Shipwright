@@ -84,6 +84,8 @@ namespace UIWidgets {
     
     bool EnhancementRadioButton(const char* text, const char* cvarName, int id);
 
+    bool EnhancementInputInt(const char* text, const char* cvarName, int step, int stepFast);
+
     bool DrawResetColorButton(const char* cvarName, ImVec4* colors, ImVec4 defaultcolors, bool has_alpha);
     bool DrawRandomizeColorButton(const char* cvarName, ImVec4* colors);
     void DrawLockColorCheckbox(const char* cvarName);

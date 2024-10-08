@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 #include "soh/UIWidgets.hpp"
 #include "soh/Enhancements/PropHunt.h"
+#include "soh/Enhancements/debugger/dlViewer.h"
 
 extern "C" {
 #include <variables.h>
@@ -1462,28 +1463,13 @@ void AnchorPropHuntWindow::DrawElement() {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.22f, 0.38f, 0.56f, 1.0f));
 
-    UIWidgets::PaddedSeparator();
-
-    UIWidgets::EnhancementCheckbox("Render selected DL in DLViewer", "gPropUseDLViewer");
-    UIWidgets::EnhancementCheckbox("Use custom sizes and offsets", "gPropCustomSizeOffsetEnabled");
-
-    if (CVarGetInteger("gPropCustomSizeOffsetEnabled", 0)) {
-        UIWidgets::PaddedEnhancementSliderInt("Size X: %d.0f", "##propsizex", "gPropSizeX", 1, 100, "", 1, true, true, false);
-        UIWidgets::PaddedEnhancementSliderInt("Size Y: %d.0f", "##propsizey", "gPropSizeY", 1, 100, "", 1, true, true, false);
-        UIWidgets::PaddedEnhancementSliderInt("Size Z: %d.0f", "##propsizez", "gPropSizeZ", 1, 100, "", 1, true, true, false);
-
-        UIWidgets::PaddedEnhancementSliderInt("Offset X: %d.0f", "##propoffsetx", "gPropOffsetX", 0, 100, "", 0, true, true, false);
-        UIWidgets::PaddedEnhancementSliderInt("Offset Y: %d.0f", "##propoffsety", "gPropOffsetY", 0, 100, "", 0, true, true, false);
-        UIWidgets::PaddedEnhancementSliderInt("Offset Z: %d.0f", "##propoffsetz", "gPropOffsetZ", 0, 100, "", 0, true, true, false);
-    }
-
-    UIWidgets::PaddedSeparator();
+    UIWidgets::Spacer(5.0f);
 
     if (ImGui::Button("Reset to Link", ImVec2(150.0f, 0.0f))) {
         gSaveContext.playerData.currentProp = LINK_PROP_DEFAULT;
     }
 
-    UIWidgets::PaddedSeparator();
+    UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
 
     for (uint16_t i = 1; i < PROP_COUNT; i++) {
         if (i % 3 != 1) {
@@ -1497,10 +1483,53 @@ void AnchorPropHuntWindow::DrawElement() {
         }
     }
 
-    UIWidgets::PaddedSeparator();
+    UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
 
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor(1);
+
+    if (ImGui::CollapsingHeader("Debug tools")) {
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12.0f, 6.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.22f, 0.38f, 0.56f, 1.0f));
+
+        UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
+
+        UIWidgets::EnhancementCheckbox("Render selected DL in DLViewer", "gPropUseDLViewer");
+        if (CVarGetInteger("gPropUseDLViewer", 0)) {
+            char* currentDL = GetActiveDisplayList();
+            if (currentDL != nullptr) {
+                ImGui::PushItemWidth(ImGui::GetWindowSize().x - 100.0f);
+                ImGui::InputText("##", currentDL, 256, ImGuiInputTextFlags_ReadOnly);
+                ImGui::PopItemWidth();
+            }
+        }
+
+        UIWidgets::Spacer(5.0f);
+        UIWidgets::EnhancementCheckbox("Use custom sizes and offsets", "gPropCustomSizeOffsetEnabled");
+
+        if (CVarGetInteger("gPropCustomSizeOffsetEnabled", 0)) {
+
+            UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
+
+            UIWidgets::EnhancementInputInt("Size X: ", "gPropSizeX", 10, 100);
+            UIWidgets::EnhancementInputInt("Size Y: ", "gPropSizeY", 10, 100);
+            UIWidgets::EnhancementInputInt("Size Z: ", "gPropSizeZ", 10, 100);
+
+            UIWidgets::PaddedSeparator(true, true, 5.0f, 5.0f);
+
+            UIWidgets::EnhancementInputInt("Offset X: ", "gPropOffsetX", 10, 100);
+            UIWidgets::EnhancementInputInt("Offset Y: ", "gPropOffsetY", 10, 100);
+            UIWidgets::EnhancementInputInt("Offset Z: ", "gPropOffsetZ", 10, 100);
+
+            UIWidgets::Spacer(5.0f);
+        }
+
+        ImGui::PopStyleVar(3);
+        ImGui::PopStyleColor(1);
+    }
 
     ImGui::End();
     ImGui::PopStyleVar();
