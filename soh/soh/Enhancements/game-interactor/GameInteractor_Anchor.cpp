@@ -799,6 +799,14 @@ uint8_t Anchor_GetClientRoomIndex(uint32_t actorIndex) {
     return client->roomIndex;
 }
 
+uint8_t Anchor_GetClientProp(uint32_t actorIndex) {
+    AnchorClient* client = Anchor_GetClientByActorIndex(actorIndex);
+    if (client == nullptr)
+        return 0;
+
+    return client->playerData.currentProp;
+}
+
 Color_RGB8 Anchor_GetClientColor(uint32_t actorIndex) {
     AnchorClient* client = Anchor_GetClientByActorIndex(actorIndex);
     if (client == nullptr) return { 100, 255, 100 };
@@ -1332,7 +1340,12 @@ void AnchorPlayerLocationWindow::DrawElement() {
         }
         if (client.sceneNum < SCENE_ID_MAX && client.fileNum != 0xFF) {
             ImGui::SameLine();
-            ImGui::TextColored(ImVec4(0.5, 0.5, 0.5, 1), "%s", SohUtils::GetSceneName(client.sceneNum).c_str());
+            if (!client.playerData.currentProp) {
+                ImGui::TextColored(ImVec4(0.5, 0.5, 0.5, 1), "%s", SohUtils::GetSceneName(client.sceneNum).c_str());
+            } else {
+                ImGui::TextColored(ImVec4(0.5, 0.5, 0.5, 1), "%s", "Hidden");
+            }
+            
             if (GameInteractor::Instance->IsSaveLoaded() && client.sceneNum != SCENE_GROTTOS && client.sceneNum != SCENE_ID_MAX && !client.playerData.currentProp) {
                 ImGui::SameLine();
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));

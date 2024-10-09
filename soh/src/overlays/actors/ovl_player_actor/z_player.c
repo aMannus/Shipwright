@@ -11625,8 +11625,8 @@ void Player_DrawGameplay(PlayState* play, Player* this, s32 lod, Gfx* cullDList,
             MATRIX_TOMTX(bunnyEarMtx);
         }
 
-       
-        if (this->currentMask != PLAYER_MASK_BUNNY || !CVarGetInteger("gHideBunnyHood", 0)) {
+        if (this->currentMask != PLAYER_MASK_BUNNY ||
+            !CVarGetInteger("gHideBunnyHood", 0) && !GameInteractor_InvisibleLinkActive()) {
             gSPDisplayList(POLY_OPA_DISP++, sMaskDlists[this->currentMask - 1]);
         }
 

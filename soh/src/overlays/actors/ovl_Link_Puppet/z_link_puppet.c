@@ -145,7 +145,11 @@ void LinkPuppet_Update(Actor* thisx, PlayState* play) {
     }
 
     Collider_UpdateCylinder(thisx, &this->collider);
-    CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+    // Collide with a prop unless you're a prop yourself. 
+    // Collide with Link if you're Link.
+    if ((playerData.currentProp && !gSaveContext.playerData.currentProp) || (!gSaveContext.playerData.currentProp && !playerData.currentProp)) {
+        CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+    }
     CollisionCheck_SetAC(play, &play->colChkCtx, &this->collider.base);
 
     if (this->actor.params >= 3) {

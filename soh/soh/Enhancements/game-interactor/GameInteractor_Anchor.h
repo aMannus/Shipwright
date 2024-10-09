@@ -95,6 +95,7 @@ uint8_t Anchor_GetClientScene(uint32_t actorIndex);
 PosRot Anchor_GetClientPosition(uint32_t actorIndex);
 const char* Anchor_GetClientName(uint32_t actorIndex);
 uint8_t Anchor_GetClientRoomIndex(uint32_t actorIndex);
+uint8_t Anchor_GetClientProp(uint32_t actorIndex);
 Vec3s* Anchor_GetClientJointTable(uint32_t actorIndex);
 PlayerData Anchor_GetClientPlayerData(uint32_t actorIndex);
 Color_RGB8 Anchor_GetClientColor(uint32_t actorIndex);
