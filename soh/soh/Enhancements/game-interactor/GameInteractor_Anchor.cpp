@@ -1485,12 +1485,40 @@ void AnchorPropHuntWindow::DrawElement() {
 
     uint16_t visibleButtons = 0;
     std::string propSearchString = propSearchChar;
+    uint16_t currentCategory = PROP_NONE;
 
+    // Loop through all DL entries
     for (uint16_t i = 1; i < PROP_COUNT; i++) {
+        uint16_t currentButtonCategory = propHuntTable[i].category;
         std::string currentButtonName = propHuntTable[i].name;
         std::transform(currentButtonName.begin(), currentButtonName.end(), currentButtonName.begin(), ::toupper);
         std::transform(propSearchString.begin(), propSearchString.end(), propSearchString.begin(), ::toupper);
+
+        // If button meets search requirements or search bar is empty
         if (propSearchString.empty() || currentButtonName.find(propSearchString) != std::string::npos) {
+
+            // Checks if category is the same as the last entry in the table. Relies on the table ordered by category as well.
+            if (currentCategory != currentButtonCategory) {
+                currentCategory = currentButtonCategory;
+                const char* currentCategoryText = "Category Name Not Found";
+                visibleButtons = 0;
+
+                switch (currentCategory) { 
+                    case PROP_COMMON_OBJECTS:
+                        currentCategoryText = "Common Objects";
+                        break;
+                    case PROP_BODY_PARTS:
+                        currentCategoryText = "Body Parts";
+                        break;
+                    default:
+                        break;
+                }
+
+                UIWidgets::Spacer(5.0f);
+                ImGui::Text(currentCategoryText);
+                UIWidgets::PaddedSeparator();
+            }
+
             visibleButtons++;
             if (visibleButtons % 3 != 1) {
                 ImGui::SameLine();
@@ -1502,6 +1530,10 @@ void AnchorPropHuntWindow::DrawElement() {
                 }
             }
         }
+    }
+
+    if (!visibleButtons) {
+        ImGui::Text("No props found.");
     }
 
     ImGui::EndChild();
