@@ -1507,8 +1507,20 @@ void AnchorPropHuntWindow::DrawElement() {
                     case PROP_COMMON_OBJECTS:
                         currentCategoryText = "Common Objects";
                         break;
+                    case PROP_SCENERY:
+                        currentCategoryText = "Scenery";
+                        break;
+                    case PROP_DUNGEON:
+                        currentCategoryText = "Dungeon";
+                        break;
+                    case PROP_ITEM:
+                        currentCategoryText = "Items";
+                        break;
                     case PROP_BODY_PARTS:
                         currentCategoryText = "Body Parts";
+                        break;
+                    case PROP_MISC:
+                        currentCategoryText = "Miscellaneous";
                         break;
                     default:
                         break;
