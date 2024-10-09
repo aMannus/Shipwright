@@ -24,11 +24,10 @@ std::string activeDL;
 char* dlistPath;
 
 void PropHunt_DrawProp(uint16_t currentProp) {
-    Gfx* PropDL = (Gfx*)"";
     Vec3f size = { 1.0f, 1.0f, 1.0f };
     Vec3f offset = { 0.0f, 0.0f, 0.0f };
 
-    PropDL = (Gfx*)propHuntTable[currentProp].dList;
+    activeDL = propHuntTable[currentProp].dList;
     size = propHuntTable[currentProp].propPos;
     offset = propHuntTable[currentProp].propOffset;
 
@@ -38,8 +37,6 @@ void PropHunt_DrawProp(uint16_t currentProp) {
         if (dlViewerSelection != nullptr) {
             activeDL = dlViewerSelection;
             activeDL = "__OTR__" + activeDL;
-            dlistPath = activeDL.data();
-            PropDL = (Gfx*)dlistPath;
         }
     }
 
@@ -55,7 +52,7 @@ void PropHunt_DrawProp(uint16_t currentProp) {
 
     Matrix_Scale(size.x, size.y, size.z, MTXMODE_APPLY);
     Matrix_Translate(offset.x, offset.y, offset.z, MTXMODE_APPLY);
-    Gfx_DrawDListOpa(gPlayState, (Gfx*)PropDL);
+    Gfx_DrawDListOpa(gPlayState, (Gfx*)activeDL.c_str());
 }
 
 void RegisterPropHunt() {
