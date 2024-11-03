@@ -205,7 +205,7 @@ static PropHuntProps propHuntTable[] = {
     { "Fairy Ocarina", "__OTR__objects/object_gi_ocarina_0/gGiOcarinaFairyDL", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
     { "Fishing Lure", "__OTR__objects/object_fish/gFishingLureFloatDL", PROP_ITEM, { 1.0f, 1.0f, 1.0f }, { 0.0f, 300.0f, 0.0f } },
     { "Gauntlets", "__OTR__objects/object_gi_gloves/gGiGauntletsDL", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
-    { "Gerudo Mask", "__OTR__objects/object_gi_gerudomask/gGiGerudoMask", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
+    { "Gerudo Mask", "__OTR__objects/object_gi_gerudomask/gGiGerudoMaskDL", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
     { "Goron Bracelet", "__OTR__objects/object_gi_bracelet/gGiGoronBraceletDL", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
     { "Goron Mask", "__OTR__objects/object_gi_golonmask/gGiGoronMaskDL", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
     { "Grass - Unused", "__OTR__objects/object_gi_grass/gGiGrassDL", PROP_ITEM, { 40.0f, 40.0f, 40.0f }, { 0.0f, 35.0f, 0.0f } },
