@@ -322,7 +322,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE assets
     ${CMAKE_CURRENT_SOURCE_DIR}/../ZAPDTR/ZAPD/resource/type
 	${SDL2-INCLUDE}
     ${SDL2-NET-INCLUDE}
-    ${BOOST-INCLUDE}
 	${CMAKE_CURRENT_SOURCE_DIR}/assets/
 	.
 )
