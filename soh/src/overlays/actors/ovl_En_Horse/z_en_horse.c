@@ -3467,6 +3467,11 @@ void EnHorse_Update(Actor* thisx, PlayState* play2) {
     Vec3f dustVel = { 0.0f, 1.0f, 0.0f };
     Player* player = GET_PLAYER(play);
 
+    for (int i = 0; i < Ship_GetInterpolationFrameCount(); i++) {
+        memcpy(&this->skin.skelAnime.extraJointTable[i * this->skin.skelAnime.limbCount],
+               this->skin.skelAnime.jointTable, this->skin.skelAnime.limbCount * sizeof(Vec3s));
+    }
+
     this->lastYaw = thisx->shape.rot.y;
     EnHorse_UpdateStick(this, play);
     EnHorse_UpdatePlayerDir(this, play);

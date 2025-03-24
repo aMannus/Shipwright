@@ -1,6 +1,6 @@
 #include "global.h"
 
-MtxF gSkinLimbMatrices[60]; // holds matrices for each limb of the skeleton currently being drawn
+MtxF gSkinLimbMatrices[60 * MAX_INTERP_FRAMES]; // holds matrices for each limb of the skeleton currently being drawn
 
 static s32 sUnused;
 
@@ -66,67 +66,67 @@ void Skin_ApplyLimbModifications(GraphicsContext* gfxCtx, Skin* skin, s32 limbIn
     modifications = (SkinLimbModif*)SEGMENTED_TO_VIRTUAL(data->limbModifications);
 
     vtxEntry = &skin->vtxTable[limbIndex];
-    vtxBuf = vtxEntry->buf[vtxEntry->index];
+
     modifCount = data->limbModifCount;
 
-    for (modif = modifications; modif < modifications + modifCount; modif++) {
-        transformCount = modif->transformCount;
-        skinVertices = (SkinVertex*)SEGMENTED_TO_VIRTUAL(modif->skinVertices);
-        limbTransformations = (SkinTransformation*)SEGMENTED_TO_VIRTUAL(modif->limbTransformations);
+    int limbCount = skin->limbCount + 1;
 
-        if (transformCount == 1) {
+    for (int interpIdx = 0; interpIdx < Ship_GetInterpolationFrameCount(); interpIdx++) {
+        vtxBuf = vtxEntry->buf[vtxEntry->index + (interpIdx * 2)];
+
+        for (modif = modifications; modif < &modifications[modifCount]; modif++) {
             Vec3f spAC;
-
-            spAC.x = limbTransformations[0].x;
-            spAC.y = limbTransformations[0].y;
-            spAC.z = limbTransformations[0].z;
-
-            SkinMatrix_Vec3fMtxFMultXYZ(&gSkinLimbMatrices[limbTransformations[0].limbIndex], &spAC, &vtxPoint);
-        } else if (arg3 == 1) {
             Vec3f spA0;
 
-            transformationEntry = &limbTransformations[modif->unk_4];
+            skinVertices = (SkinVertex*)SEGMENTED_TO_VIRTUAL(modif->skinVertices);
+            limbTransformations = (SkinTransformation*)SEGMENTED_TO_VIRTUAL(modif->limbTransformations);
+            transformCount = modif->transformCount;
 
-            spA0.x = transformationEntry->x;
-            spA0.y = transformationEntry->y;
-            spA0.z = transformationEntry->z;
+            if (transformCount == 1) {
+                spAC.x = limbTransformations[0].x;
+                spAC.y = limbTransformations[0].y;
+                spAC.z = limbTransformations[0].z;
 
-            SkinMatrix_Vec3fMtxFMultXYZ(&gSkinLimbMatrices[transformationEntry->limbIndex], &spA0, &vtxPoint);
-        } else {
-            Vec3f phi_f20;
-            Vec3f sp88;
+                SkinMatrix_Vec3fMtxFMultXYZ(
+                    &gSkinLimbMatrices[(interpIdx * limbCount) + limbTransformations[0].limbIndex], &spAC, &vtxPoint);
+            } else if (arg3) {
+                transformationEntry = &limbTransformations[modif->unk_4];
 
-            phi_f20.x = phi_f20.y = phi_f20.z = 0.0f;
+                spA0.x = transformationEntry->x;
+                spA0.y = transformationEntry->y;
+                spA0.z = transformationEntry->z;
+                SkinMatrix_Vec3fMtxFMultXYZ(
+                    &gSkinLimbMatrices[(interpIdx * limbCount) + transformationEntry->limbIndex], &spA0, &vtxPoint);
+            } else {
+                Vec3f sp88;
 
-            for (transformationEntry = &limbTransformations[0];
-                 transformationEntry < &limbTransformations[transformCount]; transformationEntry++) {
-                scale = transformationEntry->scale * 0.01f;
+                vtxPoint.x = 0.0f;
+                vtxPoint.y = 0.0f;
+                vtxPoint.z = 0.0f;
 
-                sp88.x = transformationEntry->x;
-                sp88.y = transformationEntry->y;
-                sp88.z = transformationEntry->z;
+                for (transformationEntry = limbTransformations;
+                     transformationEntry < &limbTransformations[transformCount]; transformationEntry++) {
+                    scale = transformationEntry->scale * 0.01f;
 
-                SkinMatrix_Vec3fMtxFMultXYZ(&gSkinLimbMatrices[transformationEntry->limbIndex], &sp88, &spD0);
+                    sp88.x = transformationEntry->x;
+                    sp88.y = transformationEntry->y;
+                    sp88.z = transformationEntry->z;
 
-                spD0.x *= scale;
-                spD0.y *= scale;
-                spD0.z *= scale;
+                    SkinMatrix_Vec3fMtxFMultXYZ(
+                        &gSkinLimbMatrices[(interpIdx * limbCount) + transformationEntry->limbIndex], &sp88, &spD0);
 
-                phi_f20.x += spD0.x;
-                phi_f20.y += spD0.y;
-                phi_f20.z += spD0.z;
+                    vtxPoint.x += spD0.x * scale;
+                    vtxPoint.y += spD0.y * scale;
+                    vtxPoint.z += spD0.z * scale;
+                }
             }
 
-            vtxPoint.x = phi_f20.x;
-            vtxPoint.y = phi_f20.y;
-            vtxPoint.z = phi_f20.z;
+            Skin_UpdateVertices(
+                &gSkinLimbMatrices[(interpIdx * limbCount) + limbTransformations[modif->unk_4].limbIndex],
+                skinVertices, modif, vtxBuf, &vtxPoint);
         }
-
-        Skin_UpdateVertices(&gSkinLimbMatrices[limbTransformations[modif->unk_4].limbIndex], skinVertices, modif,
-                            vtxBuf, &vtxPoint);
+        gSPSegmentInterp(POLY_OPA_DISP++, 0x08 + (interpIdx * 0x10), vtxBuf);
     }
-
-    gSPSegment(POLY_OPA_DISP++, 0x08, vtxEntry->buf[vtxEntry->index]);
 
     vtxEntry->index = (vtxEntry->index == 0) ? 1 : 0;
 
@@ -196,7 +196,13 @@ void Skin_DrawImpl(Actor* actor, PlayState* play, Skin* skin, SkinPostDraw postD
     OPEN_DISPS(gfxCtx);
 
     if (!(drawFlags & SKIN_DRAW_FLAG_CUSTOM_TRANSFORMS)) {
-        Skin_ApplyAnimTransformations(skin, gSkinLimbMatrices, actor, setTranslation);
+        int limbCount = skin->limbCount + 1;
+
+        Skin_ApplyAnimTransformations(skin, gSkinLimbMatrices, actor, setTranslation, skin->skelAnime.jointTable);
+
+        for (int i = 0; i < Ship_GetInterpolationFrameCount(); i++)
+            Skin_ApplyAnimTransformations(skin, gSkinLimbMatrices + (limbCount * (i + 1)), actor, setTranslation,
+                                          &skin->skelAnime.extraJointTable[limbCount * i]);
     }
 
     skeleton = SEGMENTED_TO_VIRTUAL(skin->skeletonHeader->segment);

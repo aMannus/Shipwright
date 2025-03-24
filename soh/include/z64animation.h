@@ -267,6 +267,9 @@ typedef struct SkelAnime {
     /* 0x38 */ Vec3s prevTransl;  // Previous modelspace translation.
     /* 0x3E */ Vec3s baseTransl;  // Base modelspace translation.
                SkeletonHeader* skeletonHeader;
+    // #region SOH [General]
+    /*      */ Vec3s* extraJointTable; // For interpolation on skinned skeletons
+    /*      */ bool isSkinned;
 } SkelAnime; // size = 0x44
 
 #endif

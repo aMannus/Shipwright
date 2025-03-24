@@ -64,20 +64,17 @@ void Skin_Init(PlayState* play, Skin* skin, SkeletonHeader* skeletonHeader, Anim
         if ((limb->segmentType != SKIN_LIMB_TYPE_ANIMATED) || (limb->segment == NULL)) {
             vtxEntry->index = 0;
 
-            vtxEntry->buf[0] = NULL;
-            vtxEntry->buf[1] = NULL;
+            for (int j = 0; j < ARRAY_COUNT(vtxEntry->buf); j++) {
+                vtxEntry->buf[j] = NULL;
+            }
         } else {
             SkinAnimatedLimbData* animatedLimbData = SEGMENTED_TO_VIRTUAL(((void)0, limb->segment));
 
             vtxEntry->index = 0;
 
-            vtxEntry->buf[0] =
-                ZELDA_ARENA_MALLOC_DEBUG(animatedLimbData->totalVtxCount * sizeof(Vtx));
-            assert(vtxEntry->buf[0] != NULL);
-
-            vtxEntry->buf[1] =
-                ZELDA_ARENA_MALLOC_DEBUG(animatedLimbData->totalVtxCount * sizeof(Vtx));
-            assert(vtxEntry->buf[1] != NULL);
+            for (int j = 0; j < ARRAY_COUNT(skin->vtxTable->buf); j++) {
+                vtxEntry->buf[j] = ZeldaArena_Malloc(animatedLimbData->totalVtxCount * sizeof(Vtx));
+            }
 
             Skin_InitAnimatedLimb(play, skin, i);
         }
@@ -94,13 +91,11 @@ void Skin_Free(PlayState* play, Skin* skin) {
         s32 i;
 
         for (i = 0; i < skin->limbCount; i++) {
-            if (skin->vtxTable[i].buf[0] != NULL) {
-                ZELDA_ARENA_FREE_DEBUG(skin->vtxTable[i].buf[0]);
-                skin->vtxTable[i].buf[0] = NULL;
-            }
-            if (skin->vtxTable[i].buf[1] != NULL) {
-                ZELDA_ARENA_FREE_DEBUG(skin->vtxTable[i].buf[1]);
-                skin->vtxTable[i].buf[1] = NULL;
+            for (int j = 0; j < ARRAY_COUNT(skin->vtxTable->buf); j++) {
+                if (skin->vtxTable[i].buf[j] != NULL) {
+                    ZeldaArena_Free(skin->vtxTable[i].buf[j]);
+                    skin->vtxTable[i].buf[j] = NULL;
+                }
             }
         }
 
@@ -148,7 +143,7 @@ s32 func_800A698C(Skin* skin, SkinLimb** skeleton, MtxF* limbMatrices, u8 parent
 /**
  * Recursively applies matrix tranformations to each limb
  */
-s32 Skin_ApplyAnimTransformations(Skin* skin, MtxF* limbMatrices, Actor* actor, s32 setTranslation) {
+s32 Skin_ApplyAnimTransformations(Skin* skin, MtxF* limbMatrices, Actor* actor, s32 setTranslation, Vec3s* jointRot) {
     s32 i;
     s32 pad;
     f32 yRot;
@@ -159,7 +154,6 @@ s32 Skin_ApplyAnimTransformations(Skin* skin, MtxF* limbMatrices, Actor* actor, 
     f32 xTransl;
     f32 zTransl;
     SkinLimb** skeleton = SEGMENTED_TO_VIRTUAL(skin->skeletonHeader->segment);
-    Vec3s* jointRot = &skin->skelAnime.jointTable[0];
 
     jointRot++;
 

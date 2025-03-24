@@ -58,6 +58,13 @@ typedef SkinLimbModif Struct_800A598C;
 #define SKIN_LIMB_TYPE_ANIMATED 4
 #define SKIN_LIMB_TYPE_NORMAL 11
 
+// At 30fps, you have 2 interpolation frames
+// At 60fps, you have 3.
+// At 120fps, you have 6.
+// Do monitors go beyond 144hz?
+// We support up to 360fps, so let's go with that.
+#define MAX_INTERP_FRAMES 18
+
 typedef struct {
     /* 0x00 */ Vec3s jointPos; // Root is position in model space, children are relative to parent
     /* 0x06 */ u8 child;
@@ -68,7 +75,7 @@ typedef struct {
 
 typedef struct {
     /* 0x000 */ u8 index; // alternates every draw cycle
-    /* 0x004 */ Vtx* buf[2]; // number of vertices in buffer determined by `totalVtxCount`
+    /* 0x004 */ Vtx* buf[2 * MAX_INTERP_FRAMES]; // number of vertices in buffer determined by `totalVtxCount`
 } SkinLimbVtx; // size = 0xC
 
 typedef struct {
