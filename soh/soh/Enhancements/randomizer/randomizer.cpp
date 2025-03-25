@@ -17,7 +17,7 @@
 #include <imgui_internal.h>
 #include "../custom-message/CustomMessageTypes.h"
 #include "../item-tables/ItemTableManager.h"
-#include "../presets.h"
+#include "../Presets/Presets.h"
 #include "../../../src/overlays/actors/ovl_En_GirlA/z_en_girla.h"
 #include <stdexcept>
 #include "randomizer_check_objects.h"
@@ -1924,11 +1924,10 @@ bool GenerateRandomizer(std::string seed /*= ""*/) {
 
 static const std::unordered_map<int32_t, const char*> randomizerPresetList = {
     { RANDOMIZER_PRESET_DEFAULT, "Default" },
-    { RANDOMIZER_PRESET_SPOCK_RACE, "Spock Race" },
-    { RANDOMIZER_PRESET_SPOCK_RACE_NO_LOGIC, "Spock Race (No Logic)" },
-    { RANDOMIZER_PRESET_S6, "S6" },
-    { RANDOMIZER_PRESET_HELL_MODE, "Hell Mode" },
-    { RANDOMIZER_PRESET_BENCHMARK, "Benchmark" }
+    { RANDOMIZER_PRESET_BEGINNER, "Beginner" },
+    { RANDOMIZER_PRESET_STANDARD, "Standard" },
+    { RANDOMIZER_PRESET_ADVANCED, "Advanced" },
+    { RANDOMIZER_PRESET_HELL_MODE, "Hell Mode" }
 };
 static int32_t randomizerPresetSelected = RANDOMIZER_PRESET_DEFAULT;
 
@@ -1938,6 +1937,8 @@ void RandomizerSettingsWindow::DrawElement() {
         generated = 0;
         randoThread.join();
     }
+    static bool locationsTabOpen = false;
+    static bool tricksTabOpen = false;
     bool disableEditingRandoSettings = CVarGetInteger(CVAR_GENERAL("RandoGenerating"), 0) || CVarGetInteger(CVAR_GENERAL("OnFileSelectNameEntry"), 0);
     ImGui::BeginDisabled(CVarGetInteger(CVAR_SETTING("DisableChanges"), 0) || disableEditingRandoSettings);
     const PresetTypeDefinition presetTypeDef = presetTypes.at(PRESET_TYPE_RANDOMIZER);
@@ -1972,6 +1973,9 @@ void RandomizerSettingsWindow::DrawElement() {
         CVarSetInteger(presetTypeCvar.c_str(), randomizerPresetSelected);
         Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesNextFrame();
         mSettings->UpdateOptionProperties();
+        // force excluded location list and trick list update if tab is open.
+        locationsTabOpen = false;
+        tricksTabOpen = false;
     }
 
     UIWidgets::Spacer(0);
@@ -2061,7 +2065,6 @@ void RandomizerSettingsWindow::DrawElement() {
         ImGui::EndDisabled();
 
         ImGui::BeginDisabled(CVarGetInteger(CVAR_RANDOMIZER_SETTING("LogicRules"), RO_LOGIC_GLITCHLESS) == RO_LOGIC_VANILLA);
-        static bool locationsTabOpen = false;
         if (ImGui::BeginTabItem("Locations")) {
             ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, cellPadding);
             if (!locationsTabOpen) {
@@ -2190,7 +2193,6 @@ void RandomizerSettingsWindow::DrawElement() {
         }
         ImGui::EndDisabled();
 
-        static bool tricksTabOpen = false;
         if (ImGui::BeginTabItem("Tricks/Glitches")) {
             if (!tricksTabOpen) {
                 tricksTabOpen = true;
