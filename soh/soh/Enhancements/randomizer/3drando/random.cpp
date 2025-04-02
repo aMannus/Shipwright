@@ -10,7 +10,7 @@ const uint64_t multiplier = 6364136223846793005ULL;
 const uint64_t increment = 11634580027462260723ULL;
 
 // Initialize with seed specified
-void Random_Init(uint32_t seed) {
+void Random_Init(uint64_t seed) {
     init = true;
     state = seed;
 }
