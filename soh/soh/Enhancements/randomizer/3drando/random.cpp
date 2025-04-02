@@ -17,7 +17,7 @@ void Random_Init(uint32_t seed) {
 
 uint32_t next32() {
     if (!init) {
-        //No seed given, get a random number from device to seed
+        // No seed given, get a random number from device to seed
 #if !defined(__SWITCH__) && !defined(__WIIU__)
         uint64_t seed = static_cast<uint64_t>(std::random_device{}());
 #else
