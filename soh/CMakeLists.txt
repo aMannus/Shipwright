@@ -275,6 +275,22 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY ${MSVC_RUNTIME_LIBRARY_STR})
 endif()
 ################################################################################
+# apclientpp + dependencies
+################################################################################
+add_compile_definitions(ASIO_STANDALONE)
+
+# TEMPORARY
+add_compile_definitions(WSWRAP_NO_SSL)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../subprojects/asio/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../subprojects/websocketpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../subprojects/wswrap/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../subprojects/valijson/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../subprojects/apclientpp
+)
+
+################################################################################
 # Compile definitions
 ################################################################################
 find_package(SDL2)
@@ -402,6 +418,7 @@ endif()
 # Compile and link options
 ################################################################################
 if(MSVC)
+    target_compile_options(${PROJECT_NAME} PUBLIC "/Zc:__cplusplus")
     if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Debug>:
