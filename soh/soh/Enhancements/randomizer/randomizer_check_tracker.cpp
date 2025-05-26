@@ -39,8 +39,6 @@ extern std::vector<ItemTrackerItem> dungeonRewardMedallions;
 extern std::vector<ItemTrackerItem> songItems;
 extern std::vector<ItemTrackerItem> equipmentItems;
 
-using json = nlohmann::json;
-
 namespace CheckTracker {
 
 // settings

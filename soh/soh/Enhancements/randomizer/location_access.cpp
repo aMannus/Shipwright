@@ -10,6 +10,7 @@
 #include "soh/Enhancements/debugger/performanceTimer.h"
 
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 extern "C" {
 extern SaveContext gSaveContext;
@@ -439,6 +440,26 @@ void RegionTable_Init() {
             exit.GetConnectedRegion()->entrances.push_front(&exit);
         }
     }
+
+    // Serialize areas/regions to JSON. This is used to bootstrap the region
+    // data for the Archipelago randomizer, not for any other purpose.
+    // This can probably be removed in the future once things have stabilized.
+    // Also see the other serialization code in Randomizer::Randomizer()
+    nlohmann::ordered_json regions;
+    for (const Region& region : areaTable) {
+        nlohmann::ordered_json exits = nlohmann::ordered_json::array();
+        for (const Rando::Entrance& exit : region.exits) {
+            exits.push_back(exit.GetConnectedRegion()->regionName);
+        }
+
+        regions[region.regionName] = {
+            { "exits", exits }
+        };
+    }
+
+    std::ofstream file("regions.json");
+    file << std::setw(2) << regions;
+    file.close();
 }
 
 void ReplaceFirstInString(std::string& s, std::string const& toReplace, std::string const& replaceWith) {

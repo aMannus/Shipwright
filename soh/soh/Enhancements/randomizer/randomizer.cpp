@@ -32,6 +32,7 @@
 #include "randomizer_settings_window.h"
 #include "savefile.h"
 #include "entrance.h"
+#include "item.h"
 #include "dungeon.h"
 #include "trial.h"
 #include "settings.h"
@@ -43,7 +44,6 @@
 
 extern std::map<RandomizerCheckArea, std::string> rcAreaNames;
 
-using json = nlohmann::json;
 using namespace std::literals::string_literals;
 
 std::unordered_map<std::string, RandomizerCheckArea> SpoilerfileAreaNameToEnum;
@@ -295,6 +295,61 @@ Randomizer::Randomizer() {
     for (size_t c = 0; c < Rando::StaticData::hintTypeNames.size(); c++) {
         SpoilerfileHintTypeNameToEnum[Rando::StaticData::hintTypeNames[(HintType)c].GetEnglish(MF_CLEAN)] = (HintType)c;
     }
+
+    // Serialize items and locations data to JSON. This should be consumed by
+    // the Archipelago randomizer, but probably only needs to be ran once.
+    // This can probably be removed in the future once things have stabilized.
+    std::array<Rando::Item, RG_MAX>& itemTable = Rando::StaticData::GetItemTable();
+    nlohmann::ordered_json itemsData;
+
+    for (const Rando::Item& item : itemTable) {
+        int id = item.GetItemID();
+
+        // Some entries in the table are empty, so skip them for serialization
+        if (id != 0) {
+            // Serialize enum
+            nlohmann::json type = item.GetItemType();
+            nlohmann::ordered_json itemData = nlohmann::ordered_json {
+                { "name", item.GetName().GetEnglish() },
+                { "type", type },
+                { "id", id },
+                // If an item can possibly be considered for logic (it's referenced
+                // in a location's rules) it *must* be a progression item.
+                // Not to be confused with *progressive* items.
+                { "progression", item.IsAdvancement() },
+                { "isMajorItem", item.IsMajorItem() }
+            };
+
+            itemsData.push_back(itemData);
+        }
+    }
+
+    std::ofstream itemsFile("items.json");
+    itemsFile << std::setw(2) << itemsData;
+    itemsFile.close();
+
+    // Serialize locations table to JSON - see other comment above
+    std::array<Rando::Location, RC_MAX>& locationTable = Rando::StaticData::GetLocationTable();
+    nlohmann::ordered_json locationsJson;
+
+    for (const Rando::Location& location : locationTable) {
+        // Use RandomizerCheck enum for the ID
+        RandomizerCheck id = location.GetRandomizerCheck();
+
+        // Some entries in the table are empty, so skip them for serialization
+        if (id != 0) {
+            nlohmann::ordered_json locationJson = nlohmann::ordered_json {
+                { "name", location.GetName() },
+                { "id", id }
+            };
+
+            locationsJson.push_back(locationJson);
+        }
+    }
+
+    std::ofstream locationsFile("locations.json");
+    locationsFile << std::setw(2) << locationsJson;
+    locationsFile.close();
 }
 
 Randomizer::~Randomizer() {
@@ -5935,3 +5990,20 @@ extern "C" u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
 
     return Return_Item_Entry(giEntry, RG_NONE);
 }
+
+NLOHMANN_JSON_SERIALIZE_ENUM(ItemType, {
+    {ITEMTYPE_ITEM, "item"},
+    {ITEMTYPE_EQUIP, "equipment"},
+    {ITEMTYPE_MAP, "map"},
+    {ITEMTYPE_COMPASS, "compass"},
+    {ITEMTYPE_BOSSKEY, "bossKey"},
+    {ITEMTYPE_SMALLKEY, "smallKey"},
+    {ITEMTYPE_TOKEN, "token"},
+    {ITEMTYPE_FORTRESS_SMALLKEY, "fortressSmallKey"},
+    {ITEMTYPE_EVENT, "event"},
+    {ITEMTYPE_DROP, "drop"},
+    {ITEMTYPE_REFILL, "refill"},
+    {ITEMTYPE_SONG, "song"},
+    {ITEMTYPE_SHOP, "shop"},
+    {ITEMTYPE_DUNGEONREWARD, "dungeonReward"}
+});
