@@ -311,7 +311,6 @@ Randomizer::Randomizer() {
             nlohmann::json type = item.GetItemType();
             nlohmann::ordered_json itemData = nlohmann::ordered_json {
                 { "name", item.GetName().GetEnglish() },
-                { "type", type },
                 { "id", id },
                 // If an item can possibly be considered for logic (it's referenced
                 // in a location's rules) it *must* be a progression item.
