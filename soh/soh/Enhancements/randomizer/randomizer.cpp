@@ -5980,20 +5980,3 @@ extern "C" u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
 
     return Return_Item_Entry(giEntry, RG_NONE);
 }
-
-NLOHMANN_JSON_SERIALIZE_ENUM(ItemType, {
-    {ITEMTYPE_ITEM, "item"},
-    {ITEMTYPE_EQUIP, "equipment"},
-    {ITEMTYPE_MAP, "map"},
-    {ITEMTYPE_COMPASS, "compass"},
-    {ITEMTYPE_BOSSKEY, "bossKey"},
-    {ITEMTYPE_SMALLKEY, "smallKey"},
-    {ITEMTYPE_TOKEN, "token"},
-    {ITEMTYPE_FORTRESS_SMALLKEY, "fortressSmallKey"},
-    {ITEMTYPE_EVENT, "event"},
-    {ITEMTYPE_DROP, "drop"},
-    {ITEMTYPE_REFILL, "refill"},
-    {ITEMTYPE_SONG, "song"},
-    {ITEMTYPE_SHOP, "shop"},
-    {ITEMTYPE_DUNGEONREWARD, "dungeonReward"}
-});
