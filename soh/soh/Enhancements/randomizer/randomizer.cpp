@@ -307,10 +307,7 @@ Randomizer::Randomizer() {
 
         // Some entries in the table are empty, so skip them for serialization
         if (id != 0) {
-            // Serialize enum
-            nlohmann::json type = item.GetItemType();
-            nlohmann::ordered_json itemData = nlohmann::ordered_json {
-                { "name", item.GetName().GetEnglish() },
+            itemsData[item.GetName().GetEnglish()] = nlohmann::ordered_json {
                 { "id", id },
                 // If an item can possibly be considered for logic (it's referenced
                 // in a location's rules) it *must* be a progression item.
@@ -318,8 +315,6 @@ Randomizer::Randomizer() {
                 { "progression", item.IsAdvancement() },
                 { "isMajorItem", item.IsMajorItem() }
             };
-
-            itemsData.push_back(itemData);
         }
     }
 
@@ -332,17 +327,13 @@ Randomizer::Randomizer() {
     nlohmann::ordered_json locationsJson;
 
     for (const Rando::Location& location : locationTable) {
-        // Use RandomizerCheck enum for the ID
         RandomizerCheck id = location.GetRandomizerCheck();
 
         // Some entries in the table are empty, so skip them for serialization
         if (id != 0) {
-            nlohmann::ordered_json locationJson = nlohmann::ordered_json {
-                { "name", location.GetName() },
+            locationsJson[location.GetName()] = nlohmann::ordered_json {
                 { "id", id }
             };
-
-            locationsJson.push_back(locationJson);
         }
     }
 
