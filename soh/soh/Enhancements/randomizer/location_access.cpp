@@ -452,8 +452,16 @@ void RegionTable_Init() {
             exits.push_back(exit.GetConnectedRegion()->regionName);
         }
 
+        nlohmann::ordered_json locations = nlohmann::ordered_json::array();
+        for (const LocationAccess& location : region.locations) {
+            locations.push_back(
+                Rando::StaticData::GetLocation(location.GetLocation())->GetName()
+            );
+        }
+
         regions[region.regionName] = {
-            { "exits", exits }
+            { "exits", exits },
+            { "locations", locations }
         };
     }
 
