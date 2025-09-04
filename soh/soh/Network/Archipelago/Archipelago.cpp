@@ -28,7 +28,7 @@ extern PlayState* gPlayState;
 }
 
 ArchipelagoClient::ArchipelagoClient() {
-    uuid = ap_get_uuid("uuid");
+    uuid = ap_get_uuid(Ship::Context::GetPathRelativeToAppDirectory("uuid"));
 
     gameWon = false;
     itemQueued = false;
