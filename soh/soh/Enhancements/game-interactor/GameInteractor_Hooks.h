@@ -47,6 +47,7 @@ void GameInteractor_ExecuteOnPlayerShieldControl(float_t* sp50, float_t* sp54);
 void GameInteractor_ExecuteOnPlayerProcessStick();
 void GameInteractor_ExecuteOnShopSlotChangeHooks(uint8_t cursorIndex, int16_t price);
 void GameInteractor_ExecuteOnPlayDestroy();
+void GameInteractor_ExecuteOnPlayDrawBegin();
 void GameInteractor_ExecuteOnPlayDrawEnd();
 bool GameInteractor_Should(GIVanillaBehavior flag, uint32_t result, ...);
 
@@ -87,12 +88,17 @@ void GameInteractor_RegisterOnAssetAltChange(void (*fn)(void));
 // Mark: - Pause Menu
 void GameInteractor_ExecuteOnKaleidoUpdate();
 
+<<<<<<< HEAD
+// Mark: - Audio
+void GameInteractor_ExecuteOnSeqPlayerInit(int32_t playerIdx, int32_t seqId);
+=======
 // Mark: - Randomizer
 void GameInteractor_ExecuteOnRandomizerItemGivenHooks(uint32_t rc, GetItemEntry gi, uint8_t isGiSkipped);
 
 // Mark: - Archipelago
 void GameInteractor_ExecuteOnArchipelagoItemReceived(uint32_t rg);
 void GameInteractor_ExecuteOnRandomizerExternalCheck(uint32_t rc);
+>>>>>>> 850743130308506f4694764046bd3b777af70454
 
 #ifdef __cplusplus
 }

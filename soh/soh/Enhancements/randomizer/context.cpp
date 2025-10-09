@@ -163,12 +163,16 @@ bool Context::IsQuestOfLocationActive(RandomizerCheck rc) {
 
 void Context::GenerateLocationPool() {
     allLocations.clear();
+    overworldLocations.clear();
+    for (auto dungeon : ctx->GetDungeons()->GetDungeonList()) {
+        dungeon->locations.clear();
+    }
     for (Location& location : StaticData::GetLocationTable()) {
         // skip RCs that shouldn't be in the pool for any reason (i.e. settings, unsupported check type, etc.)
         // TODO: Exclude checks for some of the older shuffles from the pool too i.e. Frog Songs, Scrubs, etc.)
         if (location.GetRandomizerCheck() == RC_UNKNOWN_CHECK ||
             location.GetRandomizerCheck() == RC_TRIFORCE_COMPLETED || // already in pool
-            (location.GetRandomizerCheck() == RC_MASTER_SWORD_PEDESTAL &&
+            (location.GetRandomizerCheck() == RC_TOT_MASTER_SWORD &&
              mOptions[RSK_SHUFFLE_MASTER_SWORD].Is(RO_GENERIC_OFF)) ||
             (location.GetRandomizerCheck() == RC_KAK_100_GOLD_SKULLTULA_REWARD &&
              mOptions[RSK_SHUFFLE_100_GS_REWARD].Is(RO_GENERIC_OFF)) ||
@@ -191,9 +195,12 @@ void Context::GenerateLocationPool() {
             (location.GetRCType() == RCTYPE_GRASS && mOptions[RSK_SHUFFLE_GRASS].Is(RO_SHUFFLE_GRASS_OFF)) ||
             (location.GetRCType() == RCTYPE_CRATE && mOptions[RSK_SHUFFLE_CRATES].Is(RO_SHUFFLE_CRATES_OFF)) ||
             (location.GetRCType() == RCTYPE_NLCRATE && (mOptions[RSK_SHUFFLE_CRATES].Is(RO_SHUFFLE_CRATES_OFF) ||
-                                                        !mOptions[RSK_LOGIC_RULES].Is(RO_LOGIC_NO_LOGIC))) ||
+                                                        mOptions[RSK_LOGIC_RULES].IsNot(RO_LOGIC_NO_LOGIC))) ||
             (location.GetRCType() == RCTYPE_SMALL_CRATE && mOptions[RSK_SHUFFLE_CRATES].Is(RO_SHUFFLE_CRATES_OFF)) ||
             (location.GetRCType() == RCTYPE_FAIRY && !mOptions[RSK_SHUFFLE_FAIRIES]) ||
+            (location.GetRCType() == RCTYPE_TREE && !mOptions[RSK_SHUFFLE_TREES]) ||
+            (location.GetRCType() == RCTYPE_NLTREE &&
+             (!mOptions[RSK_SHUFFLE_TREES] || mOptions[RSK_LOGIC_RULES].IsNot(RO_LOGIC_NO_LOGIC))) ||
             (location.GetRCType() == RCTYPE_FREESTANDING &&
              mOptions[RSK_SHUFFLE_FREESTANDING].Is(RO_SHUFFLE_FREESTANDING_OFF)) ||
             (location.GetRCType() == RCTYPE_BEEHIVE && !mOptions[RSK_SHUFFLE_BEEHIVES])) {
@@ -468,7 +475,7 @@ void Context::ParseArchipelagoOptions(const std::map<std::string, int>& slot_dat
     // load those in instead.
 
     nlohmann::json slotData = ArchipelagoClient::GetInstance().GetSlotData();
-    mOptions[RSK_LOGIC_RULES].Set(RO_LOGIC_NO_LOGIC);
+    mOptions[RSK_LOGIC_RULES].Set(RO_LOGIC_GLITCHLESS);
     mOptions[RSK_FOREST].Set(slotData["closed_forest"]);
     mOptions[RSK_KAK_GATE].Set(slotData["kakariko_gate"]);
     mOptions[RSK_DOOR_OF_TIME].Set(slotData["door_of_time"]);
@@ -728,6 +735,7 @@ void Context::ParseArchipelagoOptions(const std::map<std::string, int>& slot_dat
     mOptions[RSK_SHUFFLE_FAIRIES].Set(slotData["shuffle_fairies"]);
     mOptions[RSK_LOCK_OVERWORLD_DOORS].Set(slotData["lock_overworld_doors"]);
     mOptions[RSK_SHUFFLE_GRASS].Set(slotData["shuffle_grass"]);
+    mOptions[RSK_SHUFFLE_TREES].Set(slotData["shuffle_trees"]);
 }
 
 void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient::ApItem>& scouted_items) {

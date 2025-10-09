@@ -157,8 +157,6 @@ uint8_t Randomizer_GenerateRandomizer();
 void Randomizer_ShowRandomizerMenu();
 void Archipelago_ShowArchipelagoMenu();
 int CustomMessage_RetrieveIfExists(PlayState* play);
-void Overlay_DisplayText(float duration, const char* text);
-void Overlay_DisplayText_Seconds(int seconds, const char* text);
 GetItemEntry ItemTable_Retrieve(int16_t getItemID);
 GetItemEntry ItemTable_RetrieveEntry(s16 modIndex, s16 getItemID);
 void EntranceTracker_SetCurrentGrottoID(s16 entranceIndex);

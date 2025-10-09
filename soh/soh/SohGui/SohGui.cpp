@@ -32,8 +32,12 @@
 #include "soh/Enhancements/debugger/MessageViewer.h"
 #include "soh/Notification/Notification.h"
 #include "soh/Enhancements/TimeDisplay/TimeDisplay.h"
+<<<<<<< HEAD
+#include "soh/Enhancements/mod_menu.h"
+=======
 #include "soh/Network/Archipelago/ArchipelagoSettingsWindow.h"
 #include "soh/Network/Archipelago/ArchipelagoConsoleWindow.h"
+>>>>>>> 850743130308506f4694764046bd3b777af70454
 
 namespace SohGui {
 
@@ -73,6 +77,7 @@ std::shared_ptr<SohStatsWindow> mStatsWindow;
 std::shared_ptr<Ship::GuiWindow> mGfxDebuggerWindow;
 
 std::shared_ptr<SohMenu> mSohMenu;
+std::shared_ptr<ModMenuWindow> mModMenuWindow;
 std::shared_ptr<AudioEditor> mAudioEditorWindow;
 std::shared_ptr<InputViewer> mInputViewer;
 std::shared_ptr<InputViewerSettingsWindow> mInputViewerSettings;
@@ -137,6 +142,8 @@ void SetupGuiElements() {
         SPDLOG_ERROR("Could not find input editor window");
     }*/
 
+    mModMenuWindow = std::make_shared<ModMenuWindow>(CVAR_WINDOW("ModMenu"), "Mod Menu", ImVec2(820, 630));
+    gui->AddGuiWindow(mModMenuWindow);
     mAudioEditorWindow = std::make_shared<AudioEditor>(CVAR_WINDOW("AudioEditor"), "Audio Editor", ImVec2(820, 630));
     gui->AddGuiWindow(mAudioEditorWindow);
     mInputViewer = std::make_shared<InputViewer>(CVAR_WINDOW("InputViewer"), "Input Viewer");
@@ -234,6 +241,7 @@ void Destroy() {
     mColViewerWindow = nullptr;
     mActorViewerWindow = nullptr;
     mCosmeticsEditorWindow = nullptr;
+    mModMenuWindow = nullptr;
     mAudioEditorWindow = nullptr;
     mStatsWindow = nullptr;
     mConsoleWindow = nullptr;
