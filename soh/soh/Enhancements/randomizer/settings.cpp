@@ -4,11 +4,11 @@
 
 #include "soh/OTRGlobals.h"
 
-#include <spdlog/spdlog.h>
-
 #include <utility>
 
 #include "consolevariablebridge.h"
+
+#include "soh/Network/Archipelago/ArchipelagoConsoleWindow.h"
 
 namespace Rando {
 std::shared_ptr<Settings> Settings::mInstance;
@@ -2968,6 +2968,13 @@ void Settings::ParseJson(nlohmann::json spoilerFileJson) {
     for (auto it = enabledTricksJson.begin(); it != enabledTricksJson.end(); ++it) {
         const RandomizerTrick rt = mTrickNameToEnum[it.value()];
         GetTrickOption(rt).SetContextIndex(RO_GENERIC_ON);
+    }
+}
+
+void Settings::ResetExcludedLocations() {
+    const auto ctx = Context::GetInstance();
+    for (int rc = 1; rc < RC_MAX; rc++) {
+        ctx->GetItemLocation(rc)->SetExcludedOption(RO_GENERIC_OFF);
     }
 }
 

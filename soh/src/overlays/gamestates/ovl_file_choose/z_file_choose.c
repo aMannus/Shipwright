@@ -452,7 +452,7 @@ u8 ShouldRenderItem(s16 fileIndex, u8 item) {
 
     // greg
     if (item == ITEM_RUPEE_GREEN) {
-        return Save_GetSaveMetaInfo(fileIndex)->randoSave;
+        return Save_GetSaveMetaInfo(fileIndex)->randoSave || Save_GetSaveMetaInfo(fileIndex)->archiSave;
     }
 
     return 1;
@@ -704,7 +704,7 @@ static void DrawMoreInfo(FileChooseContext* this, s16 fileIndex, u8 alpha) {
 }
 
 #define MIN_QUEST (ResourceMgr_GameHasOriginal() ? QUEST_NORMAL : QUEST_MASTER)
-#define MAX_QUEST QUEST_BOSSRUSH
+#define MAX_QUEST QUEST_ARCHIPELAGO
 
 void Sram_InitDebugSave(void);
 void Sram_InitBossRushSave();
@@ -1356,6 +1356,11 @@ void FileChoose_UpdateQuestMenu(GameState* thisx) {
                                    &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
             this->prevConfigMode = this->configMode;
             this->configMode = CM_ROTATE_TO_RANDOMIZER_SETTINGS_MENU;
+        } else if (this->questType[this->buttonIndex] == QUEST_ARCHIPELAGO) {
+            Audio_PlaySoundGeneral(NA_SE_SY_FSEL_DECIDE_L, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                                   &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+            this->prevConfigMode = this->configMode;
+            this->configMode = CM_ROTATE_TO_ARCHIPELAGO_MENU;
         } else {
             Audio_PlaySoundGeneral(NA_SE_SY_FSEL_DECIDE_L, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
                                    &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
@@ -1532,7 +1537,7 @@ void FileChoose_RotateToNameEntry(GameState* thisx) {
 
     this->windowRot += VREG(16);
 
-    if (this->prevConfigMode == CM_RANDOMIZER_SETTINGS_MENU) {
+    if (this->prevConfigMode == CM_RANDOMIZER_SETTINGS_MENU || this->prevConfigMode == CM_ARCHIPELAGO_SETTINGS_MENU) {
         if (this->windowRot >= 942.0f) {
             this->windowRot = 628.0f;
             this->configMode = CM_START_NAME_ENTRY;
@@ -1589,7 +1594,8 @@ void FileChoose_RotateToQuest(GameState* thisx) {
     FileChooseContext* this = (FileChooseContext*)thisx;
 
     if (this->configMode == CM_NAME_ENTRY_TO_QUEST_MENU || this->configMode == CM_BOSS_RUSH_TO_QUEST ||
-        this->configMode == CM_RANDOMIZER_SETTINGS_MENU_TO_QUEST) {
+        this->configMode == CM_RANDOMIZER_SETTINGS_MENU_TO_QUEST ||
+        this->configMode == CM_ARCHIPELAGO_SETTINGS_TO_QUEST) {
         this->windowRot -= VREG(16);
 
         if (this->windowRot <= 314.0f) {
@@ -1637,67 +1643,250 @@ void FileChoose_RotateToRandomizer(GameState* thisx) {
     }
 }
 
-static void (*gConfigModeUpdateFuncs[])(GameState*) = {
-    FileChoose_StartFadeIn,         FileChoose_FinishFadeIn,
-    FileChoose_UpdateMainMenu,      FileChoose_SetupCopySource,
-    FileChoose_SelectCopySource,    FileChoose_SetupCopyDest1,
-    FileChoose_SetupCopyDest2,      FileChoose_SelectCopyDest,
-    FileChoose_ExitToCopySource1,   FileChoose_ExitToCopySource2,
-    FileChoose_SetupCopyConfirm1,   FileChoose_SetupCopyConfirm2,
-    FileChoose_CopyConfirm,         FileChoose_ReturnToCopyDest,
-    FileChoose_CopyAnim1,           FileChoose_CopyAnim2,
-    FileChoose_CopyAnim3,           FileChoose_CopyAnim4,
-    FileChoose_CopyAnim5,           FileChoose_ExitCopyToMain,
-    FileChoose_SetupEraseSelect,    FileChoose_EraseSelect,
-    FileChoose_SetupEraseConfirm1,  FileChoose_SetupEraseConfirm2,
-    FileChoose_EraseConfirm,        FileChoose_ExitToEraseSelect1,
-    FileChoose_ExitToEraseSelect2,  FileChoose_EraseAnim1,
-    FileChoose_EraseAnim2,          FileChoose_EraseAnim3,
-    FileChoose_ExitEraseToMain,     FileChoose_UnusedCM31,
-    FileChoose_RotateToNameEntry,   FileChoose_UpdateKeyboardCursor,
-    FileChoose_StartNameEntry,      FileChoose_RotateToMain,
-    FileChoose_RotateToOptions,     FileChoose_UpdateOptionsMenu,
-    FileChoose_StartOptions,        FileChoose_RotateToMain,
-    FileChoose_UnusedCMDelay,       FileChoose_RotateToQuest,
-    FileChoose_UpdateQuestMenu,     FileChoose_StartQuestMenu,
-    FileChoose_RotateToMain,        FileChoose_RotateToQuest,
-    FileChoose_RotateToBossRush,    FileChoose_UpdateBossRushMenu,
-    FileChoose_StartBossRushMenu,   FileChoose_RotateToQuest,
-    FileChoose_RotateToRandomizer,  FileChoose_UpdateRandomizerMenu,
-    FileChoose_StartRandomizerMenu, FileChoose_RotateToQuest,
-    FileChoose_RotateToRandomizer,
-};
+void FileChoose_RotateToArchipelago(GameState* thisx) {
+    FileChooseContext* this = (FileChooseContext*)thisx;
 
-static void (*gConfigModeUpdateFuncsNES[])(GameState*) = {
-    FileChoose_StartFadeIn,         FileChoose_FinishFadeIn,
-    FileChoose_UpdateMainMenu,      FileChoose_SetupCopySource,
-    FileChoose_SelectCopySource,    FileChoose_SetupCopyDest1,
-    FileChoose_SetupCopyDest2,      FileChoose_SelectCopyDest,
-    FileChoose_ExitToCopySource1,   FileChoose_ExitToCopySource2,
-    FileChoose_SetupCopyConfirm1,   FileChoose_SetupCopyConfirm2,
-    FileChoose_CopyConfirm,         FileChoose_ReturnToCopyDest,
-    FileChoose_CopyAnim1,           FileChoose_CopyAnim2,
-    FileChoose_CopyAnim3,           FileChoose_CopyAnim4,
-    FileChoose_CopyAnim5,           FileChoose_ExitCopyToMain,
-    FileChoose_SetupEraseSelect,    FileChoose_EraseSelect,
-    FileChoose_SetupEraseConfirm1,  FileChoose_SetupEraseConfirm2,
-    FileChoose_EraseConfirm,        FileChoose_ExitToEraseSelect1,
-    FileChoose_ExitToEraseSelect2,  FileChoose_EraseAnim1,
-    FileChoose_EraseAnim2,          FileChoose_EraseAnim3,
-    FileChoose_ExitEraseToMain,     FileChoose_UnusedCM31,
-    FileChoose_RotateToNameEntry,   FileChoose_UpdateKeyboardCursorNES,
-    FileChoose_StartNameEntryNES,   FileChoose_RotateToMain,
-    FileChoose_RotateToOptions,     FileChoose_UpdateOptionsMenuNES,
-    FileChoose_StartOptionsNES,     FileChoose_RotateToMain,
-    FileChoose_UnusedCMDelay,       FileChoose_RotateToQuest,
-    FileChoose_UpdateQuestMenu,     FileChoose_StartQuestMenu,
-    FileChoose_RotateToMain,        FileChoose_RotateToQuest,
-    FileChoose_RotateToBossRush,    FileChoose_UpdateBossRushMenu,
-    FileChoose_StartBossRushMenu,   FileChoose_RotateToQuest,
-    FileChoose_RotateToRandomizer,  FileChoose_UpdateRandomizerMenu,
-    FileChoose_StartRandomizerMenu, FileChoose_RotateToQuest,
-    FileChoose_RotateToRandomizer,
-};
+    if (this->configMode == CM_NAME_ENTRY_TO_ARCHIPELAGO_SETTINGS_MENU) {
+        this->windowRot -= VREG(16);
+
+        if (this->windowRot <= 314.0f) {
+            this->windowRot = 628.0f;
+            this->configMode = CM_START_ARCHIPELAGO_SETTINGS_MENU;
+        }
+    } else {
+        this->windowRot += VREG(16);
+
+        if (this->windowRot >= 628.0f) {
+            this->windowRot = 628.0f;
+            this->configMode = CM_START_ARCHIPELAGO_SETTINGS_MENU;
+        }
+    }
+}
+
+void FileChoose_UpdateArchipelagoMenu(GameState* thisx) {
+    FileChooseContext* this = (FileChooseContext*)thisx;
+    Input* input = &this->state.input[0];
+    bool dpad = CVarGetInteger(CVAR_SETTING("DpadInText"), 0);
+
+    // Fade in elements after opening Archipelago Options menu
+    this->archipelagoUIAlpha += 25;
+    if (this->archipelagoUIAlpha > 255) {
+        this->archipelagoUIAlpha = 255;
+    }
+
+    // Move menu selection up or down
+    if (ABS(this->stickRelY) > 30 || (dpad && CHECK_BTN_ANY(input->press.button, BTN_DDOWN | BTN_DUP))) {
+        // move down
+        if (this->stickRelY < -30 || (dpad && CHECK_BTN_ANY(input->press.button, BTN_DDOWN))) {
+            if ((this->archipelagoIndex + 1) > ASM_CHANGE_CONNECTION_INFO) {
+                this->archipelagoIndex = ASM_START_ARCHIPELAGO;
+            } else {
+                this->archipelagoIndex++;
+            }
+        } else {
+            if (((int8_t)this->archipelagoIndex - 1) < ASM_START_ARCHIPELAGO) {
+                this->archipelagoIndex = ASM_CHANGE_CONNECTION_INFO;
+            } else {
+                this->archipelagoIndex--;
+            }
+        }
+        Audio_PlaySoundGeneral(NA_SE_SY_FSEL_CURSOR, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                               &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+    }
+
+    if (CHECK_BTN_ALL(input->press.button, BTN_B)) {
+        this->configMode = CM_ARCHIPELAGO_SETTINGS_TO_QUEST;
+        return;
+    }
+
+    if (CHECK_BTN_ALL(input->press.button, BTN_A)) {
+        if (this->archipelagoIndex == ASM_START_ARCHIPELAGO) {
+            // Only continue when connected to a slot and locations are scouted.
+            if (CVarGetInteger(CVAR_REMOTE_ARCHIPELAGO("ConnectionStatus"), 0) != 4) {
+                Audio_PlaySoundGeneral(NA_SE_SY_FSEL_ERROR, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                                       &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+                return;
+            }
+            Audio_PlaySoundGeneral(NA_SE_SY_FSEL_DECIDE_L, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                                   &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+            ParseArchipelago();
+            static u8 emptyName[] = { 0x3E, 0x3E, 0x3E, 0x3E, 0x3E, 0x3E, 0x3E, 0x3E };
+            static u8 emptyNameNES[] = { 0xDF, 0xDF, 0xDF, 0xDF, 0xDF, 0xDF, 0xDF, 0xDF };
+            static u8 linkName[] = { 0x15, 0x2C, 0x31, 0x2E, 0x3E, 0x3E, 0x3E, 0x3E };
+            static u8 linkNameNES[] = { 0xB6, 0xB3, 0xB8, 0xB5, 0xDF, 0xDF, 0xDF, 0xDF };
+            static u8 linkNameJP[] = { 0x81, 0x87, 0x61, 0xDF, 0xDF, 0xDF, 0xDF, 0xDF };
+            u8* defaultName;
+
+            this->prevConfigMode = this->configMode;
+            this->configMode = CM_ROTATE_TO_NAME_ENTRY;
+            this->logoAlpha = 0;
+            CVarSetInteger(CVAR_GENERAL("OnFileSelectNameEntry"), 1);
+            this->kbdButton = FS_KBD_BTN_NONE;
+            this->charPage = FS_CHAR_PAGE_ENG;
+            this->kbdX = 0;
+            this->kbdY = 0;
+            this->charIndex = 0;
+            this->charBgAlpha = 0;
+            this->newFileNameCharCount = CVarGetInteger(CVAR_ENHANCEMENT("LinkDefaultName"), 0) ? 4 : 0;
+            this->nameEntryBoxPosX = 120;
+            this->nameEntryBoxAlpha = 0;
+            if (ResourceMgr_GetGameRegion(0) == GAME_REGION_PAL && gSaveContext.language != LANGUAGE_JPN) {
+                defaultName = CVarGetInteger(CVAR_ENHANCEMENT("LinkDefaultName"), 0) ? &linkName : &emptyName;
+            } else if (gSaveContext.language == LANGUAGE_JPN) { // Japanese
+                if (CVarGetInteger(CVAR_ENHANCEMENT("LinkDefaultName"), 0) != 0) {
+                    // Set player name to "リンク" ("Link" in Katakana, 3 characters long) when playing in Japanese.
+                    defaultName = &linkNameJP;
+                    this->newFileNameCharCount = 3;
+                } else {
+                    defaultName = &emptyNameNES;
+                }
+                this->charPage = FS_CHAR_PAGE_HIRA; // Default to Hiragana Keyboard
+            } else {                                // GAME_REGION_NTSC
+                defaultName = CVarGetInteger(CVAR_ENHANCEMENT("LinkDefaultName"), 0) ? &linkNameNES : &emptyNameNES;
+            }
+            memcpy(Save_GetSaveMetaInfo(this->buttonIndex)->playerName, defaultName, 8);
+        } else if (this->archipelagoIndex == ASM_CHANGE_CONNECTION_INFO) {
+            Audio_PlaySoundGeneral(NA_SE_SY_FSEL_DECIDE_L, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                                   &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+            Archipelago_ShowArchipelagoMenu();
+        }
+    }
+}
+
+void FileChoose_StartArchipelagoMenu(GameState* thisx) {
+    FileChooseContext* this = (FileChooseContext*)thisx;
+
+    this->logoAlpha -= 25;
+    this->archipelagoUIAlpha = 0;
+    this->archipelagoArrowOffset = 0;
+
+    if (this->logoAlpha <= 0) {
+        this->logoAlpha = 0;
+        this->configMode = CM_ARCHIPELAGO_SETTINGS_MENU;
+    }
+}
+
+static void (*gConfigModeUpdateFuncs[])(GameState*) = { FileChoose_StartFadeIn,
+                                                        FileChoose_FinishFadeIn,
+                                                        FileChoose_UpdateMainMenu,
+                                                        FileChoose_SetupCopySource,
+                                                        FileChoose_SelectCopySource,
+                                                        FileChoose_SetupCopyDest1,
+                                                        FileChoose_SetupCopyDest2,
+                                                        FileChoose_SelectCopyDest,
+                                                        FileChoose_ExitToCopySource1,
+                                                        FileChoose_ExitToCopySource2,
+                                                        FileChoose_SetupCopyConfirm1,
+                                                        FileChoose_SetupCopyConfirm2,
+                                                        FileChoose_CopyConfirm,
+                                                        FileChoose_ReturnToCopyDest,
+                                                        FileChoose_CopyAnim1,
+                                                        FileChoose_CopyAnim2,
+                                                        FileChoose_CopyAnim3,
+                                                        FileChoose_CopyAnim4,
+                                                        FileChoose_CopyAnim5,
+                                                        FileChoose_ExitCopyToMain,
+                                                        FileChoose_SetupEraseSelect,
+                                                        FileChoose_EraseSelect,
+                                                        FileChoose_SetupEraseConfirm1,
+                                                        FileChoose_SetupEraseConfirm2,
+                                                        FileChoose_EraseConfirm,
+                                                        FileChoose_ExitToEraseSelect1,
+                                                        FileChoose_ExitToEraseSelect2,
+                                                        FileChoose_EraseAnim1,
+                                                        FileChoose_EraseAnim2,
+                                                        FileChoose_EraseAnim3,
+                                                        FileChoose_ExitEraseToMain,
+                                                        FileChoose_UnusedCM31,
+                                                        FileChoose_RotateToNameEntry,
+                                                        FileChoose_UpdateKeyboardCursor,
+                                                        FileChoose_StartNameEntry,
+                                                        FileChoose_RotateToMain,
+                                                        FileChoose_RotateToOptions,
+                                                        FileChoose_UpdateOptionsMenu,
+                                                        FileChoose_StartOptions,
+                                                        FileChoose_RotateToMain,
+                                                        FileChoose_UnusedCMDelay,
+                                                        FileChoose_RotateToQuest,
+                                                        FileChoose_UpdateQuestMenu,
+                                                        FileChoose_StartQuestMenu,
+                                                        FileChoose_RotateToMain,
+                                                        FileChoose_RotateToQuest,
+                                                        FileChoose_RotateToBossRush,
+                                                        FileChoose_UpdateBossRushMenu,
+                                                        FileChoose_StartBossRushMenu,
+                                                        FileChoose_RotateToQuest,
+                                                        FileChoose_RotateToRandomizer,
+                                                        FileChoose_UpdateRandomizerMenu,
+                                                        FileChoose_StartRandomizerMenu,
+                                                        FileChoose_RotateToQuest,
+                                                        FileChoose_RotateToRandomizer,
+                                                        FileChoose_RotateToArchipelago,
+                                                        FileChoose_UpdateArchipelagoMenu,
+                                                        FileChoose_StartArchipelagoMenu,
+                                                        FileChoose_RotateToQuest,
+                                                        FileChoose_RotateToArchipelago };
+
+static void (*gConfigModeUpdateFuncsNES[])(GameState*) = { FileChoose_StartFadeIn,
+                                                           FileChoose_FinishFadeIn,
+                                                           FileChoose_UpdateMainMenu,
+                                                           FileChoose_SetupCopySource,
+                                                           FileChoose_SelectCopySource,
+                                                           FileChoose_SetupCopyDest1,
+                                                           FileChoose_SetupCopyDest2,
+                                                           FileChoose_SelectCopyDest,
+                                                           FileChoose_ExitToCopySource1,
+                                                           FileChoose_ExitToCopySource2,
+                                                           FileChoose_SetupCopyConfirm1,
+                                                           FileChoose_SetupCopyConfirm2,
+                                                           FileChoose_CopyConfirm,
+                                                           FileChoose_ReturnToCopyDest,
+                                                           FileChoose_CopyAnim1,
+                                                           FileChoose_CopyAnim2,
+                                                           FileChoose_CopyAnim3,
+                                                           FileChoose_CopyAnim4,
+                                                           FileChoose_CopyAnim5,
+                                                           FileChoose_ExitCopyToMain,
+                                                           FileChoose_SetupEraseSelect,
+                                                           FileChoose_EraseSelect,
+                                                           FileChoose_SetupEraseConfirm1,
+                                                           FileChoose_SetupEraseConfirm2,
+                                                           FileChoose_EraseConfirm,
+                                                           FileChoose_ExitToEraseSelect1,
+                                                           FileChoose_ExitToEraseSelect2,
+                                                           FileChoose_EraseAnim1,
+                                                           FileChoose_EraseAnim2,
+                                                           FileChoose_EraseAnim3,
+                                                           FileChoose_ExitEraseToMain,
+                                                           FileChoose_UnusedCM31,
+                                                           FileChoose_RotateToNameEntry,
+                                                           FileChoose_UpdateKeyboardCursorNES,
+                                                           FileChoose_StartNameEntryNES,
+                                                           FileChoose_RotateToMain,
+                                                           FileChoose_RotateToOptions,
+                                                           FileChoose_UpdateOptionsMenuNES,
+                                                           FileChoose_StartOptionsNES,
+                                                           FileChoose_RotateToMain,
+                                                           FileChoose_UnusedCMDelay,
+                                                           FileChoose_RotateToQuest,
+                                                           FileChoose_UpdateQuestMenu,
+                                                           FileChoose_StartQuestMenu,
+                                                           FileChoose_RotateToMain,
+                                                           FileChoose_RotateToQuest,
+                                                           FileChoose_RotateToBossRush,
+                                                           FileChoose_UpdateBossRushMenu,
+                                                           FileChoose_StartBossRushMenu,
+                                                           FileChoose_RotateToQuest,
+                                                           FileChoose_RotateToRandomizer,
+                                                           FileChoose_UpdateRandomizerMenu,
+                                                           FileChoose_StartRandomizerMenu,
+                                                           FileChoose_RotateToQuest,
+                                                           FileChoose_RotateToRandomizer,
+                                                           FileChoose_RotateToArchipelago,
+                                                           FileChoose_UpdateArchipelagoMenu,
+                                                           FileChoose_StartArchipelagoMenu,
+                                                           FileChoose_RotateToQuest,
+                                                           FileChoose_RotateToArchipelago };
 
 /**
  * Updates the alpha of the cursor to make it pulsate.
@@ -2185,7 +2374,8 @@ void FileChoose_DrawFileInfo(GameState* thisx, s16 fileIndex, s16 isActive) {
                                &deathCountSplit[2]);
 
         // draw death count
-        if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) == 0 || this->menuMode != FS_MENU_MODE_SELECT) {
+        if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) == 0 || this->menuMode != FS_MENU_MODE_SELECT ||
+            Save_GetSaveMetaInfo(this->selectedFileIndex)->archiSave) {
             for (i = 0, vtxOffset = 0; i < 3; i++, vtxOffset += 4) {
                 FileChoose_DrawCharacter(this->state.gfxCtx, sp54->fontBuf + deathCountSplit[i] * FONT_CHAR_TEX_SIZE,
                                          vtxOffset);
@@ -2211,7 +2401,8 @@ void FileChoose_DrawFileInfo(GameState* thisx, s16 fileIndex, s16 isActive) {
 
         i = Save_GetSaveMetaInfo(fileIndex)->healthCapacity / 0x10;
 
-        if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) == 0 || this->menuMode != FS_MENU_MODE_SELECT) {
+        if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) == 0 || this->menuMode != FS_MENU_MODE_SELECT ||
+            Save_GetSaveMetaInfo(this->selectedFileIndex)->archiSave) {
             // draw hearts
             for (vtxOffset = 0, j = 0; j < i; j++, vtxOffset += 4) {
                 gSPVertex(POLY_OPA_DISP++, &this->windowContentVtx[D_8081284C[fileIndex] + vtxOffset] + 0x30, 4, 0);
@@ -2228,7 +2419,8 @@ void FileChoose_DrawFileInfo(GameState* thisx, s16 fileIndex, s16 isActive) {
             textAlpha = 255;
         }
 
-        if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) != 0 && this->menuMode == FS_MENU_MODE_SELECT) {
+        if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) != 0 && this->menuMode == FS_MENU_MODE_SELECT &&
+            Save_GetSaveMetaInfo(this->selectedFileIndex)->archiSave == 0) {
             DrawMoreInfo(this, fileIndex, textAlpha);
         } else {
             // draw quest items
@@ -2251,6 +2443,57 @@ void FileChoose_DrawFileInfo(GameState* thisx, s16 fileIndex, s16 isActive) {
                     }
                 }
             }
+        }
+
+        if (Save_GetSaveMetaInfo(this->selectedFileIndex)->archiSave) {
+            uint8_t language = (gSaveContext.language == LANGUAGE_JPN) ? LANGUAGE_ENG : gSaveContext.language;
+
+            // Connection status text
+            int statusPos = 61 + Interface_DrawTextLine(this->state.gfxCtx,
+                                                        SohFileSelect_GetArchipelagoSettingText(ASM_STATUS, language),
+                                                        58, 133, 200, 200, 200, textAlpha, 0.8f, true);
+
+            const bool connectedToThisSlot =
+                checkArchipelagoSlotInfo(Save_GetSaveMetaInfo(this->selectedFileIndex)->slotName,
+                                         Save_GetSaveMetaInfo(this->selectedFileIndex)->archiRoomSeed);
+
+            switch (CVarGetInteger(CVAR_REMOTE_ARCHIPELAGO("ConnectionStatus"), 0)) {
+                case 0: // Not Connected
+                    Interface_DrawTextLine(this->state.gfxCtx,
+                                           SohFileSelect_GetArchipelagoSettingText(ASM_NOT_CONNECTED, language),
+                                           statusPos, 133, 255, 120, 120, textAlpha, 0.8f, true);
+                    break;
+                case 1: // Connecting
+                case 2: // Connection error, retrying
+                case 3: // Connected
+                    Interface_DrawTextLine(this->state.gfxCtx,
+                                           SohFileSelect_GetArchipelagoSettingText(ASM_CONNECTING, language), statusPos,
+                                           133, 185, 185, 185, textAlpha, 0.8f, true);
+                    break;
+                case 4: // Connected + Locations Scouted
+                    if (connectedToThisSlot) {
+                        Interface_DrawTextLine(this->state.gfxCtx,
+                                               SohFileSelect_GetArchipelagoSettingText(ASM_CONNECTED, language),
+                                               statusPos, 133, 120, 255, 120, textAlpha, 0.8f, true);
+                    } else {
+                        Interface_DrawTextLine(
+                            this->state.gfxCtx,
+                            SohFileSelect_GetArchipelagoSettingText(ASM_CHAR_SELECT_CONNECTED_TO_OTHER_SLOT, language),
+                            statusPos, 133, 255, 255, 120, textAlpha, 0.8f, true);
+                    }
+
+                    break;
+            }
+
+            if (!connectedToThisSlot) {
+                Interface_DrawTextLine(this->state.gfxCtx,
+                                       SohFileSelect_GetArchipelagoSettingText(ASM_CHAR_START_TO_CONNECT, language), 58,
+                                       144, 200, 200, 200, textAlpha, 0.8f, true);
+            }
+
+            // Interface_DrawTextLine(this->state.gfxCtx,
+            //     SohFileSelect_GetArchipelagoSettingText(ASM_CHAR_SELECT_CHANGE_CONNECTION_INFO, language), 95, 220,
+            //     100, 250, 255, textAlpha, 1.0f, true);
         }
     }
 
@@ -2359,6 +2602,7 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
         case CM_NAME_ENTRY_TO_QUEST_MENU:
         case CM_ROTATE_TO_BOSS_RUSH_MENU:
         case CM_ROTATE_TO_RANDOMIZER_SETTINGS_MENU:
+        case CM_ROTATE_TO_ARCHIPELAGO_MENU:
             tex = FileChoose_GetQuestChooseTitleTexName(gSaveContext.language);
             break;
         case CM_BOSS_RUSH_MENU:
@@ -2368,6 +2612,10 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
         case CM_START_RANDOMIZER_SETTINGS_MENU:
         case CM_RANDOMIZER_SETTINGS_MENU_TO_QUEST:
         case CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU:
+        case CM_START_ARCHIPELAGO_SETTINGS_MENU:
+        case CM_ARCHIPELAGO_SETTINGS_MENU:
+        case CM_ARCHIPELAGO_SETTINGS_TO_QUEST:
+        case CM_NAME_ENTRY_TO_ARCHIPELAGO_SETTINGS_MENU:
             tex = FileChoose_GetSohOptionsTitleTexName(gSaveContext.language);
             break;
         default:
@@ -2484,6 +2732,17 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                     ResourceMgr_GameHasOriginal() ? gTitleZeldaShieldLogoTex : gTitleZeldaShieldLogoMQTex, 160, 160);
                 FileChoose_DrawImageRGBA32(this->state.gfxCtx, 182, 180, gTitleBossRushSubtitleTex, 128, 32);
                 break;
+            case QUEST_ARCHIPELAGO:
+                gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 255, 255, 255, this->logoAlpha);
+                FileChoose_DrawTextureI8(this->state.gfxCtx, gTitleTheLegendOfTextTex, 72, 8, 156, 108, 72, 8, 1024,
+                                         1024);
+                FileChoose_DrawTextureI8(this->state.gfxCtx, gTitleOcarinaOfTimeTMTextTex, 96, 8, 154, 163, 96, 8, 1024,
+                                         1024);
+                FileChoose_DrawImageRGBA32(
+                    this->state.gfxCtx, 160, 135,
+                    ResourceMgr_GameHasOriginal() ? gTitleZeldaShieldLogoTex : gTitleZeldaShieldLogoMQTex, 160, 160);
+                FileChoose_DrawImageRGBA32(this->state.gfxCtx, 182, 180, gTitleArchipelagoSubtitleTex, 128, 32);
+                break;
         }
     } else if (this->configMode == CM_BOSS_RUSH_MENU) {
         FileChoose_DrawBossRushMenuWindowContents(this);
@@ -2508,14 +2767,14 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                 textColorR = textColorG = textColorB = 100;
             }
 
-            Interface_DrawTextLine(this->state.gfxCtx, SohFileSelect_GetSettingText(index, language), 70,
+            Interface_DrawTextLine(this->state.gfxCtx, SohFileSelect_GetRandomizerSettingText(index, language), 70,
                                    (80 + (index * 16)), textColorR, textColorG, textColorB, textAlpha, 0.8f, true);
         }
 
         // Show text to indicate randomizer is being generated.
         if (generating) {
-            Interface_DrawTextLine(this->state.gfxCtx, SohFileSelect_GetSettingText(RSM_GENERATING, language), 70,
-                                   (80 + 64), 255, 255, 255, textAlpha, 0.8f, true);
+            Interface_DrawTextLine(this->state.gfxCtx, SohFileSelect_GetRandomizerSettingText(RSM_GENERATING, language),
+                                   70, (80 + 64), 255, 255, 255, textAlpha, 0.8f, true);
         }
 
         // If no randomizer is generated and "start randomizer" is selected, show text to explain why user can't start
@@ -2523,8 +2782,8 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
         if (!Randomizer_IsSeedGenerated() && !Randomizer_IsSpoilerLoaded() &&
             this->randomizerIndex == RSM_START_RANDOMIZER) {
             Interface_DrawTextLine(this->state.gfxCtx,
-                                   SohFileSelect_GetSettingText(RSM_NO_RANDOMIZER_GENERATED, language), 70, (80 + 64),
-                                   240, 80, 80, textAlpha, 0.8f, true);
+                                   SohFileSelect_GetRandomizerSettingText(RSM_NO_RANDOMIZER_GENERATED, language), 70,
+                                   (80 + 64), 240, 80, 80, textAlpha, 0.8f, true);
         }
 
         uint16_t textOffset = 16 * this->randomizerIndex;
@@ -2537,12 +2796,91 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                                this->stickRightPrompt.arrowColorG, this->stickRightPrompt.arrowColorB, textAlpha, 62,
                                (85 + textOffset), 0.42f, 0, 0, 1.0f, 1.0f);
 
+    } else if (this->configMode == CM_ARCHIPELAGO_SETTINGS_MENU) {
+        uint8_t language = (gSaveContext.language == LANGUAGE_JPN) ? LANGUAGE_ENG : gSaveContext.language;
+        uint8_t textAlpha = this->archipelagoUIAlpha;
+
+        uint8_t textIndex = 0;
+
+        for (uint8_t index = 0; index <= ASM_CHANGE_CONNECTION_INFO; index++) {
+            uint8_t textColorR = 255;
+            uint8_t textColorG = 255;
+            uint8_t textColorB = 255;
+
+            // If current index is the selected one, make the text yellow.
+            if (this->archipelagoIndex == index) {
+                textColorB = 80;
+            }
+
+            // If not connected, make Start Archipelago text gray.
+            if (index == ASM_START_ARCHIPELAGO && CVarGetInteger(CVAR_REMOTE_ARCHIPELAGO("ConnectionStatus"), 0) != 4) {
+                textColorR = textColorG = textColorB = 100;
+            }
+
+            Interface_DrawTextLine(this->state.gfxCtx, SohFileSelect_GetArchipelagoSettingText(index, language), 70,
+                                   (80 + index * 16), textColorR, textColorG, textColorB, textAlpha, 0.8f, true);
+        }
+
+        // Server address text
+        Interface_DrawTextLine(this->state.gfxCtx,
+                               SohFileSelect_GetArchipelagoSettingText(ASM_SERVER_ADDRESS, language), 70, 120, 255, 255,
+                               255, textAlpha, 0.8f, true);
+        textIndex++;
+        Interface_DrawTextLine(this->state.gfxCtx, CVarGetString(CVAR_REMOTE_ARCHIPELAGO("ServerAddress"), "No Data"),
+                               70, 130, 185, 185, 185, textAlpha, 0.8f, true);
+
+        // Slot name text
+        textIndex++;
+        Interface_DrawTextLine(this->state.gfxCtx, SohFileSelect_GetArchipelagoSettingText(ASM_SLOT_NAME, language), 70,
+                               145, 255, 255, 255, textAlpha, 0.8f, true);
+        textIndex++;
+        Interface_DrawTextLine(this->state.gfxCtx, CVarGetString(CVAR_REMOTE_ARCHIPELAGO("SlotName"), "No Data"), 70,
+                               155, 185, 185, 185, textAlpha, 0.8f, true);
+
+        // Connection status text
+        int statusPos = 75 + Interface_DrawTextLine(this->state.gfxCtx,
+                                                    SohFileSelect_GetArchipelagoSettingText(ASM_STATUS, language), 70,
+                                                    175, 255, 255, 255, textAlpha, 0.8f, true);
+
+        switch (CVarGetInteger(CVAR_REMOTE_ARCHIPELAGO("ConnectionStatus"), 0)) {
+            case 0: // Not Connected
+                Interface_DrawTextLine(this->state.gfxCtx,
+                                       SohFileSelect_GetArchipelagoSettingText(ASM_NOT_CONNECTED, language), statusPos,
+                                       175, 255, 120, 120, textAlpha, 0.8f, true);
+                break;
+            case 1: // Connecting
+            case 2: // Connection error, retrying
+            case 3: // Connected
+                Interface_DrawTextLine(this->state.gfxCtx,
+                                       SohFileSelect_GetArchipelagoSettingText(ASM_CONNECTING, language), statusPos,
+                                       175, 185, 185, 185, textAlpha, 0.8f, true);
+                break;
+            case 4: // Connected + Locations Scouted
+                Interface_DrawTextLine(this->state.gfxCtx,
+                                       SohFileSelect_GetArchipelagoSettingText(ASM_CONNECTED, language), statusPos, 175,
+                                       120, 255, 120, textAlpha, 0.8f, true);
+                break;
+        }
+
+        Gfx_SetupDL_39Opa(this->state.gfxCtx);
+        gDPSetCombineMode(POLY_OPA_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPLoadTextureBlock(POLY_OPA_DISP++, gArrowCursorTex, G_IM_FMT_IA, G_IM_SIZ_8b, 16, 24, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOMASK, G_TX_NOLOD,
+                            G_TX_NOLOD);
+        FileChoose_DrawTextRec(this->state.gfxCtx, this->stickRightPrompt.arrowColorR,
+                               this->stickRightPrompt.arrowColorG, this->stickRightPrompt.arrowColorB, textAlpha, 62,
+                               (85 + (this->archipelagoIndex * 16)), 0.42f, 0, 0, 1.0f, 1.0f);
+
     } else if (this->configMode != CM_ROTATE_TO_NAME_ENTRY && this->configMode != CM_START_BOSS_RUSH_MENU &&
                this->configMode != CM_ROTATE_TO_BOSS_RUSH_MENU && this->configMode != CM_BOSS_RUSH_TO_QUEST &&
                this->configMode != CM_START_RANDOMIZER_SETTINGS_MENU &&
                this->configMode != CM_ROTATE_TO_RANDOMIZER_SETTINGS_MENU &&
                this->configMode != CM_RANDOMIZER_SETTINGS_MENU_TO_QUEST &&
-               this->configMode != CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU) {
+               this->configMode != CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU &&
+               this->configMode != CM_START_ARCHIPELAGO_SETTINGS_MENU &&
+               this->configMode != CM_ROTATE_TO_ARCHIPELAGO_MENU &&
+               this->configMode != CM_ARCHIPELAGO_SETTINGS_TO_QUEST &&
+               this->configMode != CM_NAME_ENTRY_TO_ARCHIPELAGO_SETTINGS_MENU) {
         gDPPipeSync(POLY_OPA_DISP++);
         gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 255, 255, 255, this->titleAlpha[1]);
         gDPLoadTextureBlock(POLY_OPA_DISP++, sTitleLabels[gSaveContext.language][this->nextTitleLabel], G_IM_FMT_IA,
@@ -2562,7 +2900,8 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
 
             // Draw the small file name box instead when more meta info is enabled
             if (CVarGetInteger(CVAR_ENHANCEMENT("FileSelectMoreInfo"), 0) != 0 &&
-                this->menuMode == FS_MENU_MODE_SELECT) {
+                this->menuMode == FS_MENU_MODE_SELECT &&
+                Save_GetSaveMetaInfo(this->selectedFileIndex)->archiSave == 0) {
                 // Location of file 1 small name box vertices
                 gSPVertex(POLY_OPA_DISP++, &this->windowContentVtx[68], 4, 0);
 
@@ -2629,7 +2968,7 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                 gSP1Quadrangle(POLY_OPA_DISP++, 8, 10, 11, 9, 0);
             }
 
-            // draw rando label
+            // Draw rando label
             if (Save_GetSaveMetaInfo(i)->randoSave) {
                 if (!FileChoose_IsSaveCompatible(Save_GetSaveMetaInfo(i))) {
                     gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, sWindowContentColors[1][0], sWindowContentColors[1][1],
@@ -2660,6 +2999,21 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                                     G_TX_NOLOD, G_TX_NOLOD);
                 gSP1Quadrangle(POLY_OPA_DISP++, 8, 10, 11, 9, 0);
             }
+            // Draw archipelago label
+            if (Save_GetSaveMetaInfo(i)->archiSave) {
+                if (!FileChoose_IsSaveCompatible(Save_GetSaveMetaInfo(i))) {
+                    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, sWindowContentColors[1][0], sWindowContentColors[1][1],
+                                    sWindowContentColors[1][2], this->nameBoxAlpha[i]);
+                } else {
+                    gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, sWindowContentColors[isActive][0],
+                                    sWindowContentColors[isActive][1], sWindowContentColors[isActive][2],
+                                    this->nameAlpha[i]);
+                }
+                gDPLoadTextureBlock(POLY_OPA_DISP++, gFileSelArchiButtonTex, G_IM_FMT_IA, G_IM_SIZ_16b, 44, 16, 0,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                    G_TX_NOLOD, G_TX_NOLOD);
+                gSP1Quadrangle(POLY_OPA_DISP++, 8, 10, 11, 9, 0);
+            }
 
             // draw connectors
             if (!FileChoose_IsSaveCompatible(Save_GetSaveMetaInfo(i)) && Save_GetSaveMetaInfo(i)->valid) {
@@ -2675,7 +3029,7 @@ void FileChoose_DrawWindowContents(GameState* thisx) {
                                 G_TX_NOLOD, G_TX_NOLOD);
             gSP1Quadrangle(POLY_OPA_DISP++, 12, 14, 15, 13, 0);
 
-            if (this->n64ddFlags[i] || Save_GetSaveMetaInfo(i)->randoSave ||
+            if (this->n64ddFlags[i] || Save_GetSaveMetaInfo(i)->randoSave || Save_GetSaveMetaInfo(i)->archiSave ||
                 Save_GetSaveMetaInfo(i)->requiresMasterQuest) {
                 gSP1Quadrangle(POLY_OPA_DISP++, 16, 18, 19, 17, 0);
             }
@@ -2794,7 +3148,9 @@ void FileChoose_ConfigModeDraw(GameState* thisx) {
     if (this->configMode != CM_NAME_ENTRY && this->configMode != CM_START_NAME_ENTRY &&
         this->configMode != CM_QUEST_MENU && this->configMode != CM_NAME_ENTRY_TO_QUEST_MENU &&
         this->configMode != CM_RANDOMIZER_SETTINGS_MENU &&
-        this->configMode != CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU) {
+        this->configMode != CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU &&
+        this->configMode != CM_ARCHIPELAGO_SETTINGS_MENU &&
+        this->configMode != CM_NAME_ENTRY_TO_ARCHIPELAGO_SETTINGS_MENU) {
         gDPPipeSync(POLY_OPA_DISP++);
         gDPSetCombineMode(POLY_OPA_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, this->windowColor[0], this->windowColor[1], this->windowColor[2],
@@ -2903,7 +3259,10 @@ void FileChoose_ConfigModeDraw(GameState* thisx) {
         this->configMode == CM_ROTATE_TO_NAME_ENTRY || this->configMode == CM_QUEST_TO_MAIN ||
         this->configMode == CM_NAME_ENTRY_TO_QUEST_MENU || this->configMode == CM_ROTATE_TO_BOSS_RUSH_MENU ||
         this->configMode == CM_ROTATE_TO_RANDOMIZER_SETTINGS_MENU ||
-        this->configMode == CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU) {
+        this->configMode == CM_ROTATE_TO_ARCHIPELAGO_MENU ||
+        this->configMode == CM_NAME_ENTRY_TO_RANDOMIZER_SETTINGS_MENU ||
+        this->configMode == CM_ARCHIPELAGO_SETTINGS_MENU ||
+        this->configMode == CM_NAME_ENTRY_TO_ARCHIPELAGO_SETTINGS_MENU) {
         // window
         gDPPipeSync(POLY_OPA_DISP++);
         gDPSetCombineMode(POLY_OPA_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -2936,7 +3295,9 @@ void FileChoose_ConfigModeDraw(GameState* thisx) {
         this->configMode == CM_START_BOSS_RUSH_MENU || this->configMode == CM_BOSS_RUSH_TO_QUEST ||
         this->configMode == CM_RANDOMIZER_SETTINGS_MENU || this->configMode == CM_ROTATE_TO_RANDOMIZER_SETTINGS_MENU ||
         this->configMode == CM_START_RANDOMIZER_SETTINGS_MENU ||
-        this->configMode == CM_RANDOMIZER_SETTINGS_MENU_TO_QUEST) {
+        this->configMode == CM_RANDOMIZER_SETTINGS_MENU_TO_QUEST ||
+        this->configMode == CM_START_ARCHIPELAGO_SETTINGS_MENU || this->configMode == CM_ARCHIPELAGO_SETTINGS_MENU ||
+        this->configMode == CM_ROTATE_TO_ARCHIPELAGO_MENU || this->configMode == CM_ARCHIPELAGO_SETTINGS_TO_QUEST) {
         // window
         gDPPipeSync(POLY_OPA_DISP++);
         gDPSetCombineMode(POLY_OPA_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -3262,6 +3623,7 @@ void FileChoose_LoadGame(GameState* thisx) {
     gSaveContext.naviTimer = 0;
 
     GameInteractor_ExecuteOnLoadGame(gSaveContext.fileNum);
+    GameInteractor_ExecutePostLoadGame(gSaveContext.fileNum);
 }
 
 static void (*gSelectModeUpdateFuncs[])(GameState*) = {
@@ -3749,6 +4111,7 @@ void FileChoose_InitContext(GameState* thisx) {
     this->bossRushIndex = 0;
     this->bossRushOffset = 0;
     this->randomizerIndex = 0;
+    this->archipelagoIndex = 0;
 
     ShrinkWindow_SetVal(0);
 

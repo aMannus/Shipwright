@@ -233,6 +233,28 @@ jobs:
         make
         sudo make install
         sudo cp -av /usr/local/lib/libzip* /lib/x86_64-linux-gnu/
+    # this is available in 24.04 but not in 22.04, manually install it
+    - name: Install valijson
+      run: |
+        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+        if [ ! -d "deps/valijson-1.0.6" ]; then
+          wget https://github.com/tristanpenman/valijson/archive/refs/tags/v1.0.6.tar.gz
+          tar -xzf v1.0.6.tar.gz -C deps
+        fi
+        cd deps/valijson-1.0.6
+        mkdir -p build
+        cd build
+        cmake ..
+        sudo cmake --install .
+    # websocketpp has a known issue when using older versions of gcc and cpp 20
+    # https://github.com/zaphoyd/websocketpp/issues/991
+    # we can patch it here to work with the old version until we update the runner
+    # to a version of ubuntu that has newer versions of gcc
+    - name: Patch websocketpp
+      run: |
+        sudo sed -i 's/endpoint<connection,config>(/endpoint(/g' /usr/include/websocketpp/endpoint.hpp
+        sudo sed -i 's/basic<concurrency,names>(/basic(/g' /usr/include/websocketpp/logger/basic.hpp
+        sudo sed -i 's/server<config>(/server(/g' /usr/include/websocketpp/roles/server_endpoint.hpp
     - name: Download soh.o2r
       uses: actions/download-artifact@v4
       with:

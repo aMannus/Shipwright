@@ -38,6 +38,7 @@ class Randomizer {
     static const std::string NaviRandoMessageTableID;
     static const std::string IceTrapRandoMessageTableID;
     static const std::string randoMiscHintsTableID;
+    static const std::string archipelagoItemsTableID;
 
     static Sprite* GetSeedTexture(uint8_t index);
     bool SpoilerFileExists(const char* spoilerFileName);
@@ -75,6 +76,7 @@ class Randomizer {
     static CustomMessage GetRupeeMessage(u16 rupeeTextId);
     static CustomMessage GetIceTrapMessage();
     static CustomMessage GetTriforcePieceMessage();
+    static CustomMessage GetArchipelagoItemMessage(int16_t randomizerGet, uint32_t randomizerCheck);
 };
 
 #ifdef __cplusplus

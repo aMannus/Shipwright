@@ -306,4 +306,5 @@ std::unordered_map<u32, RandomizerHint> StaticData::grottoChestParamsToHint{
 };
 
 std::array<HintText, RHT_MAX> StaticData::hintTextTable = {};
+
 } // namespace Rando

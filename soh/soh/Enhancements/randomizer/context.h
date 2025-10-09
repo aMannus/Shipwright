@@ -8,6 +8,7 @@
 #include "hint.h"
 #include "fishsanity.h"
 #include "trial.h"
+#include "soh/Network/Archipelago/Archipelago.h"
 
 #include <memory>
 #include <array>
@@ -116,6 +117,8 @@ class Context {
     void LACSCondition(RandoOptionLACSCondition lacsCondition);
 
     GetItemEntry GetFinalGIEntry(RandomizerCheck rc, bool checkObtainability = true, GetItemID ogItemId = GI_NONE);
+    void AddReceivedArchipelagoItem(const RandomizerGet item);
+    GetItemEntry GetArchipelagoGIEntry();
     void ParseSpoiler(const char* spoilerFileName);
     void ParseHashIconIndexesJson(nlohmann::json spoilerFileJson);
     void ParseItemLocationsJson(nlohmann::json spoilerFileJson);
@@ -132,6 +135,10 @@ class Context {
     bool playthroughBeatable = false;
     bool allLocationsReachable = false;
     RandomizerArea GetAreaFromString(std::string str);
+
+    void ParseArchipelago();
+    void ParseArchipelagoOptions(const std::map<std::string, int>& slot_data);
+    void ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient::ApItem>& slot_data);
 
     /**
      * @brief Get the hash for the current seed.
@@ -193,5 +200,6 @@ class Context {
     std::string mHash;
     std::string mSeedString;
     uint32_t mFinalSeed = 0;
+    std::queue<RandomizerGet> mAPreceiveQueue = {};
 };
 } // namespace Rando

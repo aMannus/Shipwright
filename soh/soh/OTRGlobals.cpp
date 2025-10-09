@@ -47,6 +47,7 @@
 #include "Enhancements/custom-message/CustomMessageManager.h"
 #include "Enhancements/Presets/Presets.h"
 #include "util.h"
+#include "soh/Enhancements/randomizer/hook_handlers.h"
 
 #if not defined(__SWITCH__) && not defined(__WIIU__)
 #include "Extractor/Extract.h"
@@ -2215,6 +2216,10 @@ extern "C" void Randomizer_ShowRandomizerMenu() {
     SohGui::ShowRandomizerSettingsMenu();
 }
 
+extern "C" void Archipelago_ShowArchipelagoMenu() {
+    SohGui::ShowArchipelagoSettingsMenu();
+}
+
 CustomMessage Randomizer_GetCustomGetItemMessage(Player* player) {
     s16 giid;
     if (player->getItemEntry.objectId != OBJECT_INVALID) {
@@ -2388,6 +2393,11 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
                 messageEntry = Randomizer::GetIceTrapMessage();
             } else if (player->getItemEntry.getItemId == RG_TRIFORCE_PIECE) {
                 messageEntry = Randomizer::GetTriforcePieceMessage();
+            } else if (player->getItemEntry.getItemId == RG_ARCHIPELAGO_ITEM_USEFUL ||
+                       player->getItemEntry.getItemId == RG_ARCHIPELAGO_ITEM_JUNK ||
+                       player->getItemEntry.getItemId == RG_ARCHIPELAGO_ITEM_PROGRESSIVE) {
+                messageEntry = Randomizer::GetArchipelagoItemMessage(player->getItemEntry.getItemId,
+                                                                     RandomizerReturnCurrentlyQueuedItem());
             } else {
                 messageEntry = Randomizer_GetCustomGetItemMessage(player);
             }
@@ -2831,6 +2841,16 @@ bool SoH_HandleConfigDrop(char* filePath) {
         return false;
     }
     return false;
+}
+
+extern "C" void ParseArchipelago() {
+    OTRGlobals::Instance->gRandoContext->ParseArchipelago();
+}
+
+extern "C" bool checkArchipelagoSlotInfo(const char* slotName, const char* roomHash) {
+    const std::string slot = std::string(slotName);
+    const std::string room = std::string(roomHash);
+    return ArchipelagoClient::GetInstance().slotMatch(slot, room);
 }
 
 extern "C" void CheckTracker_RecalculateAvailableChecks() {

@@ -14,6 +14,10 @@ void GameInteractor_ExecuteOnLoadGame(int32_t fileNum) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnLoadGame>(fileNum);
 }
 
+void GameInteractor_ExecutePostLoadGame(int32_t fileNum) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::PostLoadGame>(fileNum);
+}
+
 void GameInteractor_ExecuteOnExitGame(int32_t fileNum) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnExitGame>(fileNum);
 }
@@ -83,6 +87,10 @@ void GameInteractor_ExecuteOnSceneSpawnActors() {
 
 void GameInteractor_ExecuteOnPlayerUpdate() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnPlayerUpdate>();
+}
+
+void GameInteractor_ExecuteOnPlayerDeath() {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnPlayerDeath>();
 }
 
 void GameInteractor_ExecuteOnSetDoAction(uint16_t action) {
@@ -328,7 +336,23 @@ void GameInteractor_ExecuteOnKaleidoUpdate() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnKaleidoUpdate>();
 }
 
+<<<<<<< HEAD
 // Mark: Audio
 void GameInteractor_ExecuteOnSeqPlayerInit(int32_t playerIdx, int32_t seqId) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnSeqPlayerInit>(playerIdx, seqId);
+=======
+// Mark: Randomizer
+
+void GameInteractor_ExecuteOnRandomizerItemGivenHooks(uint32_t rc, GetItemEntry gi, uint8_t isGiSkipped) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnRandomizerItemGivenHooks>(rc, gi, isGiSkipped);
+}
+
+// MARK: Archipelago
+void GameInteractor_ExecuteOnArchipelagoItemReceived(uint32_t rg) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnArchipelagoItemReceived>(rg);
+}
+
+void GameInteractor_ExecuteOnRandomizerExternalCheck(uint32_t rc) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnRandomizerExternalCheck>(rc);
+>>>>>>> 850743130308506f4694764046bd3b777af70454
 }

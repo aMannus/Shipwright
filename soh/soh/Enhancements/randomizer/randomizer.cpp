@@ -40,6 +40,7 @@
 #include "soh/util.h"
 #include "fishsanity.h"
 #include "randomizerTypes.h"
+#include "soh/Network/Archipelago/Archipelago.h"
 #include "soh/Notification/Notification.h"
 
 extern std::map<RandomizerCheckArea, std::string> rcAreaNames;
@@ -65,6 +66,7 @@ const std::string Randomizer::triforcePieceMessageTableID = "RandomizerTriforceP
 const std::string Randomizer::NaviRandoMessageTableID = "RandomizerNavi";
 const std::string Randomizer::IceTrapRandoMessageTableID = "RandomizerIceTrap";
 const std::string Randomizer::randoMiscHintsTableID = "RandomizerMiscHints";
+const std::string Randomizer::archipelagoItemsTableID = "ÁrchipelagoItems";
 
 static const char* englishRupeeNames[188] = {
     "[P]",
@@ -3613,19 +3615,24 @@ ShopItemIdentity Randomizer::IdentifyShopItem(s32 sceneNum, u8 slotIndex) {
         (sceneNum == SCENE_BAZAAR && gSaveContext.entranceIndex == ENTR_BAZAAR_0) ? SCENE_TEST01 : sceneNum,
         slotIndex - 1);
 
-    if (location->GetRandomizerCheck() != RC_UNKNOWN_CHECK) {
-        shopItemIdentity.randomizerInf = rcToRandomizerInf[location->GetRandomizerCheck()];
-        shopItemIdentity.randomizerCheck = location->GetRandomizerCheck();
-        shopItemIdentity.ogItemId = (GetItemID)Rando::StaticData::RetrieveItem(location->GetVanillaItem()).GetItemID();
+    RandomizerCheck randoCheck = location->GetRandomizerCheck();
 
-        RandomizerGet randoGet =
-            Rando::Context::GetInstance()->GetItemLocation(shopItemIdentity.randomizerCheck)->GetPlacedRandomizerGet();
-        if (randomizerGetToEnGirlShopItem.find(randoGet) != randomizerGetToEnGirlShopItem.end()) {
-            shopItemIdentity.enGirlAShopItem = randomizerGetToEnGirlShopItem[randoGet];
+    if (randoCheck != RC_UNKNOWN_CHECK) {
+        RandomizerGet randoGet = Rando::Context::GetInstance()->GetItemLocation(randoCheck)->GetPlacedRandomizerGet();
+
+        if (randoGet != RG_NONE) {
+            shopItemIdentity.randomizerInf = rcToRandomizerInf[randoCheck];
+            shopItemIdentity.randomizerCheck = randoCheck;
+            shopItemIdentity.ogItemId =
+                (GetItemID)Rando::StaticData::RetrieveItem(location->GetVanillaItem()).GetItemID();
+
+            if (randomizerGetToEnGirlShopItem.find(randoGet) != randomizerGetToEnGirlShopItem.end()) {
+                shopItemIdentity.enGirlAShopItem = randomizerGetToEnGirlShopItem[randoGet];
+            }
+
+            shopItemIdentity.itemPrice =
+                OTRGlobals::Instance->gRandoContext->GetItemLocation(shopItemIdentity.randomizerCheck)->GetPrice();
         }
-
-        shopItemIdentity.itemPrice =
-            OTRGlobals::Instance->gRandoContext->GetItemLocation(shopItemIdentity.randomizerCheck)->GetPrice();
     }
 
     return shopItemIdentity;
@@ -5501,11 +5508,43 @@ CustomMessage Randomizer::GetGoronMessage(u16 index) {
     return messageEntry;
 }
 
+void CreateArchipelagoItemMessage() {
+    CustomMessageManager* customMessageManager = CustomMessageManager::Instance;
+    customMessageManager->AddCustomMessageTable(Randomizer::archipelagoItemsTableID);
+    customMessageManager->CreateMessage(
+        Randomizer::archipelagoItemsTableID, 0,
+        CustomMessage("You found [[apcolor]][[apitem]]%w for %r[[applayer]]%w!",
+                      "You found \x05\x06[[apitem]]\x05\x00 for \x05\x05[[applayer]]\x05\x00!",
+                      "You found \x05\x06[[apitem]]\x05\x00 for \x05\x05[[applayer]]\x05\x00!"));
+}
+
+CustomMessage Randomizer::GetArchipelagoItemMessage(int16_t randomizerGet, uint32_t randomizerCheck) {
+    CustomMessage messageEntry =
+        CustomMessageManager::Instance->RetrieveMessage(Randomizer::archipelagoItemsTableID, 0);
+
+    std::string itemColor = "";
+    if (randomizerGet == RG_ARCHIPELAGO_ITEM_PROGRESSIVE) {
+        itemColor = "%p";
+    } else if (randomizerGet == RG_ARCHIPELAGO_ITEM_USEFUL) {
+        itemColor = "%b";
+    } else {
+        itemColor = "%c";
+    }
+
+    messageEntry.Replace("[[apcolor]]", itemColor);
+    messageEntry.Replace("[[apitem]]",
+                         std::string(gSaveContext.ship.quest.data.archipelago.locations[randomizerCheck].itemName));
+    messageEntry.Replace("[[applayer]]",
+                         std::string(gSaveContext.ship.quest.data.archipelago.locations[randomizerCheck].playerName));
+    messageEntry.AutoFormat();
+    return messageEntry;
+}
+
 void Randomizer::CreateCustomMessages() {
     // RANDTODO: Translate into french and german and replace GIMESSAGE_UNTRANSLATED
     // with GIMESSAGE(getItemID, itemID, english, german, french).
     const std::array<GetItemMessage, 112> getItemMessages = { {
-        GIMESSAGE(RG_GREG_RUPEE, ITEM_MASK_GORON, "You found %gGreg%w!", "%gGreg%w! Du hast ihn&wirklich gefunden!",
+        GIMESSAGE(RG_GREG_RUPEE, ITEM_MASK_GORON, "You found %gGreg%w!", "%gGreg%w! Du hast ihn wirklich gefunden!",
                   "Félicitation! Vous avez trouvé %gGreg%w!"),
         GIMESSAGE(RG_MASTER_SWORD, ITEM_SWORD_MASTER, "You found the %gMaster Sword%w!",
                   "Du erhältst das %gMaster-Schwert%w!", "Vous obtenez %gl'Épée de Légende%w!"),
@@ -5874,6 +5913,7 @@ void Randomizer::CreateCustomMessages() {
     CreateTriforcePieceMessages();
     CreateNaviRandoMessages();
     CreateFireTempleGoronMessages();
+    CreateArchipelagoItemMessage();
 }
 
 class ExtendedVanillaTableInvalidItemIdException : public std::exception {
@@ -6040,6 +6080,12 @@ extern "C" u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
     // if it's an item that just sets a randomizerInf, set it
     if (randomizerGetToRandInf.find(item) != randomizerGetToRandInf.end()) {
         Flags_SetRandomizerInf(randomizerGetToRandInf.find(item)->second);
+        return Return_Item_Entry(giEntry, RG_NONE);
+    }
+
+    // If it's an archipelago item, don't give anything
+    if (item == RG_ARCHIPELAGO_ITEM_USEFUL || item == RG_ARCHIPELAGO_ITEM_JUNK ||
+        item == RG_ARCHIPELAGO_ITEM_PROGRESSIVE) {
         return Return_Item_Entry(giEntry, RG_NONE);
     }
 
@@ -6266,6 +6312,7 @@ extern "C" u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
                 gSaveContext.ship.stats.itemTimestamp[TIMESTAMP_TRIFORCE_COMPLETED] =
                     static_cast<u32>(GAMEPLAYSTAT_TOTAL_TIME);
                 gSaveContext.ship.stats.gameComplete = 1;
+                ArchipelagoClient::GetInstance().SendGameWon();
                 Flags_SetRandomizerInf(RAND_INF_GRANT_GANONS_BOSSKEY);
                 Play_PerformSave(play);
                 Notification::Emit({

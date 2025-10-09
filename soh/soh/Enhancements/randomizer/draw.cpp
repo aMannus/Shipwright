@@ -1222,3 +1222,29 @@ extern "C" void Randomizer_DrawOverworldKey(PlayState* play, GetItemEntry* getIt
 
     CLOSE_DISPS(play->state.gfxCtx);
 }
+
+extern "C" void Randomizer_DrawArchipelagoItem(PlayState* play, GetItemEntry* getItemEntry) {
+    OPEN_DISPS(play->state.gfxCtx);
+
+    Gfx_SetupDL_25Opa(play->state.gfxCtx);
+
+    Matrix_Scale(0.035f, 0.035f, 0.035f, MTXMODE_APPLY);
+
+    // To-do: Implement "Archipelago Item Matches Contents" option.
+    // Default to "useful" item model.
+    Gfx* archipelagoItemDL = (Gfx*)gArchipelagoItemDL;
+    if (true /*ArchipelagoItemMatchesContents==true*/) {
+        if (getItemEntry->getItemId == RG_ARCHIPELAGO_ITEM_JUNK) {
+            archipelagoItemDL = (Gfx*)gArchipelagoJunkDL;
+        } else if (getItemEntry->getItemId == RG_ARCHIPELAGO_ITEM_PROGRESSIVE) {
+            archipelagoItemDL = (Gfx*)gArchipelagoProgressiveDL;
+        }
+    }
+
+    gSPMatrix(POLY_OPA_DISP++, Matrix_NewMtx(play->state.gfxCtx, (char*)__FILE__, __LINE__),
+              G_MTX_MODELVIEW | G_MTX_LOAD);
+
+    gSPDisplayList(POLY_OPA_DISP++, archipelagoItemDL);
+
+    CLOSE_DISPS(play->state.gfxCtx);
+}

@@ -11,6 +11,7 @@ extern "C" {
 void GameInteractor_ExecuteOnZTitleInit(void* gameState);
 void GameInteractor_ExecuteOnZTitleUpdate(void* gameState);
 void GameInteractor_ExecuteOnLoadGame(int32_t fileNum);
+void GameInteractor_ExecutePostLoadGame(int32_t fileNum);
 void GameInteractor_ExecuteOnExitGame(int32_t fileNum);
 void GameInteractor_ExecuteOnGameStateMainStart();
 void GameInteractor_ExecuteOnGameFrameUpdate();
@@ -25,6 +26,7 @@ void GameInteractor_ExecuteOnFlagSet(int16_t flagType, int16_t flag);
 void GameInteractor_ExecuteOnFlagUnset(int16_t flagType, int16_t flag);
 void GameInteractor_ExecuteOnSceneSpawnActors();
 void GameInteractor_ExecuteOnPlayerUpdate();
+void GameInteractor_ExecuteOnPlayerDeath();
 void GameInteractor_ExecuteOnSetDoAction(uint16_t action);
 void GameInteractor_ExecuteOnOcarinaSongAction();
 void GameInteractor_ExecuteOnCuccoOrChickenHatch();
@@ -86,8 +88,17 @@ void GameInteractor_RegisterOnAssetAltChange(void (*fn)(void));
 // Mark: - Pause Menu
 void GameInteractor_ExecuteOnKaleidoUpdate();
 
+<<<<<<< HEAD
 // Mark: - Audio
 void GameInteractor_ExecuteOnSeqPlayerInit(int32_t playerIdx, int32_t seqId);
+=======
+// Mark: - Randomizer
+void GameInteractor_ExecuteOnRandomizerItemGivenHooks(uint32_t rc, GetItemEntry gi, uint8_t isGiSkipped);
+
+// Mark: - Archipelago
+void GameInteractor_ExecuteOnArchipelagoItemReceived(uint32_t rg);
+void GameInteractor_ExecuteOnRandomizerExternalCheck(uint32_t rc);
+>>>>>>> 850743130308506f4694764046bd3b777af70454
 
 #ifdef __cplusplus
 }

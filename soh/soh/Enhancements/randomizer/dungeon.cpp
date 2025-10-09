@@ -259,4 +259,11 @@ void Dungeons::ParseJson(nlohmann::json spoilerFileJson) {
         }
     }
 }
+
+void Dungeons::ResetAllDungeons() {
+    for (auto& dungeon : dungeonList) {
+        dungeon.ClearMQ();
+    }
+}
+
 } // namespace Rando

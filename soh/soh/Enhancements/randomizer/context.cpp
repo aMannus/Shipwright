@@ -13,6 +13,8 @@
 #include "3drando/hints.hpp"
 #include "soh/util.h"
 #include "../kaleido.h"
+#include "soh/Network/Archipelago/Archipelago.h"
+#include "soh/Network/Archipelago/ArchipelagoConsoleWindow.h"
 
 #include <fstream>
 #include <spdlog/spdlog.h>
@@ -352,6 +354,26 @@ void Context::SetSpoilerLoaded(const bool spoilerLoaded) {
     mSpoilerLoaded = spoilerLoaded;
 }
 
+void Context::AddReceivedArchipelagoItem(const RandomizerGet item) {
+    mAPreceiveQueue.emplace(item);
+}
+
+GetItemEntry Context::GetArchipelagoGIEntry() {
+    if (mAPreceiveQueue.empty()) {
+        // Something must have gone wrong here, just give a rupee
+        return ItemTableManager::Instance->RetrieveItemEntry(MOD_NONE, GI_HEART);
+    }
+
+    // Get the first item from the archipelago queue
+    RandomizerGet itemId = mAPreceiveQueue.front();
+    assert(itemId != RG_NONE);
+
+    Item& item = StaticData::RetrieveItem(itemId);
+    GetItemEntry itemEntry = item.GetGIEntry_Copy();
+    mAPreceiveQueue.pop();
+    return itemEntry;
+}
+
 GetItemEntry Context::GetFinalGIEntry(const RandomizerCheck rc, const bool checkObtainability,
                                       const GetItemID ogItemId) {
     const auto itemLoc = GetItemLocation(rc);
@@ -402,6 +424,19 @@ void Context::ParseSpoiler(const char* spoilerFileName) {
     } catch (...) { LUSLOG_ERROR("Failed to load Spoiler File: %s", spoilerFileName); }
 }
 
+void Context::ParseArchipelago() {
+    mSeedGenerated = false;
+    mSpoilerLoaded = false;
+
+    Rando::Settings::GetInstance()->ResetExcludedLocations();
+    ArchipelagoClient& apClient = ArchipelagoClient::GetInstance();
+    ParseArchipelagoItemsLocations(apClient.GetScoutedItems());
+    ParseArchipelagoOptions(apClient.GetSlotData());
+    mEntranceShuffler->UnshuffleAllEntrances();
+    mDungeons->ResetAllDungeons();
+    mTrials->RemoveAllTrials();
+}
+
 void Context::ParseHashIconIndexesJson(nlohmann::json spoilerFileJson) {
     nlohmann::json hashJson = spoilerFileJson["file_hash"];
     int index = 0;
@@ -412,6 +447,7 @@ void Context::ParseHashIconIndexesJson(nlohmann::json spoilerFileJson) {
 }
 
 void Context::ParseItemLocationsJson(nlohmann::json spoilerFileJson) {
+    // first fill all the items with their vanilla location
     nlohmann::json locationsJson = spoilerFileJson["locations"];
     for (auto it = locationsJson.begin(); it != locationsJson.end(); ++it) {
         RandomizerCheck rc = StaticData::locationNameToEnum[it.key()];
@@ -432,6 +468,313 @@ void Context::ParseItemLocationsJson(nlohmann::json spoilerFileJson) {
             itemLocationTable[rc].SetPlacedItem(StaticData::itemNameToEnum[it.value().get<std::string>()]);
         }
     }
+}
+
+void Context::ParseArchipelagoOptions(const std::map<std::string, int>& slot_data) {
+    // Set options to what Archipelago expects. Need to slowly convert these to options in apworld and
+    // load those in instead.
+
+    nlohmann::json slotData = ArchipelagoClient::GetInstance().GetSlotData();
+    mOptions[RSK_LOGIC_RULES].Set(RO_LOGIC_NO_LOGIC);
+    mOptions[RSK_FOREST].Set(slotData["closed_forest"]);
+    mOptions[RSK_KAK_GATE].Set(slotData["kakariko_gate"]);
+    mOptions[RSK_DOOR_OF_TIME].Set(slotData["door_of_time"]);
+    mOptions[RSK_ZORAS_FOUNTAIN].Set(slotData["zoras_fountain"]);
+    mOptions[RSK_SLEEPING_WATERFALL].Set(slotData["sleeping_waterfall"]);
+    mOptions[RSK_JABU_OPEN].Set(slotData["jabu_jabu"]);
+    mOptions[RSK_STARTING_AGE].Set(RO_AGE_CHILD);
+    mOptions[RSK_SELECTED_STARTING_AGE].Set(0);
+    mOptions[RSK_GERUDO_FORTRESS].Set(slotData["fortress_carpenters"]);
+    mOptions[RSK_RAINBOW_BRIDGE].Set(slotData["rainbow_bridge"]);
+    mOptions[RSK_RAINBOW_BRIDGE_STONE_COUNT].Set(slotData["rainbow_bridge_stones_required"]);
+    mOptions[RSK_RAINBOW_BRIDGE_MEDALLION_COUNT].Set(slotData["rainbow_bridge_medallions_required"]);
+    mOptions[RSK_RAINBOW_BRIDGE_REWARD_COUNT].Set(slotData["rainbow_bridge_dungeon_rewards_required"]);
+    mOptions[RSK_RAINBOW_BRIDGE_DUNGEON_COUNT].Set(slotData["rainbow_bridge_dungeons_required"]);
+    mOptions[RSK_RAINBOW_BRIDGE_TOKEN_COUNT].Set(slotData["rainbow_bridge_skull_tokens_required"]);
+    mOptions[RSK_BRIDGE_OPTIONS].Set(0);
+    mOptions[RSK_GANONS_TRIALS].Set(RO_GANONS_TRIALS_SET_NUMBER);
+    mOptions[RSK_TRIAL_COUNT].Set(slotData["ganons_trials_required"]);
+    mOptions[RSK_STARTING_OCARINA].Set(RO_GENERIC_NO);
+    mOptions[RSK_SHUFFLE_OCARINA].Set(RO_GENERIC_YES);
+    mOptions[RSK_SHUFFLE_OCARINA_BUTTONS].Set(slotData["shuffle_ocarina_buttons"]);
+    mOptions[RSK_SHUFFLE_SWIM].Set(slotData["shuffle_swim"]);
+    mOptions[RSK_STARTING_DEKU_SHIELD].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_KOKIRI_SWORD].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_MASTER_SWORD].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_ZELDAS_LULLABY].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_EPONAS_SONG].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_SARIAS_SONG].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_SUNS_SONG].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_SONG_OF_TIME].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_SONG_OF_STORMS].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_MINUET_OF_FOREST].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_BOLERO_OF_FIRE].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_SERENADE_OF_WATER].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_REQUIEM_OF_SPIRIT].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_NOCTURNE_OF_SHADOW].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_PRELUDE_OF_LIGHT].Set(RO_GENERIC_NO);
+    mOptions[RSK_SHUFFLE_KOKIRI_SWORD].Set(RO_GENERIC_YES);
+    mOptions[RSK_SHUFFLE_MASTER_SWORD].Set(slotData["shuffle_master_sword"]);
+    mOptions[RSK_SHUFFLE_CHILD_WALLET].Set(slotData["shuffle_childs_wallet"]);
+    mOptions[RSK_INCLUDE_TYCOON_WALLET].Set(RO_GENERIC_YES);
+    if (slotData["shuffle_dungeon_rewards"] == 0) {
+        mOptions[RSK_SHUFFLE_DUNGEON_REWARDS].Set(RO_DUNGEON_REWARDS_VANILLA);
+    } else if (slotData["shuffle_dungeon_rewards"] == 1) {
+        mOptions[RSK_SHUFFLE_DUNGEON_REWARDS].Set(RO_DUNGEON_REWARDS_END_OF_DUNGEON);
+    } else if (slotData["shuffle_dungeon_rewards"] == 2) {
+        mOptions[RSK_SHUFFLE_DUNGEON_REWARDS].Set(RO_DUNGEON_REWARDS_ANYWHERE);
+    }
+    mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_ANYWHERE);
+    mOptions[RSK_SHUFFLE_TOKENS].Set(slotData["shuffle_skull_tokens"]);
+    mOptions[RSK_SHOPSANITY].Set(slotData["shuffle_shops"]);
+    mOptions[RSK_SHOPSANITY_COUNT].Set(4);
+    mOptions[RSK_SHOPSANITY_PRICES].Set(RO_PRICE_FIXED);
+    mOptions[RSK_SHOPSANITY_PRICES_FIXED_PRICE].Set(1);
+    mOptions[RSK_SHOPSANITY_PRICES_RANGE_1].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_RANGE_2].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_NO_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_CHILD_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_ADULT_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_GIANT_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_TYCOON_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SHOPSANITY_PRICES_AFFORDABLE].Set(0);
+    if (slotData["shuffle_scrubs"] == 1) {
+        mOptions[RSK_SHUFFLE_SCRUBS].Set(RO_SCRUBS_ALL);
+    } else {
+        mOptions[RSK_SHUFFLE_SCRUBS].Set(RO_SCRUBS_OFF);
+    }
+    mOptions[RSK_SCRUBS_PRICES].Set(RO_PRICE_FIXED);
+    mOptions[RSK_SCRUBS_PRICES_FIXED_PRICE].Set(1);
+    mOptions[RSK_SCRUBS_PRICES_RANGE_1].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_RANGE_2].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_NO_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_CHILD_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_ADULT_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_GIANT_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_TYCOON_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_SCRUBS_PRICES_AFFORDABLE].Set(0);
+    mOptions[RSK_SHUFFLE_BEEHIVES].Set(slotData["shuffle_beehives"]);
+    mOptions[RSK_SHUFFLE_COWS].Set(slotData["shuffle_cows"]);
+    // Ship shows Malon Egg location if weird egg is shuffled even with "Skip Child Zelda" on
+    // So manually set this to off.
+    if (slotData["skip_child_zelda"] == 0) {
+        mOptions[RSK_SHUFFLE_WEIRD_EGG].Set(slotData["shuffle_weird_egg"]);
+    } else {
+        mOptions[RSK_SHUFFLE_WEIRD_EGG].Set(RO_GENERIC_NO);
+    }
+    mOptions[RSK_SHUFFLE_GERUDO_MEMBERSHIP_CARD].Set(RO_GENERIC_YES);
+    mOptions[RSK_SHUFFLE_POTS].Set(slotData["shuffle_pots"]);
+    mOptions[RSK_SHUFFLE_CRATES].Set(slotData["shuffle_crates"]);
+    mOptions[RSK_SHUFFLE_FROG_SONG_RUPEES].Set(slotData["shuffle_frog_song_rupees"]);
+    mOptions[RSK_ITEM_POOL].Set(0);
+    mOptions[RSK_ICE_TRAPS].Set(0);
+    mOptions[RSK_GOSSIP_STONE_HINTS].Set(RO_GOSSIP_STONES_NONE);
+    mOptions[RSK_TOT_ALTAR_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_GANONDORF_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_SHEIK_LA_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_DAMPES_DIARY_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_GREG_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_LOACH_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_SARIA_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_FROGS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_OOT_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_KAK_10_SKULLS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_KAK_20_SKULLS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_KAK_30_SKULLS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_KAK_40_SKULLS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_KAK_50_SKULLS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_KAK_100_SKULLS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_MASK_SHOP_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_BIGGORON_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_BIG_POES_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_CHICKENS_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_MALON_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_HBA_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_WARP_SONG_HINTS].Set(RO_GENERIC_NO);
+    mOptions[RSK_SCRUB_TEXT_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_MERCHANT_TEXT_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_FISHING_POLE_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_HINT_CLARITY].Set(0);
+    mOptions[RSK_HINT_DISTRIBUTION].Set(0);
+    if (slotData["maps_and_compasses"] == 0) {
+        mOptions[RSK_SHUFFLE_MAPANDCOMPASS].Set(RO_DUNGEON_ITEM_LOC_STARTWITH);
+    } else if (slotData["maps_and_compasses"] == 1) {
+        mOptions[RSK_SHUFFLE_MAPANDCOMPASS].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
+    }
+    mOptions[RSK_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
+    mOptions[RSK_GERUDO_KEYS].Set(RO_GERUDO_KEYS_ANYWHERE);
+    mOptions[RSK_BOSS_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
+    if (slotData["ganons_castle_boss_key"] == 0) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_VANILLA);
+    } else if (slotData["ganons_castle_boss_key"] == 1) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_ANYWHERE);
+    } else if (slotData["ganons_castle_boss_key"] == 2) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_VANILLA);
+    } else if (slotData["ganons_castle_boss_key"] == 3) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_STONES);
+    } else if (slotData["ganons_castle_boss_key"] == 4) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_MEDALLIONS);
+    } else if (slotData["ganons_castle_boss_key"] == 5) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_REWARDS);
+    } else if (slotData["ganons_castle_boss_key"] == 6) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_DUNGEONS);
+    } else if (slotData["ganons_castle_boss_key"] == 7) {
+        mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_TOKENS);
+    }
+    mOptions[RSK_SKIP_CHILD_ZELDA].Set(slotData["skip_child_zelda"]);
+    mOptions[RSK_STARTING_STICKS].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_NUTS].Set(RO_GENERIC_NO);
+    mOptions[RSK_FULL_WALLETS].Set(slotData["full_wallets"]);
+    mOptions[RSK_SHUFFLE_CHEST_MINIGAME].Set(RO_GENERIC_NO);
+    mOptions[RSK_BIG_POE_COUNT].Set(slotData["big_poe_target_count"]);
+    mOptions[RSK_SKIP_EPONA_RACE].Set(slotData["skip_epona_race"]);
+    mOptions[RSK_COMPLETE_MASK_QUEST].Set(slotData["complete_mask_quest"]);
+    mOptions[RSK_SKIP_SCARECROWS_SONG].Set(slotData["skip_scarecrows_song"]);
+    mOptions[RSK_SKULLS_SUNS_SONG].Set(0);
+    mOptions[RSK_SHUFFLE_ADULT_TRADE].Set(slotData["shuffle_adult_trade_items"]);
+    mOptions[RSK_SHUFFLE_MERCHANTS].Set(slotData["shuffle_merchants"]);
+    mOptions[RSK_MERCHANT_PRICES].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_FIXED_PRICE].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_RANGE_1].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_RANGE_2].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_NO_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_CHILD_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_ADULT_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_GIANT_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_TYCOON_WALLET_WEIGHT].Set(0);
+    mOptions[RSK_MERCHANT_PRICES_AFFORDABLE].Set(0);
+    mOptions[RSK_BLUE_FIRE_ARROWS].Set(slotData["blue_fire_arrows"]);
+    mOptions[RSK_SUNLIGHT_ARROWS].Set(slotData["sunlight_arrows"]);
+    mOptions[RSK_ENABLE_BOMBCHU_DROPS].Set(slotData["bombchu_drops"]);
+    mOptions[RSK_BOMBCHU_BAG].Set(slotData["bombchu_bag"]);
+    mOptions[RSK_LINKS_POCKET].Set(RO_LINKS_POCKET_ANYTHING);
+    mOptions[RSK_MQ_DUNGEON_RANDOM].Set(0);
+    mOptions[RSK_MQ_DUNGEON_COUNT].Set(0);
+    mOptions[RSK_MQ_DUNGEON_SET].Set(0);
+    mOptions[RSK_MQ_DEKU_TREE].Set(0);
+    mOptions[RSK_MQ_DODONGOS_CAVERN].Set(0);
+    mOptions[RSK_MQ_JABU_JABU].Set(0);
+    mOptions[RSK_MQ_FOREST_TEMPLE].Set(0);
+    mOptions[RSK_MQ_FIRE_TEMPLE].Set(0);
+    mOptions[RSK_MQ_WATER_TEMPLE].Set(0);
+    mOptions[RSK_MQ_SPIRIT_TEMPLE].Set(0);
+    mOptions[RSK_MQ_SHADOW_TEMPLE].Set(0);
+    mOptions[RSK_MQ_BOTTOM_OF_THE_WELL].Set(0);
+    mOptions[RSK_MQ_ICE_CAVERN].Set(0);
+    mOptions[RSK_MQ_GTG].Set(0);
+    mOptions[RSK_MQ_GANONS_CASTLE].Set(0);
+    mOptions[RSK_LACS_STONE_COUNT].Set(slotData["ganons_castle_boss_key_stones_required"]);
+    mOptions[RSK_LACS_MEDALLION_COUNT].Set(slotData["ganons_castle_boss_key_medallions_required"]);
+    mOptions[RSK_LACS_REWARD_COUNT].Set(slotData["ganons_castle_boss_key_dungeon_rewards_required"]);
+    mOptions[RSK_LACS_DUNGEON_COUNT].Set(slotData["ganons_castle_boss_key_dungeons_required"]);
+    mOptions[RSK_LACS_TOKEN_COUNT].Set(slotData["ganons_castle_boss_key_skull_tokens_required"]);
+    mOptions[RSK_LACS_OPTIONS].Set(0);
+    if (slotData["key_rings"] == 0) {
+        mOptions[RSK_KEYRINGS].Set(RO_KEYRINGS_OFF);
+    } else if (slotData["key_rings"] == 1) {
+        mOptions[RSK_KEYRINGS].Set(RO_KEYRINGS_COUNT);
+    }
+    mOptions[RSK_KEYRINGS_RANDOM_COUNT].Set(9);
+    mOptions[RSK_KEYRINGS_GERUDO_FORTRESS].Set(0);
+    mOptions[RSK_KEYRINGS_FOREST_TEMPLE].Set(0);
+    mOptions[RSK_KEYRINGS_FIRE_TEMPLE].Set(0);
+    mOptions[RSK_KEYRINGS_WATER_TEMPLE].Set(0);
+    mOptions[RSK_KEYRINGS_SPIRIT_TEMPLE].Set(0);
+    mOptions[RSK_KEYRINGS_SHADOW_TEMPLE].Set(0);
+    mOptions[RSK_KEYRINGS_BOTTOM_OF_THE_WELL].Set(0);
+    mOptions[RSK_KEYRINGS_GTG].Set(0);
+    mOptions[RSK_KEYRINGS_GANONS_CASTLE].Set(0);
+    mOptions[RSK_SHUFFLE_ENTRANCES].Set(0);
+    mOptions[RSK_SHUFFLE_DUNGEON_ENTRANCES].Set(0);
+    mOptions[RSK_SHUFFLE_OVERWORLD_ENTRANCES].Set(0);
+    mOptions[RSK_SHUFFLE_INTERIOR_ENTRANCES].Set(0);
+    mOptions[RSK_SHUFFLE_GROTTO_ENTRANCES].Set(0);
+    mOptions[RSK_SHUFFLE_OWL_DROPS].Set(0);
+    mOptions[RSK_SHUFFLE_WARP_SONGS].Set(0);
+    mOptions[RSK_SHUFFLE_OVERWORLD_SPAWNS].Set(0);
+    mOptions[RSK_MIXED_ENTRANCE_POOLS].Set(0);
+    mOptions[RSK_MIX_DUNGEON_ENTRANCES].Set(0);
+    mOptions[RSK_MIX_BOSS_ENTRANCES].Set(0);
+    mOptions[RSK_MIX_OVERWORLD_ENTRANCES].Set(0);
+    mOptions[RSK_MIX_INTERIOR_ENTRANCES].Set(0);
+    mOptions[RSK_MIX_GROTTO_ENTRANCES].Set(0);
+    mOptions[RSK_DECOUPLED_ENTRANCES].Set(0);
+    mOptions[RSK_STARTING_SKULLTULA_TOKEN].Set(0);
+    mOptions[RSK_STARTING_HEARTS].Set(2);
+    mOptions[RSK_DAMAGE_MULTIPLIER].Set(0);
+    mOptions[RSK_ALL_LOCATIONS_REACHABLE].Set(0);
+    mOptions[RSK_SHUFFLE_BOSS_ENTRANCES].Set(0);
+    mOptions[RSK_SHUFFLE_100_GS_REWARD].Set(RO_GENERIC_NO);
+    mOptions[RSK_TRIFORCE_HUNT].Set(slotData["triforce_hunt"]);
+    uint16_t triforcePiecesRequired = slotData["triforce_hunt_required_pieces"];
+    float triforcePiecesExtraMultiplier = 1 + (float(slotData["triforce_hunt_extra_pieces_percentage"]) / 100);
+    uint16_t triforcePiecesTotal = floor(triforcePiecesRequired * triforcePiecesExtraMultiplier);
+    if (triforcePiecesTotal > 100) {
+        triforcePiecesTotal = 100;
+    }
+    mOptions[RSK_TRIFORCE_HUNT_PIECES_TOTAL].Set((triforcePiecesTotal - 1));
+    mOptions[RSK_TRIFORCE_HUNT_PIECES_REQUIRED].Set((triforcePiecesRequired - 1));
+    mOptions[RSK_SHUFFLE_BOSS_SOULS].Set(slotData["shuffle_boss_souls"]);
+    if (slotData["shuffle_fish"] == 0) {
+        mOptions[RSK_FISHSANITY].Set(RO_FISHSANITY_OFF);
+    } else if (slotData["shuffle_fish"] == 1) {
+        mOptions[RSK_FISHSANITY].Set(RO_FISHSANITY_POND);
+    } else if (slotData["shuffle_fish"] == 2) {
+        mOptions[RSK_FISHSANITY].Set(RO_FISHSANITY_OVERWORLD);
+    } else if (slotData["shuffle_fish"] == 3) {
+        mOptions[RSK_FISHSANITY].Set(RO_FISHSANITY_BOTH);
+    }
+    mOptions[RSK_FISHSANITY_POND_COUNT].Set(15);
+    mOptions[RSK_FISHSANITY_AGE_SPLIT].Set(1);
+    mOptions[RSK_SHUFFLE_FISHING_POLE].Set(slotData["shuffle_fishing_pole"]);
+    mOptions[RSK_INFINITE_UPGRADES].Set(slotData["infinite_upgrades"]);
+    mOptions[RSK_SKELETON_KEY].Set(slotData["skeleton_key"]);
+    mOptions[RSK_SHUFFLE_DEKU_STICK_BAG].Set(slotData["shuffle_deku_stick_bag"]);
+    mOptions[RSK_SHUFFLE_DEKU_NUT_BAG].Set(slotData["shuffle_deku_nut_bag"]);
+    mOptions[RSK_SHUFFLE_FREESTANDING].Set(slotData["shuffle_freestanding_items"]);
+    mOptions[RSK_SHUFFLE_FAIRIES].Set(slotData["shuffle_fairies"]);
+    mOptions[RSK_LOCK_OVERWORLD_DOORS].Set(slotData["lock_overworld_doors"]);
+    mOptions[RSK_SHUFFLE_GRASS].Set(slotData["shuffle_grass"]);
+}
+
+void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient::ApItem>& scouted_items) {
+    const std::string SlotName = ArchipelagoClient::GetInstance().GetSlotName();
+
+    // Zero out the location table first
+    for (int rc = 1; rc < RC_MAX; rc++) {
+        itemLocationTable[rc].SetPlacedItem(RG_NONE);
+    }
+
+    for (const ArchipelagoClient::ApItem& ap_item : scouted_items) {
+        // const RandomizerCheck rc = StaticData::APcheckToSoh.find(ap_item.locationName)->second;
+        const RandomizerCheck rc = StaticData::locationNameToEnum[ap_item.locationName];
+
+        itemLocationTable[rc].SetCustomPrice(10);
+
+        if (SlotName == ap_item.playerName) {
+            // our item
+            SPDLOG_TRACE("Populated item {} at location {}", ap_item.itemName, ap_item.locationName);
+            const RandomizerGet item = StaticData::itemNameToEnum[ap_item.itemName];
+            itemLocationTable[rc].SetPlacedItem(item);
+        } else {
+            // Other player item
+            // If progressive or trap bit flag is set, make item progressive.
+            if (ap_item.flags & (1 << 0) || ap_item.flags & (1 << 2)) {
+                itemLocationTable[rc].SetPlacedItem(RG_ARCHIPELAGO_ITEM_PROGRESSIVE);
+                // If useful bit flag is on, make item useful.
+            } else if (ap_item.flags & (1 << 1)) {
+                itemLocationTable[rc].SetPlacedItem(RG_ARCHIPELAGO_ITEM_USEFUL);
+                // None of these flags being present means it's junk.
+            } else {
+                itemLocationTable[rc].SetPlacedItem(RG_ARCHIPELAGO_ITEM_JUNK);
+            }
+        }
+    }
+
+    itemLocationTable[RC_ZR_MAGIC_BEAN_SALESMAN].SetCustomPrice(60);
+    itemLocationTable[RC_KAK_GRANNYS_SHOP].SetCustomPrice(100);
+    itemLocationTable[RC_WASTELAND_BOMBCHU_SALESMAN].SetCustomPrice(200);
+    itemLocationTable[RC_GC_MEDIGORON].SetCustomPrice(200);
 }
 
 void Context::WriteHintJson(nlohmann::ordered_json& spoilerFileJson) {

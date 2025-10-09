@@ -8,6 +8,7 @@
 DEFINE_HOOK(OnZTitleInit, (void* gameState));
 DEFINE_HOOK(OnZTitleUpdate, (void* gameState));
 DEFINE_HOOK(OnLoadGame, (int32_t fileNum));
+DEFINE_HOOK(PostLoadGame, (int32_t fileNum));
 DEFINE_HOOK(OnExitGame, (int32_t fileNum));
 DEFINE_HOOK(OnGameStateMainStart, ());
 DEFINE_HOOK(OnGameFrameUpdate, ());
@@ -22,6 +23,7 @@ DEFINE_HOOK(OnFlagSet, (int16_t flagType, int16_t flag));
 DEFINE_HOOK(OnFlagUnset, (int16_t flagType, int16_t flag));
 DEFINE_HOOK(OnSceneSpawnActors, ());
 DEFINE_HOOK(OnPlayerUpdate, ());
+DEFINE_HOOK(OnPlayerDeath, ());
 DEFINE_HOOK(OnSetDoAction, (uint16_t action));
 DEFINE_HOOK(OnOcarinaSongAction, ());
 DEFINE_HOOK(OnCuccoOrChickenHatch, ());
@@ -75,5 +77,11 @@ DEFINE_HOOK(OnSetGameLanguage, ());
 DEFINE_HOOK(OnAssetAltChange, ());
 DEFINE_HOOK(OnKaleidoUpdate, ());
 
+<<<<<<< HEAD
 // Audio
 DEFINE_HOOK(OnSeqPlayerInit, (int32_t playerIdx, int32_t seqId));
+=======
+DEFINE_HOOK(OnRandomizerItemGivenHooks, (uint32_t rc, GetItemEntry gi, uint8_t isGiSkipped));
+DEFINE_HOOK(OnArchipelagoItemReceived, (uint32_t rg));
+DEFINE_HOOK(OnRandomizerExternalCheck, (uint32_t rc));
+>>>>>>> 850743130308506f4694764046bd3b777af70454

@@ -26,14 +26,18 @@
 #include "soh/OTRGlobals.h"
 #include "soh/Enhancements/Presets/Presets.h"
 #include "soh/resource/type/Skeleton.h"
-#include "libultraship/libultraship.h"
 
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/cosmetics/authenticGfxPatches.h"
 #include "soh/Enhancements/debugger/MessageViewer.h"
 #include "soh/Notification/Notification.h"
 #include "soh/Enhancements/TimeDisplay/TimeDisplay.h"
+<<<<<<< HEAD
 #include "soh/Enhancements/mod_menu.h"
+=======
+#include "soh/Network/Archipelago/ArchipelagoSettingsWindow.h"
+#include "soh/Network/Archipelago/ArchipelagoConsoleWindow.h"
+>>>>>>> 850743130308506f4694764046bd3b777af70454
 
 namespace SohGui {
 
@@ -94,6 +98,8 @@ std::shared_ptr<ItemTrackerSettingsWindow> mItemTrackerSettingsWindow;
 std::shared_ptr<ItemTrackerWindow> mItemTrackerWindow;
 std::shared_ptr<TimeSplitWindow> mTimeSplitWindow;
 std::shared_ptr<PlandomizerWindow> mPlandomizerWindow;
+std::shared_ptr<ArchipelagoSettingsWindow> mArchipelagoSettingsWindow;
+std::shared_ptr<ArchipelagoConsoleWindow> mArchipelagoConsoleWindow;
 std::shared_ptr<RandomizerSettingsWindow> mRandomizerSettingsWindow;
 std::shared_ptr<SohModalWindow> mModalWindow;
 std::shared_ptr<Notification::Window> mNotificationWindow;
@@ -197,6 +203,12 @@ void SetupGuiElements() {
     mPlandomizerWindow =
         std::make_shared<PlandomizerWindow>(CVAR_WINDOW("PlandomizerEditor"), "Plandomizer Editor", ImVec2(850, 760));
     gui->AddGuiWindow(mPlandomizerWindow);
+    mArchipelagoSettingsWindow = std::make_shared<ArchipelagoSettingsWindow>(CVAR_WINDOW("ArchipelagoSettingsWindow"),
+                                                                             "Archipelago Settings", ImVec2(600, 450));
+    gui->AddGuiWindow(mArchipelagoSettingsWindow);
+    mArchipelagoConsoleWindow = std::make_shared<ArchipelagoConsoleWindow>(CVAR_WINDOW("ArchipelagoConsoleWindow"),
+                                                                           "Archipelago Console", ImVec2(600, 550));
+    gui->AddGuiWindow(mArchipelagoConsoleWindow);
     mModalWindow = std::make_shared<SohModalWindow>(CVAR_WINDOW("ModalWindow"), "Modal Window");
     gui->AddGuiWindow(mModalWindow);
     mModalWindow->Show();
@@ -239,6 +251,8 @@ void Destroy() {
     mInputViewerSettings = nullptr;
     mTimeSplitWindow = nullptr;
     mPlandomizerWindow = nullptr;
+    mArchipelagoSettingsWindow = nullptr;
+    mArchipelagoConsoleWindow = nullptr;
     mTimeDisplayWindow = nullptr;
 }
 
@@ -249,5 +263,9 @@ void RegisterPopup(std::string title, std::string message, std::string button1, 
 
 void ShowRandomizerSettingsMenu() {
     mRandomizerSettingsWindow->Show();
+}
+
+void ShowArchipelagoSettingsMenu() {
+    mArchipelagoSettingsWindow->Show();
 }
 } // namespace SohGui

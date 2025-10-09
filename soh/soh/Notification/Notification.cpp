@@ -41,8 +41,7 @@ void Window::Draw() {
             return;
     }
 
-    ImGui::PushStyleColor(ImGuiCol_WindowBg,
-                          ImVec4(0, 0, 0, CVarGetFloat(CVAR_SETTING("Notifications.BgOpacity"), 0.5f)));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
     ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 4.0f);
 
@@ -51,13 +50,15 @@ void Window::Draw() {
         int inverseIndex = -ABS(index - (notifications.size() - 1));
 
         ImGui::SetNextWindowViewport(vp->ID);
+        // Fade out
         if (notification.remainingTime < 4.0f) {
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, (notification.remainingTime - 1) / 3.0f);
         } else {
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
         }
 
-        ImGui::Begin(("notification#" + std::to_string(notification.id)).c_str(), nullptr,
+        ImGui::SetNextWindowSize(ImVec2(0, vp->Size.y - (margin * 2)));
+        ImGui::Begin(("Notification#" + std::to_string(notification.id)).c_str(), nullptr,
                      ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoFocusOnAppearing |
                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
                          ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove |
@@ -68,39 +69,54 @@ void Window::Draw() {
         ImVec2 notificationPos;
         switch (position) {
             case 0: // Top Left
-                notificationPos =
-                    ImVec2(basePosition.x, basePosition.y + ((ImGui::GetWindowSize().y + padding) * inverseIndex));
+                notificationPos = ImVec2(basePosition.x, basePosition.y);
                 break;
             case 1: // Top Right
-                notificationPos = ImVec2(basePosition.x - ImGui::GetWindowSize().x,
-                                         basePosition.y + ((ImGui::GetWindowSize().y + padding) * inverseIndex));
+                notificationPos = ImVec2(basePosition.x - ImGui::GetWindowSize().x, basePosition.y);
                 break;
             case 2: // Bottom Left
-                notificationPos = ImVec2(basePosition.x,
-                                         basePosition.y - ((ImGui::GetWindowSize().y + padding) * (inverseIndex + 1)));
+                notificationPos = ImVec2(basePosition.x, basePosition.y - (ImGui::GetWindowSize().y + padding));
                 break;
             case 3: // Bottom Right
                 notificationPos = ImVec2(basePosition.x - ImGui::GetWindowSize().x,
-                                         basePosition.y - ((ImGui::GetWindowSize().y + padding) * (inverseIndex + 1)));
+                                         basePosition.y - (ImGui::GetWindowSize().y + padding));
                 break;
         }
 
         ImGui::SetWindowPos(notificationPos);
 
-        if (notification.itemIcon != nullptr) {
-            ImGui::Image(Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName(notification.itemIcon),
-                         ImVec2(24, 24));
-            ImGui::SameLine();
+        // If bottom aligned
+        if (position == 2 || position == 3) {
+            ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (60 * (inverseIndex + 1)));
+        } else {
+            ImGui::SetCursorPosY(60 * inverseIndex);
         }
-        if (!notification.prefix.empty()) {
-            ImGui::TextColored(notification.prefixColor, "%s", notification.prefix.c_str());
-            ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0.5));
+
+        if (ImGui::BeginChild(("Notification#" + std::to_string(notification.id)).c_str(), ImVec2(0, 0),
+                              ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_AlwaysAutoResize |
+                                  ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_AutoResizeY)) {
+
+            if (notification.itemIcon != nullptr) {
+                ImGui::Image(
+                    Ship::Context::GetInstance()->GetWindow()->GetGui()->GetTextureByName(notification.itemIcon),
+                    ImVec2(32, 32));
+                ImGui::SameLine();
+            }
+            if (!notification.prefix.empty()) {
+                ImGui::TextColored(notification.prefixColor, "%s", notification.prefix.c_str());
+                ImGui::SameLine();
+            }
+            ImGui::TextColored(notification.messageColor, "%s", notification.message.c_str());
+            if (!notification.suffix.empty()) {
+                ImGui::SameLine();
+                ImGui::TextColored(notification.suffixColor, "%s", notification.suffix.c_str());
+            }
+            ImGui::EndChild();
         }
-        ImGui::TextColored(notification.messageColor, "%s", notification.message.c_str());
-        if (!notification.suffix.empty()) {
-            ImGui::SameLine();
-            ImGui::TextColored(notification.suffixColor, "%s", notification.suffix.c_str());
-        }
+
+        ImGui::PopStyleColor();
 
         ImGui::End();
         ImGui::PopStyleVar();

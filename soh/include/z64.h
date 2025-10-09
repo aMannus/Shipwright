@@ -1593,7 +1593,7 @@ typedef struct FileChooseContext {
     /* 0x1CAD4 */ s16 newFileNameCharCount;
     /* 0x1CAD6 */ s16 unk_1CAD6[5];
     s16 logoAlpha;
-    s8 questType[3]; // 0 for Normal, 1 for MQ
+    s8 questType[4]; // 0 for Normal, 1 for MQ
     StickDirectionPrompt stickLeftPrompt;
     StickDirectionPrompt stickRightPrompt;
     f32 arrowAnimTween;
@@ -1607,6 +1607,10 @@ typedef struct FileChooseContext {
     uint8_t randomizerIndex;
     int16_t randomizerUIAlpha;
     uint16_t randomizerArrowOffset;
+    uint8_t archipelagoIndex;
+    int16_t archipelagoUIAlpha;
+    uint16_t archipelagoArrowOffset;
+
 } FileChooseContext; // size = 0x1CAE0
 
 // Macros for `EntranceInfo.field`

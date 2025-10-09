@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.26.0 FATAL_ERROR)
+include(FetchContent)
 
 set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
 
@@ -282,11 +283,68 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	endif()
 	set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY ${MSVC_RUNTIME_LIBRARY_STR})
 endif()
-################################################################################
-# Find/download Dr Libs (For custom audio)
-################################################################################
+
 include(FetchContent)
 
+################################################################################
+# apclientpp + dependencies
+################################################################################
+add_compile_definitions(ASIO_STANDALONE)
+
+if(BUILD_REMOTE_CONTROL)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        FetchContent_Declare(
+            valijson
+            GIT_REPOSITORY https://github.com/tristanpenman/valijson.git
+            GIT_TAG v1.0.6
+        )
+        FetchContent_MakeAvailable(valijson)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${valijson_SOURCE_DIR}/include)
+    else()
+        find_package(valijson REQUIRED)
+    endif()
+
+    FetchContent_Declare(
+            asio
+            GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+            GIT_TAG asio-1-30-2
+    )
+    FetchContent_MakeAvailable(asio)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${asio_SOURCE_DIR}/asio/include)
+
+    # websocketpp has been temporarily removed from vcpkg, see
+    # https://github.com/microsoft/vcpkg/pull/42678#issuecomment-2914451436
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        FetchContent_Declare(
+            websocketpp
+            GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
+            GIT_TAG 0.8.2
+        )
+        FetchContent_Populate(websocketpp)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${websocketpp_SOURCE_DIR})
+    else()
+        find_package(websocketpp REQUIRED)
+    endif()
+
+    FetchContent_Declare(
+            wswrap
+            GIT_REPOSITORY https://github.com/black-sliver/wswrap.git
+            GIT_TAG 47438193ec50427ee28aadf294ba57baefd9f3f1
+    )
+    FetchContent_MakeAvailable(wswrap)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${wswrap_SOURCE_DIR}/include)
+
+    FetchContent_Declare(
+            apclientpp
+            GIT_REPOSITORY https://github.com/black-sliver/apclientpp.git
+            GIT_TAG 65638b7479f6894eda172e603cffa79762c0ddc1
+    )
+    FetchContent_MakeAvailable(apclientpp)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${apclientpp_SOURCE_DIR})
+endif()
+
+# Find/download Dr Libs (For custom audio)
+################################################################################
 FetchContent_Declare(
         dr_libs
         GIT_REPOSITORY https://github.com/mackron/dr_libs.git
@@ -294,6 +352,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(dr_libs)
 
+################################################################################
+# Compile definitions
+################################################################################
 find_package(SDL2)
 set(SDL2-INCLUDE ${SDL2_INCLUDE_DIRS})
 
@@ -301,11 +362,44 @@ if (BUILD_REMOTE_CONTROL)
     find_package(SDL2_net)
 
     if(NOT SDL2_net_FOUND)
-        message(STATUS "SDL2_net not found (it's possible the version installed is too old). Disabling BUILD_REMOTE_CONTROL.")
+        # todo: make archi optional so this can build with BUILD_REMOTE_CONTROL off
+        message(FATAL_ERROR "SDL2_net not found (it's possible the version installed is too old).")
         set(BUILD_REMOTE_CONTROL 0)
     else()
         set(SDL2-NET-INCLUDE ${SDL_NET_INCLUDE_DIRS})
     endif()
+
+    set(OPENSSL_USE_STATIC_LIBS ON)
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        file(STRINGS /etc/os-release distro REGEX "^NAME=")
+        string(REGEX REPLACE "NAME=\"(.*)\"" "\\1" distro "${distro}")
+
+        if(${distro} MATCHES "Fedora Linux")
+            set(OPENSSL_USE_STATIC_LIBS OFF)
+        endif()
+    endif()
+
+    find_package(OpenSSL)
+    if(NOT OPENSSL_FOUND)
+        # todo: make archi optional so this can build with BUILD_REMOTE_CONTROL off
+        message(FATAL_ERROR "OpenSSL not found (it's possible the version installed is too old).")
+        set(BUILD_REMOTE_CONTROL 0)
+    endif()
+
+    FetchContent_Declare(
+        sslCertStore
+        URL https://curl.se/ca/cacert.pem
+        DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/networking
+        DOWNLOAD_NO_EXTRACT TRUE
+    )
+
+    FetchContent_MakeAvailable(
+        sslCertStore
+    )
+
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/networking/cacert.pem DESTINATION ./networking COMPONENT ship)
+
 endif()
 
 if (ESPEAK)
@@ -428,6 +522,7 @@ endif()
 # Compile and link options
 ################################################################################
 if(MSVC)
+    target_compile_options(${PROJECT_NAME} PUBLIC "/Zc:__cplusplus")
     if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Debug>:
@@ -661,6 +756,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 			"SDL2::SDL2;"
 			"SDL2::SDL2main;"
             "$<$<BOOL:${BUILD_REMOTE_CONTROL}>:SDL2_net::SDL2_net-static>"
+            "$<$<BOOL:${BUILD_REMOTE_CONTROL}>:OpenSSL::SSL>"
+            "$<$<BOOL:${BUILD_REMOTE_CONTROL}>:OpenSSL::Crypto>"
 			"glfw;"
 			"winmm;"
 			"imm32;"
@@ -728,6 +825,8 @@ else()
 		"Opus::opus"
 		"Opusfile::Opusfile"
         "$<$<BOOL:${BUILD_REMOTE_CONTROL}>:SDL2_net::SDL2_net>"
+        "$<$<BOOL:${BUILD_REMOTE_CONTROL}>:OpenSSL::SSL>"
+        "$<$<BOOL:${BUILD_REMOTE_CONTROL}>:OpenSSL::Crypto>"
 		${CMAKE_DL_LIBS}
 		Threads::Threads
 	)
