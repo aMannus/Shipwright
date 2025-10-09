@@ -475,7 +475,7 @@ void Context::ParseArchipelagoOptions(const std::map<std::string, int>& slot_dat
     // load those in instead.
 
     nlohmann::json slotData = ArchipelagoClient::GetInstance().GetSlotData();
-    mOptions[RSK_LOGIC_RULES].Set(RO_LOGIC_NO_LOGIC);
+    mOptions[RSK_LOGIC_RULES].Set(RO_LOGIC_GLITCHLESS);
     mOptions[RSK_FOREST].Set(slotData["closed_forest"]);
     mOptions[RSK_KAK_GATE].Set(slotData["kakariko_gate"]);
     mOptions[RSK_DOOR_OF_TIME].Set(slotData["door_of_time"]);
@@ -735,6 +735,7 @@ void Context::ParseArchipelagoOptions(const std::map<std::string, int>& slot_dat
     mOptions[RSK_SHUFFLE_FAIRIES].Set(slotData["shuffle_fairies"]);
     mOptions[RSK_LOCK_OVERWORLD_DOORS].Set(slotData["lock_overworld_doors"]);
     mOptions[RSK_SHUFFLE_GRASS].Set(slotData["shuffle_grass"]);
+    mOptions[RSK_SHUFFLE_TREES].Set(slotData["shuffle_trees"]);
 }
 
 void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient::ApItem>& scouted_items) {
