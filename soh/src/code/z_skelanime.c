@@ -822,6 +822,10 @@ s16 Animation_GetLastFrameLegacy(LegacyAnimationHeader* animation) {
  * Linearly interpolates the start and target frame tables with the given weight, putting the result in dst
  */
 void SkelAnime_InterpFrameTable(s32 limbCount, Vec3s* dst, Vec3s* start, Vec3s* target, f32 weight) {
+
+    Patched_InterpFrameTable(limbCount, dst, start, target, weight);
+    return;
+
     s32 i;
     s16 diff;
     s16 base;
