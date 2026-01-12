@@ -527,6 +527,7 @@ void Context::ParseArchipelagoOptions() {
         mOptions[RSK_GANONS_TRIALS].Set(RO_GANONS_TRIALS_SKIP);
     }
     mOptions[RSK_TRIAL_COUNT].Set(6);
+    mOptions[RSK_MEDALLION_LOCKED_TRIALS].Set(RO_GENERIC_NO);
     mOptions[RSK_STARTING_OCARINA].Set(RO_GENERIC_NO);
     mOptions[RSK_SHUFFLE_OCARINA].Set(slotData["shuffle_ocarinas"]);
     mOptions[RSK_SHUFFLE_OCARINA_BUTTONS].Set(slotData["shuffle_ocarina_buttons"]);
@@ -557,7 +558,7 @@ void Context::ParseArchipelagoOptions() {
     } else if (slotData["shuffle_dungeon_rewards"] == 2) {
         mOptions[RSK_SHUFFLE_DUNGEON_REWARDS].Set(RO_DUNGEON_REWARDS_ANYWHERE);
     }
-    mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_ANYWHERE);
+    mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_ANYWHERE);  // Vanilla locations are placed by AP world
     if (slotData["shuffle_skull_tokens"] == 3) {
         mOptions[RSK_SHUFFLE_TOKENS].Set(RO_TOKENSANITY_ALL);
     } else if (slotData["shuffle_skull_tokens"] == 2) {
@@ -608,6 +609,8 @@ void Context::ParseArchipelagoOptions() {
     mOptions[RSK_SHUFFLE_GERUDO_MEMBERSHIP_CARD].Set(slotData["shuffle_gerudo_membership_card"]);
     mOptions[RSK_SHUFFLE_POTS].Set(slotData["shuffle_pots"]);
     mOptions[RSK_SHUFFLE_CRATES].Set(slotData["shuffle_crates"]);
+    mOptions[RSK_SHUFFLE_TREES].Set(slotData["shuffle_trees"]);
+    mOptions[RSK_SHUFFLE_BUSHES].Set(RO_GENERIC_NO);
     mOptions[RSK_SHUFFLE_FROG_SONG_RUPEES].Set(slotData["shuffle_frog_song_rupees"]);
     mOptions[RSK_ITEM_POOL].Set(0);
     mOptions[RSK_BASE_ICE_TRAPS].Set(0);
@@ -617,10 +620,12 @@ void Context::ParseArchipelagoOptions() {
     mOptions[RSK_TOT_ALTAR_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_GANONDORF_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_SHEIK_LA_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_BOSS_KEY_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_DAMPES_DIARY_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_GREG_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_LOACH_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_SARIA_HINT].Set(RO_GENERIC_NO);
+    mOptions[RSK_MIDO_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_FROGS_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_OOT_HINT].Set(RO_GENERIC_NO);
     mOptions[RSK_KAK_10_SKULLS_HINT].Set(RO_GENERIC_NO);
@@ -646,9 +651,9 @@ void Context::ParseArchipelagoOptions() {
     } else if (slotData["maps_and_compasses"] == 1) {
         mOptions[RSK_SHUFFLE_MAPANDCOMPASS].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
     }
-    mOptions[RSK_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
-    mOptions[RSK_GERUDO_KEYS].Set(RO_GERUDO_KEYS_ANYWHERE);
-    mOptions[RSK_BOSS_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
+    mOptions[RSK_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);  // Vanilla locations are placed by AP world
+    mOptions[RSK_GERUDO_KEYS].Set(RO_GERUDO_KEYS_ANYWHERE);     // Vanilla locations are placed by AP world
+    mOptions[RSK_BOSS_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE); // Vanilla locations are placed by AP world
     if (slotData["ganons_castle_boss_key"] == 0) {
         mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_VANILLA);
     } else if (slotData["ganons_castle_boss_key"] == 1) {
@@ -666,15 +671,18 @@ void Context::ParseArchipelagoOptions() {
     } else if (slotData["ganons_castle_boss_key"] == 7) {
         mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_LACS_TOKENS);
     }
+    mOptions[RSK_SKIP_CHILD_STEALTH].Set(RO_GENERIC_NO);
     mOptions[RSK_SKIP_CHILD_ZELDA].Set(slotData["skip_child_zelda"]);
     mOptions[RSK_STARTING_STICKS].Set(RO_GENERIC_NO);
     mOptions[RSK_STARTING_NUTS].Set(RO_GENERIC_NO);
+    mOptions[RSK_STARTING_BEANS].Set(RO_GENERIC_NO);
     mOptions[RSK_FULL_WALLETS].Set(slotData["full_wallets"]);
     mOptions[RSK_SHUFFLE_CHEST_MINIGAME].Set(RO_GENERIC_NO);
     mOptions[RSK_BIG_POE_COUNT].Set(slotData["big_poe_target_count"]);
     mOptions[RSK_SKIP_EPONA_RACE].Set(slotData["skip_epona_race"]);
     mOptions[RSK_COMPLETE_MASK_QUEST].Set(slotData["complete_mask_quest"]);
     mOptions[RSK_SKIP_SCARECROWS_SONG].Set(slotData["skip_scarecrows_song"]);
+    mOptions[RSK_SKIP_PLANTING_BEANS].Set(RO_GENERIC_NO);
     mOptions[RSK_SKULLS_SUNS_SONG].Set(slotData["skulls_sun_song"]);
     mOptions[RSK_SHUFFLE_ADULT_TRADE].Set(slotData["shuffle_adult_trade_items"]);
     mOptions[RSK_SHUFFLE_MERCHANTS].Set(slotData["shuffle_merchants"]);
@@ -690,7 +698,6 @@ void Context::ParseArchipelagoOptions() {
     mOptions[RSK_MERCHANT_PRICES_AFFORDABLE].Set(0);
     mOptions[RSK_BLUE_FIRE_ARROWS].Set(slotData["blue_fire_arrows"]);
     mOptions[RSK_SUNLIGHT_ARROWS].Set(slotData["sunlight_arrows"]);
-    mOptions[RSK_ROCS_FEATHER].Set(slotData["rocs_feather"]);
     mOptions[RSK_SLINGBOW_BREAK_BEEHIVES].Set(slotData["slingbow_break_beehives"]);
     mOptions[RSK_ENABLE_BOMBCHU_DROPS].Set(slotData["bombchu_drops"]);
     mOptions[RSK_BOMBCHU_BAG].Set(slotData["bombchu_bag"]);
@@ -720,17 +727,19 @@ void Context::ParseArchipelagoOptions() {
         mOptions[RSK_KEYRINGS].Set(RO_KEYRINGS_OFF);
     } else if (slotData["key_rings"] == 1) {
         mOptions[RSK_KEYRINGS].Set(RO_KEYRINGS_COUNT);
+    } else if (slotData["key_rings"] == 2) {
+        mOptions[RSK_KEYRINGS].Set(RO_KEYRINGS_SELECTION);
     }
-    mOptions[RSK_KEYRINGS_RANDOM_COUNT].Set(9);
-    mOptions[RSK_KEYRINGS_GERUDO_FORTRESS].Set(0);
-    mOptions[RSK_KEYRINGS_FOREST_TEMPLE].Set(0);
-    mOptions[RSK_KEYRINGS_FIRE_TEMPLE].Set(0);
-    mOptions[RSK_KEYRINGS_WATER_TEMPLE].Set(0);
-    mOptions[RSK_KEYRINGS_SPIRIT_TEMPLE].Set(0);
-    mOptions[RSK_KEYRINGS_SHADOW_TEMPLE].Set(0);
-    mOptions[RSK_KEYRINGS_BOTTOM_OF_THE_WELL].Set(0);
-    mOptions[RSK_KEYRINGS_GTG].Set(0);
-    mOptions[RSK_KEYRINGS_GANONS_CASTLE].Set(0);
+    mOptions[RSK_KEYRINGS_RANDOM_COUNT].Set(slotData["key_rings_count"]);
+    mOptions[RSK_KEYRINGS_GERUDO_FORTRESS].Set(slotData["gerudo_fortress_key_ring"]);
+    mOptions[RSK_KEYRINGS_FOREST_TEMPLE].Set(slotData["forest_temple_key_ring"]);
+    mOptions[RSK_KEYRINGS_FIRE_TEMPLE].Set(slotData["fire_temple_key_ring"]);
+    mOptions[RSK_KEYRINGS_WATER_TEMPLE].Set(slotData["water_temple_key_ring"]);
+    mOptions[RSK_KEYRINGS_SPIRIT_TEMPLE].Set(slotData["spirit_temple_key_ring"]);
+    mOptions[RSK_KEYRINGS_SHADOW_TEMPLE].Set(slotData["shadow_temple_key_ring"]);
+    mOptions[RSK_KEYRINGS_BOTTOM_OF_THE_WELL].Set(slotData["bottom_of_the_well_key_ring"]);
+    mOptions[RSK_KEYRINGS_GTG].Set(slotData["gerudo_training_ground_key_ring"]);
+    mOptions[RSK_KEYRINGS_GANONS_CASTLE].Set(slotData["ganons_castle_key_ring"]);
     mOptions[RSK_SHUFFLE_ENTRANCES].Set(0);
     mOptions[RSK_SHUFFLE_DUNGEON_ENTRANCES].Set(0);
     mOptions[RSK_SHUFFLE_OVERWORLD_ENTRANCES].Set(0);
@@ -760,6 +769,7 @@ void Context::ParseArchipelagoOptions() {
     uint8_t triforcePieceRequired = slotData["triforce_hunt_pieces_required"];
     mOptions[RSK_TRIFORCE_HUNT_PIECES_TOTAL].Set((triforcePieceTotal - 1));
     mOptions[RSK_TRIFORCE_HUNT_PIECES_REQUIRED].Set((triforcePieceRequired - 1));
+    mOptions[RSK_SHUFFLE_BEAN_SOULS].Set(RO_GENERIC_NO);
     mOptions[RSK_SHUFFLE_BOSS_SOULS].Set(slotData["shuffle_boss_souls"]);
     if (slotData["shuffle_fish"] == 0) {
         mOptions[RSK_FISHSANITY].Set(RO_FISHSANITY_OFF);
@@ -784,7 +794,7 @@ void Context::ParseArchipelagoOptions() {
     mOptions[RSK_SHUFFLE_SONG_FAIRIES].Set(slotData["shuffle_song_fairies"]);
     mOptions[RSK_LOCK_OVERWORLD_DOORS].Set(slotData["lock_overworld_doors"]);
     mOptions[RSK_SHUFFLE_GRASS].Set(slotData["shuffle_grass"]);
-    mOptions[RSK_SHUFFLE_TREES].Set(slotData["shuffle_trees"]);
+    mOptions[RSK_ROCS_FEATHER].Set(slotData["rocs_feather"]);
 }
 
 void Context::ParseArchipelagoTricks() {
