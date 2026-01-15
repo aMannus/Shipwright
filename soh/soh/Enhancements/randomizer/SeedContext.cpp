@@ -453,6 +453,9 @@ void Context::ParseSpoiler(const char* spoilerFileName) {
 void Context::ParseArchipelago() {
     mSeedGenerated = false;
     mSpoilerLoaded = false;
+    mEntranceShuffler->UnshuffleAllEntrances();
+    mDungeons->ResetAllDungeons();
+    mTrials->RemoveAllTrials();
 
     Rando::Settings::GetInstance()->ResetExcludedLocations();
     ArchipelagoClient& apClient = ArchipelagoClient::GetInstance();
@@ -461,9 +464,6 @@ void Context::ParseArchipelago() {
     ParseArchipelagoTricks();
     ParseArchipelagoExcludedLocations();
     CreateStaticHints();
-    mEntranceShuffler->UnshuffleAllEntrances();
-    mDungeons->ResetAllDungeons();
-    mTrials->RemoveAllTrials();
 }
 
 void Context::ParseHashIconIndexesJson(nlohmann::json spoilerFileJson) {
@@ -521,12 +521,16 @@ void Context::ParseArchipelagoOptions() {
     mOptions[RSK_RAINBOW_BRIDGE_DUNGEON_COUNT].Set(slotData["rainbow_bridge_dungeons_required"]);
     mOptions[RSK_RAINBOW_BRIDGE_TOKEN_COUNT].Set(slotData["rainbow_bridge_skull_tokens_required"]);
     mOptions[RSK_BRIDGE_OPTIONS].Set(slotData["rainbow_bridge_greg_modifier"]);
+    // todo parse trials properly when we add the option to select trials
     if (slotData["skip_ganons_trials"] == 0) {
         mOptions[RSK_GANONS_TRIALS].Set(RO_GANONS_TRIALS_SET_NUMBER);
+        mOptions[RSK_TRIAL_COUNT].Set(6);
+        mTrials->RequireAll();
     } else {
         mOptions[RSK_GANONS_TRIALS].Set(RO_GANONS_TRIALS_SKIP);
+        mOptions[RSK_TRIAL_COUNT].Set(0);
+        mTrials->RemoveAllTrials();
     }
-    mOptions[RSK_TRIAL_COUNT].Set(6);
     mOptions[RSK_MEDALLION_LOCKED_TRIALS].Set(RO_GENERIC_NO);
     mOptions[RSK_STARTING_OCARINA].Set(RO_GENERIC_NO);
     mOptions[RSK_SHUFFLE_OCARINA].Set(slotData["shuffle_ocarinas"]);
@@ -558,7 +562,7 @@ void Context::ParseArchipelagoOptions() {
     } else if (slotData["shuffle_dungeon_rewards"] == 2) {
         mOptions[RSK_SHUFFLE_DUNGEON_REWARDS].Set(RO_DUNGEON_REWARDS_ANYWHERE);
     }
-    mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_ANYWHERE);  // Vanilla locations are placed by AP world
+    mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_ANYWHERE); // Vanilla locations are placed by AP world
     if (slotData["shuffle_skull_tokens"] == 3) {
         mOptions[RSK_SHUFFLE_TOKENS].Set(RO_TOKENSANITY_ALL);
     } else if (slotData["shuffle_skull_tokens"] == 2) {
@@ -651,8 +655,8 @@ void Context::ParseArchipelagoOptions() {
     } else if (slotData["maps_and_compasses"] == 1) {
         mOptions[RSK_SHUFFLE_MAPANDCOMPASS].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);
     }
-    mOptions[RSK_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);  // Vanilla locations are placed by AP world
-    mOptions[RSK_GERUDO_KEYS].Set(RO_GERUDO_KEYS_ANYWHERE);     // Vanilla locations are placed by AP world
+    mOptions[RSK_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE);      // Vanilla locations are placed by AP world
+    mOptions[RSK_GERUDO_KEYS].Set(RO_GERUDO_KEYS_ANYWHERE);         // Vanilla locations are placed by AP world
     mOptions[RSK_BOSS_KEYSANITY].Set(RO_DUNGEON_ITEM_LOC_ANYWHERE); // Vanilla locations are placed by AP world
     if (slotData["ganons_castle_boss_key"] == 0) {
         mOptions[RSK_GANONS_BOSS_KEY].Set(RO_GANON_BOSS_KEY_VANILLA);
