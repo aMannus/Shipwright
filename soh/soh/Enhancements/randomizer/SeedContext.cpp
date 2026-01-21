@@ -564,11 +564,11 @@ void Context::ParseArchipelagoOptions() {
     }
     if (slotData["shuffle_songs"] == 0) {
         mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_OFF);
-    } else if(slotData["shuffle_songs"] == 1) {
+    } else if (slotData["shuffle_songs"] == 1) {
         mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_SONG_LOCATIONS);
-    } else if(slotData["shuffle_songs"] == 2) {
+    } else if (slotData["shuffle_songs"] == 2) {
         mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_DUNGEON_REWARDS);
-    } else if(slotData["shuffle_songs"] == 3) {
+    } else if (slotData["shuffle_songs"] == 3) {
         mOptions[RSK_SHUFFLE_SONGS].Set(RO_SONG_SHUFFLE_ANYWHERE);
     }
     if (slotData["shuffle_skull_tokens"] == 3) {
