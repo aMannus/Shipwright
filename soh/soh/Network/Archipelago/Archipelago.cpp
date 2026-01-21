@@ -99,13 +99,17 @@ bool ArchipelagoClient::StartClient() {
         slotData = data;
 
         std::string expectedVersion = AP_Client_consts::AP_WORLD_VERSION;
+        expectedVersion = expectedVersion.substr(0, 3);
         std::string apworldVersion = slotData["apworld_version"];
+        apworldVersion = apworldVersion.substr(0, 3);
         if (apworldVersion != expectedVersion) {
             disconnecting = true;
             std::string errorMessage =
-                "[ERROR] Client version does not match the APWorld's version.\nExpected version is " + expectedVersion +
-                ". APWorld is on version " + apworldVersion +
-                " instead.\nPlease use the SoH AP client matching the APWorld's version.\nDisconnecting...";
+                "[ERROR] Client version does not match the APWorld version that\nwas used to generate the multiworld.\n"
+                "Supported version in this client is " +
+                expectedVersion + ".x.\nThe used APWorld is on version " + apworldVersion +
+                ".x instead.\nPlease use the SoH AP client matching the APWorld's version.\nAutomatically "
+                "disconnecting...";
             ArchipelagoConsole_SendMessage(errorMessage.c_str());
             return;
         }
