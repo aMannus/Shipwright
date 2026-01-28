@@ -385,6 +385,11 @@ void CheckAndCreateModFolder() {
     }
 }
 
+// Number of interpolated frames
+extern "C" uint32_t Ship_GetInterpolationFrameCount() {
+    return ceil((float)OTRGlobals::Instance->GetInterpolationFPS() / 20.0f);
+}
+
 namespace SohGui {
 extern std::shared_ptr<SohGui::SohMenu> mSohMenu;
 }
@@ -1709,11 +1714,15 @@ void RunCommands(Gfx* Commands, const std::vector<std::unordered_map<Mtx*, MtxF>
     // Process window events for resize, mouse, keyboard events
     wnd->HandleEvents();
 
+    auto intp = wnd->GetInterpreterWeak().lock().get();
+    intp->mInterpolationIndex = 0;
+
     UIWidgets::Colors themeColor =
         static_cast<UIWidgets::Colors>(CVarGetInteger(CVAR_SETTING("Menu.Theme"), UIWidgets::Colors::LightBlue));
     ImGui::PushStyleColor(ImGuiCol_TitleBgActive, UIWidgets::ColorValues.at(themeColor));
     for (const auto& m : mtx_replacements) {
         wnd->DrawAndRunGraphicsCommands(Commands, m);
+        intp->mInterpolationIndex++;
     }
     ImGui::PopStyleColor();
 }

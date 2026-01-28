@@ -160,6 +160,7 @@ void Gfx_TextureCacheDelete(const uint8_t* addr);
 void SaveManager_ThreadPoolWait();
 void CheckTracker_OnMessageClose();
 void CheckTracker_RecalculateAvailableChecks();
+uint32_t Ship_GetInterpolationFrameCount();
 
 GetItemID RetrieveGetItemIDFromItemID(ItemID itemID);
 RandomizerGet RetrieveRandomizerGetFromItemID(ItemID itemID);
