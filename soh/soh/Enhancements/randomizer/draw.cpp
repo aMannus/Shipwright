@@ -373,9 +373,9 @@ extern "C" void Randomizer_DrawMasterSword(PlayState* play, GetItemEntry* getIte
     Gfx_SetupDL_25Opa(play->state.gfxCtx);
 
     gSPSegment(POLY_OPA_DISP++, 0x08,
-               (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, 1 * (play->state.frames * 1),
-                                           0 * (play->state.frames * 1), 32, 32, 1, 0 * (play->state.frames * 1),
-                                           0 * (play->state.frames * 1), 32, 32));
+               (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, 1 * (play->state.frames * 1),
+                                             0 * (play->state.frames * 1), 32, 32, 1, 0 * (play->state.frames * 1),
+                                             0 * (play->state.frames * 1), 32, 32, 1, 0, 0, 0));
 
     Matrix_Scale(0.05f, 0.05f, 0.05f, MTXMODE_APPLY);
     Matrix_RotateZ(2.1f, MTXMODE_APPLY);
@@ -611,8 +611,8 @@ extern "C" s32 OverrideLimbDrawBarinade(PlayState* play, s32 limbIndex, Gfx** dL
     if (limbIndex == 20) {
         gDPPipeSync(POLY_OPA_DISP++);
         gSPSegment(POLY_OPA_DISP++, 0x08,
-                   (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 8, 16, 1, 0,
-                                               (play->gameplayFrames * -2) % 64, 16, 16));
+                   (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, 0, 0, 8, 16, 1, 0,
+                                               (play->gameplayFrames * -2) % 64, 16, 16, 0, 0, 0, -2));
         gDPSetEnvColor(POLY_OPA_DISP++, 0, 0, 0, 200);
         Matrix_RotateX(-M_PIf / 2.0f, MTXMODE_APPLY);
     } else if ((limbIndex >= 10) && (limbIndex < 20)) {
@@ -637,8 +637,8 @@ extern "C" void PostLimbDrawBarinade(PlayState* play, s32 limbIndex, Gfx** dList
 
     if (limbIndex == 25) {
         gSPSegment(POLY_XLU_DISP++, 0x09,
-                   (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, (play->gameplayFrames * 10) % 128, 16, 32, 1,
-                                               0, (play->gameplayFrames * 5) % 128, 16, 32));
+                   (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, 0, (play->gameplayFrames * 10) % 128, 16, 32, 1,
+                                               0, (play->gameplayFrames * 5) % 128, 16, 32, 0, 10, 0, 5));
         gSPMatrix(POLY_XLU_DISP++, Matrix_NewMtx(play->state.gfxCtx, (char*)__FILE__, __LINE__),
                   G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPDisplayList(POLY_XLU_DISP++, (Gfx*)gBarinadeDL_008D70);
@@ -693,11 +693,11 @@ extern "C" void DrawBarinade(PlayState* play) {
     Matrix_Scale(0.03f, 0.03f, 0.03f, MTXMODE_APPLY);
 
     gSPSegment(POLY_OPA_DISP++, 0x08,
-               (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, 0, 8, 16, 1, 0, (play->gameplayFrames * -10) % 16,
-                                           16, 16));
+               (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, 0, 0, 8, 16, 1, 0, (play->gameplayFrames * -10) % 16,
+                                           16, 16, 0, 0, 0, -10));
     gSPSegment(POLY_OPA_DISP++, 0x09,
-               (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0, (play->gameplayFrames * -10) % 32, 16, 0x20, 1, 0,
-                                           (play->gameplayFrames * -5) % 32, 16, 32));
+               (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, 0, (play->gameplayFrames * -10) % 32, 16, 0x20, 1, 0,
+                                           (play->gameplayFrames * -5) % 32, 16, 32, 0, -10, 0, -5));
 
     SkelAnime_DrawSkeletonOpa(play, &skelAnime, OverrideLimbDrawBarinade, PostLimbDrawBarinade, NULL);
 
@@ -763,8 +763,8 @@ extern "C" void DrawVolvagia(PlayState* play) {
 
     gSPSegment(POLY_OPA_DISP++, 0x09, (uintptr_t)gVolvagiaEyeOpenTex);
     gSPSegment(POLY_OPA_DISP++, 0x08,
-               (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, play->state.frames * 4, 120, 0x20, 0x20, 1,
-                                           play->state.frames * 3, play->state.frames * -2, 0x20, 0x20));
+               (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, play->state.frames * 4, 120, 0x20, 0x20, 1,
+                                             play->state.frames * 3, play->state.frames * -2, 0x20, 0x20, 4, 0, 3, -2));
 
     gDPSetPrimColor(POLY_OPA_DISP++, 0, 0, 255, 255, 255, 255);
     gDPSetEnvColor(POLY_OPA_DISP++, 255, 255, 255, 255);
@@ -982,9 +982,9 @@ extern "C" void Randomizer_DrawBossSoul(PlayState* play, GetItemEntry* getItemEn
     OPEN_DISPS(play->state.gfxCtx);
     Gfx_SetupDL_25Xlu(play->state.gfxCtx);
     gSPSegment(POLY_XLU_DISP++, 8,
-               (uintptr_t)Gfx_TwoTexScroll(play->state.gfxCtx, 0, 0 * (play->state.frames * 0),
+               (uintptr_t)Gfx_TwoTexScrollEx(play->state.gfxCtx, 0, 0 * (play->state.frames * 0),
                                            0 * (play->state.frames * 0), 16, 32, 1, 1 * (play->state.frames * 1),
-                                           -1 * (play->state.frames * 8), 16, 32));
+                                           -1 * (play->state.frames * 8), 16, 32, 0, 0, 1, -8));
     Matrix_Push();
     Matrix_Translate(0.0f, -70.0f, 0.0f, MTXMODE_APPLY);
     Matrix_Scale(5.0f, 5.0f, 5.0f, MTXMODE_APPLY);
