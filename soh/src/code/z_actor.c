@@ -2795,7 +2795,9 @@ void Actor_Draw(PlayState* play, Actor* actor) {
         }
     }
 
-    actor->draw(actor, play);
+    if (GameInteractor_Should(VB_ACTOR_DRAW, true, actor)) {
+        actor->draw(actor, play);
+    }
 
     if (actor->colorFilterTimer != 0) {
         if (actor->colorFilterParams & 0x2000) {

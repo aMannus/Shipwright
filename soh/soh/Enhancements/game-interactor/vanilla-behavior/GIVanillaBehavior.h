@@ -2597,6 +2597,22 @@ typedef enum {
     // - `s32` commonType
     VB_SET_IDLE_ANIM,
 
+    // #### `result`
+    // ```c
+    // true
+    // ```
+    // #### `args`
+    // - `*actor`
+    VB_ACTOR_DRAW,
+
+    // #### `result`
+    // ```c
+    // true
+    // ```
+    // #### `args`
+    // - `*Collider ac`
+    VB_PERFORM_AC_COLLISION,
+
 } GIVanillaBehavior;
 
 #endif
