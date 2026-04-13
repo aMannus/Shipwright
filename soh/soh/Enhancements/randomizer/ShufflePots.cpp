@@ -16,6 +16,8 @@ extern void EnItem00_DrawRandomizedItem(EnItem00* enItem00, PlayState* play);
 extern "C" void ObjTsubo_RandomizerDraw(Actor* thisx, PlayState* play) {
     OPEN_DISPS(play->state.gfxCtx);
 
+    gSPPushShader(POLY_OPA_DISP++, (uintptr_t)gShaderTest);
+
     Gfx_SetupDL_25Opa(play->state.gfxCtx);
     gSPMatrix(POLY_OPA_DISP++, MATRIX_NEWMTX(play->state.gfxCtx), G_MTX_MODELVIEW | G_MTX_LOAD);
 
@@ -60,6 +62,8 @@ extern "C" void ObjTsubo_RandomizerDraw(Actor* thisx, PlayState* play) {
     } else {
         gSPDisplayList(POLY_OPA_DISP++, (Gfx*)gPotDL);
     }
+
+    gSPPopShader(POLY_OPA_DISP++);
 
     CLOSE_DISPS(play->state.gfxCtx);
 }
