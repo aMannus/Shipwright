@@ -21,7 +21,9 @@ extern "C" void ObjTsubo_RandomizerDraw(Actor* thisx, PlayState* play) {
 
     const auto potIdentity = ObjectExtension::GetInstance().Get<CheckIdentity>(thisx);
 
-    gSPPushShader(POLY_OPA_DISP++, "__OTR__shadermods/test");
+    static const char testShader[] = "__OTR__shadermods/test";
+
+    gSPPushShader(POLY_OPA_DISP++, testShader);
 
     if (potIdentity != nullptr && potIdentity->randomizerCheck != RC_MAX &&
         Flags_GetRandomizerInf(potIdentity->randomizerInf) == 0) {
