@@ -38,7 +38,6 @@ extern PlayState* gPlayState;
 }
 
 ArchipelagoClient::ArchipelagoClient() {
-    gameWon = false;
     itemQueued = false;
     disconnecting = false;
     isDeathLinkedDeath = false;
@@ -439,8 +438,6 @@ void ArchipelagoClient::GameLoaded() {
     SynchItems();
     SynchSentLocations();
     SynchReceivedLocations();
-
-    gameWon = false;
 }
 
 void ArchipelagoClient::StartLocationScouts() {
@@ -592,10 +589,7 @@ void ArchipelagoClient::SendGameWon() {
         return;
     }
 
-    if (!gameWon) {
-        apClient->StatusUpdate(APClient::ClientStatus::GOAL);
-        gameWon = true;
-    }
+    apClient->StatusUpdate(APClient::ClientStatus::GOAL);
 }
 
 void ArchipelagoClient::SendMessageToConsole(const std::string message) {
