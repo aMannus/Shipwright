@@ -150,9 +150,7 @@ bool ArchipelagoClient::StartClient() {
             ResetQueue();
             SynchSentLocations();
             SynchReceivedLocations();
-            if (gPlayState != nullptr) {
-                ArchipelagoClient::SetDataStorage("scene", gPlayState->sceneNum);
-            }
+            ArchipelagoClient::SetDataStorage("scene", gPlayState->sceneNum);
         }
 
         const int team_number = apClient->get_team_number();
@@ -762,11 +760,9 @@ void ArchipelagoClient::ResetQueue() {
 }
 
 void ArchipelagoClient::OnSceneInit(uint16_t sceneNum) {
-    if (!ArchipelagoClient::IsConnected())
-        return;
-    if (gPlayState == nullptr)
-        return;
-    ArchipelagoClient::SetDataStorage("scene", sceneNum);
+    if (ArchipelagoClient::IsConnected() && GameInteractor::IsSaveLoaded(true)) {
+        ArchipelagoClient::SetDataStorage("scene", sceneNum);
+    }
 }
 
 void ArchipelagoClient::SetDataStorage(const std::string& key, const nlohmann::json& value) const {
