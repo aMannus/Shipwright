@@ -392,7 +392,7 @@ GetItemEntry Context::GetArchipelagoGIEntry() {
         itemEntry.drawModIndex = fakeGiEntry->drawModIndex;
         itemEntry.drawFunc = fakeGiEntry->drawFunc;
     }
-    
+
     mAPreceiveQueue.pop();
     return itemEntry;
 }
@@ -967,7 +967,7 @@ void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient
             }
         }
     }
-    
+
     // Place vanilla shop items
     nlohmann::json vanillaShopItems = slotData["shop_vanilla_items"];
     for (auto it = vanillaShopItems.begin(); it != vanillaShopItems.end(); it++) {

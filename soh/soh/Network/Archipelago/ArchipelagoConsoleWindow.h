@@ -11,14 +11,14 @@
 class ArchipelagoConsoleWindow final : public Ship::GuiWindow {
   public:
     using GuiWindow::GuiWindow;
-    ~ArchipelagoConsoleWindow() {};
+    ~ArchipelagoConsoleWindow(){};
 
     static ImVec4 getColorVal(const AP_Text::TextColor color);
 
   protected:
-    void InitElement() override {};
+    void InitElement() override{};
     void DrawElement() override;
-    void UpdateElement() override {};
+    void UpdateElement() override{};
 };
 
 void ArchipelagoConsole_SendMessage(const char* fmt, ...);

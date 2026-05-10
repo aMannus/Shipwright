@@ -10,12 +10,12 @@
 class ArchipelagoHintWindow final : public Ship::GuiWindow {
   public:
     using GuiWindow::GuiWindow;
-    ~ArchipelagoHintWindow() {};
+    ~ArchipelagoHintWindow(){};
 
   protected:
-    void InitElement() override {};
+    void InitElement() override{};
     void DrawElement() override;
-    void UpdateElement() override {};
+    void UpdateElement() override{};
 
   private:
     enum HintTableColumns : int { COL_RECIEVING, COL_ITEM, COL_FINDING, COL_LOCATION, COL_STATUS };

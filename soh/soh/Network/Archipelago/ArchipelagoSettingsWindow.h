@@ -8,12 +8,12 @@
 class ArchipelagoSettingsWindow final : public Ship::GuiWindow {
   public:
     using GuiWindow::GuiWindow;
-    ~ArchipelagoSettingsWindow() {};
+    ~ArchipelagoSettingsWindow(){};
 
   protected:
     void InitElement() override;
     void DrawElement() override;
-    void UpdateElement() override {};
+    void UpdateElement() override{};
 };
 
 #endif // ARCHIPELAGO_SETTINGS_WINDOW_H
