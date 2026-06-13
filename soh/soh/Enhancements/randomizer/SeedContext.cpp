@@ -497,7 +497,7 @@ void Context::ParseItemLocationsJson(nlohmann::json spoilerFileJson) {
 }
 
 void Context::ParseArchipelagoOptions() {
-    
+
     // Set all options to their default before parsing them from Archipelago. This gives us
     // a thin layer of future proofing for when Ship adds new settings down the line.
     const auto ctx = Rando::Context::GetInstance();
