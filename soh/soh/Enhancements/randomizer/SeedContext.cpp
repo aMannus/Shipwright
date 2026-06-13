@@ -497,9 +497,28 @@ void Context::ParseItemLocationsJson(nlohmann::json spoilerFileJson) {
 }
 
 void Context::ParseArchipelagoOptions() {
+    
+    // Set all options to their default before parsing them from Archipelago. This gives us
+    // a thin layer of future proofing for when Ship adds new settings down the line.
+    const auto ctx = Rando::Context::GetInstance();
+    auto& optionGroups = Rando::Settings::GetInstance()->GetOptionGroups();
+    for (size_t i = 0; i < RSG_MAX; i++) {
+        auto& optionGroup = optionGroups[i];
+        // don't go through non-menus
+        if (optionGroup.GetContainsType() == Rando::OptionGroupType::SUBGROUP) {
+            continue;
+        }
+
+        for (Rando::Option* option : optionGroup.GetOptions()) {
+            RandomizerSettingKey key = option->GetKey();
+            if (option->IsCategory(Rando::OptionCategory::Setting) && key < RSK_MAX) {
+                ctx->GetOption(key).Set(option->GetOptionDefault());
+            }
+        }
+    }
+
     // Set options to what Archipelago expects. Need to slowly convert these to options in apworld and
     // load those in instead.
-
     nlohmann::json slotData = ArchipelagoClient::GetInstance().GetSlotData();
     mOptions[RSK_LOGIC_RULES].Set(slotData["no_logic"]);
     mOptions[RSK_FOREST].Set(slotData["closed_forest"]);

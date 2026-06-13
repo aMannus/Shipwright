@@ -93,6 +93,10 @@ uint8_t Option::GetOptionIndex() const {
     return CVarGetInteger(cvarName.c_str(), defaultOption);
 }
 
+uint8_t Option::GetOptionDefault() const {
+    return defaultOption;
+}
+
 const std::string& Option::GetOptionText(size_t index) const {
     return options[index];
 }
