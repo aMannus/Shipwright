@@ -860,6 +860,11 @@ void ArchipelagoClient::AfterSceneCommands(uint16_t sceneNum) {
     if (ArchipelagoClient::IsConnected() && GameInteractor::IsSaveLoaded(true)) {
         ArchipelagoClient::SetDataStorage("scene", sceneNum);
     }
+
+    // Goal when warped to the end credits cutscene.
+    if (sceneNum == SCENE_CHAMBER_OF_THE_SAGES && gSaveContext.cutsceneIndex == 0xFFF2) {
+        SendGameWon();
+    }
 }
 
 void ArchipelagoClient::SetDataStorage(const std::string& key, const nlohmann::json& value) const {

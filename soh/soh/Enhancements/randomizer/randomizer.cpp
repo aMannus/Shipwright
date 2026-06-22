@@ -26,7 +26,6 @@
 #include "settings.h"
 #include "soh/util.h"
 #include "randomizerTypes.h"
-#include "soh/Network/Archipelago/Archipelago.h"
 #include "soh/Notification/Notification.h"
 #include "soh/ObjectExtension/ObjectExtension.h"
 
@@ -3899,7 +3898,6 @@ extern "C" u16 Randomizer_Item_Give(PlayState* play, GetItemEntry giEntry) {
                     gSaveContext.ship.stats.itemTimestamp[TIMESTAMP_TRIFORCE_COMPLETED] =
                         static_cast<u32>(GAMEPLAYSTAT_TOTAL_TIME);
                     gSaveContext.ship.stats.gameComplete = 1;
-                    ArchipelagoClient::GetInstance().SendGameWon();
                     Play_PerformSave(play);
                     Notification::Emit({
                         .message = "Game autosaved",
